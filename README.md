@@ -29,16 +29,16 @@ The status code is `0` for success, or non-zero if an error occurs. Upon success
 `version.h` defines `get_version_resource`, which is used to access the version information:
 
 ```c
-static inline const version_resource* get_version_resource(void)
+static inline const version_resource* get_version_resource(void);
 ```
 
 as well as a few other helpers to access individual pieces of information:
 
 ```c
-static inline uint16_t get_version_major(void)
-static inline uint16_t get_version_minor(void)
-static inline uint16_t get_version_build(void)
-static inline const char* get_version_notes(void)
+static inline uint16_t get_version_major(void);
+static inline uint16_t get_version_minor(void);
+static inline uint16_t get_version_build(void);
+static inline const char* get_version_notes(void);
 ```
 
 The `version_resource` struct is defined as follows:
