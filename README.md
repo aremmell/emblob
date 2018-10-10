@@ -26,8 +26,8 @@ The status code is `0` for success, or non-zero if an error occurs. Upon success
 
 | File name | Purpose |
 | --------- | :-----: |
-| `VERSION.o` | Object file to pass to the linker.
-| `VERSION` | Temporary binary file *(can delete)*.
+| VERSION.o | Object file to pass to the linker.
+| VERSION | Temporary binary file *(can delete)*.
 
 ### Run-time
 
