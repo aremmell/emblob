@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "version.h"
 
+#define APP_NAME "mkverobj"
 #define BIN_FILENAME "VERSION"
 #define OBJ_FILENAME "VERSION.o"
 
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
         const char* linker = getenv("LD");
         if (!linker) {
             linker = "ld";
-            std::cerr << "mkverbin: " << "WARNING: $LD is not set; using 'ld'" << std::endl;
+            std::cerr << APP_NAME ": " << "WARNING: $LD is not set; using 'ld'" << std::endl;
         }
 
         std::stringstream cmd;
@@ -58,13 +59,13 @@ int main(int argc, char** argv)
         int sysret = system(cmd.str().c_str());
 
         if (0 != sysret) {
-            std::cerr << "mkverbin: executing '" << cmd.str() << "' failed: "
+            std::cerr << APP_NAME ": executing '" << cmd.str() << "' failed: "
                 << (-1 == sysret ? -1 : WEXITSTATUS(sysret)) << std::endl;
             return EXIT_FAILURE;
         }
 
     } catch (std::exception& ex) {
-        std::cerr << "mkverbin: " << ex.what() << std::endl;
+        std::cerr << APP_NAME ": " << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
 

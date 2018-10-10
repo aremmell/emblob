@@ -1,4 +1,2 @@
-*.d
-*.o
-mkverbin
-VERSION
+build/*
+VERSION*

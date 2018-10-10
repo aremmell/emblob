@@ -1,26 +1,27 @@
 #####################################################
 #                                                   #
-#              mkverbin make recipes                #
+#              mkverobj make recipes                #
 #                                                   #
 #####################################################
 
-OBJ=mkverbin.o
-SRC=mkverbin.cc
-OUT=mkverbin
+OUTDIR=build
+OBJ=$(OUTDIR)/mkverobj.o
+OUT=$(OUTDIR)/mkverobj
+SRC=mkverobj.cc
 
 CXXFLAGS = -Wpedantic -Wno-psabi -std=c++17 -I.
 
 all: $(OUT)
 
--include *.d
+-include $(OUTDIR)/*.d
 
-mkverbin.o: $(SRC) $(DEPS)
+$(OUTDIR)/mkverobj.o: $(SRC) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
 $(OUT): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(CXXFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f *.o *.d $(OUT)
+	rm -f $(OUTDIR)/*
 
 .PHONY: clean
