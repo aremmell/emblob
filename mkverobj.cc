@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -22,9 +23,8 @@ static inline uint16_t string_to_uint16(const char* str)
 
 static int print_usage()
 {
-    std::cout << R"END(usage:
-    mkverbin <major> <minor> <build> <notes>
-)END";
+    std::cout << "usage:" << std::endl << "\t" APP_NAME " <major> <minor> <build> <notes>"
+        << std::endl;
     return EXIT_FAILURE;
 }
 
@@ -36,12 +36,11 @@ int main(int argc, char** argv)
             return print_usage();
 
         version_resource res;
-        memset(&res, 0, sizeof(res));
 
         res.major = string_to_uint16(argv[1]);
         res.minor = string_to_uint16(argv[2]);
         res.build = string_to_uint16(argv[3]);
-        std::strncpy(res.notes, argv[4], MAX_VERSION_NOTES - 1);
+        std::strncpy(res.notes, argv[4], MAX_VER_NOTES - 1);
 
         std::ofstream strm(BIN_FILENAME, std::ios::binary | std::ios::trunc);
         strm.exceptions(strm.badbit | strm.failbit);
@@ -55,8 +54,14 @@ int main(int argc, char** argv)
         }
 
         std::stringstream cmd;
-        cmd << linker << " -r -b binary -o " << OBJ_FILENAME << " " << BIN_FILENAME << " > /dev/null 2>&1";
+        cmd << linker << " -r -b binary -o " << OBJ_FILENAME << " " << BIN_FILENAME
+            << " > /dev/null 2>&1";
         int sysret = system(cmd.str().c_str());
+        int unlink = std::remove(BIN_FILENAME);
+
+        if (0 != unlink)
+            std::cerr << APP_NAME ": WARNING: unable to remove " << BIN_FILENAME
+                << ": " << std::strerror(unlink) << std::endl;
 
         if (0 != sysret) {
             std::cerr << APP_NAME ": executing '" << cmd.str() << "' failed: "

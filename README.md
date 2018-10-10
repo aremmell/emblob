@@ -22,19 +22,23 @@ For example, for version *1.2.123 '(f00)'* :
 
 `mkverobj "1" "2" "123" "(f00)"`
 
-The status code is `0` for success, or non-zero if an error occurs. Upon successful completion, two files are generated:
-
-| File name | Purpose |
-| --------- | :-----: |
-| VERSION.o | Object file to pass to the linker.
-| VERSION | Temporary binary file *(can delete)*.
+The status code is `0` for success, or non-zero if an error occurs. Upon successful completion, an object file named `VERSION.o` is generated. You can then pass it to the linker in your build process.
 
 ### Run-time
 
-`version.h` defines `get_version_resource`, which is used to access the version information compiled in:
+`version.h` defines `get_version_resource`, which is used to access the version information:
 
 ```c
-static inline void get_version_resource(version_resource* restrict out)
+static inline const version_resource* get_version_resource(void)
+```
+
+as well as a few other helpers to access individual pieces of information:
+
+```c
+static inline uint16_t get_version_major(void)
+static inline uint16_t get_version_minor(void)
+static inline uint16_t get_version_build(void)
+static inline const char* get_version_notes(void)
 ```
 
 The `version_resource` struct is defined as follows:
@@ -42,14 +46,16 @@ The `version_resource` struct is defined as follows:
 ```c
 typedef struct
 {
-    uint16_t major;  /* major version */
-    uint16_t minor;  /* minor version */
-    uint16_t build;  /* build number */
-    char notes[256]; /* notes */
+    uint16_t major;  /** major version */
+    uint16_t minor;  /** minor version */
+    uint16_t build;  /** build number */
+    char notes[MAX_VER_NOTES]; /** notes (e.g. commit hash, date) */
 } version_resource;
 ```
 
 #### Example C program
+
+- Build with: `gcc -Wall -o build/example example.c VERSION.o -I. -std=c11`
 
 ```c
 #include <stdio.h>
@@ -58,15 +64,30 @@ typedef struct
 
 int main (int argc, char** argv)
 {
-    version_resource res;
-    get_version_resource(&res);
+    const version_resource* res = get_version_resource();
     printf("major: %u, minor: %u, build: %u, notes: '%s'\n",
-        res.major, res.minor, res.build, res.notes);
+        res->major, res->minor, res->build, res->notes);
     return EXIT_SUCCESS;
 }
 ```
-- Build with: `gcc -o example example.c VERSION.o -I. -std=c11`
-- Outputs: `major: 1, minor: 2, build: 123, notes: '(f00)'`
+
+#### Example C++ program
+
+- Build with: `g++ -Wall -o build/example++ example.cc VERSION.o -I. -std=c++17`
+
+```cpp
+#include <iostream>
+#include <cstdlib>
+#include "version.h"
+
+int main (int argc, char** argv)
+{
+    auto res = get_version_resource();
+    std::cout << "major: " << res->major << ", minor: " << res->minor << ", build: " << res->build
+        << ", notes: '" << res->notes << "'" << std::endl;
+    return EXIT_SUCCESS;
+}
+```
 
 ### Cross-compiling
 
