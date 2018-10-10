@@ -16,13 +16,13 @@ The intention is to use `mkverobj` as part of your build process&mdash;before th
 
 ### Compile-time
 
-Simply run `mkverobj` with the version information you'd like as arguments: major, minor, build, and notes *(i.e., commit hash)*.
+Simply run `mkverobj` with the version information you'd like as arguments: major, minor, build, and notes *(i.e., commit hash)*. The last argument is the object file to generate.
 
 For example, for version *1.2.123 '(f00)'* :
 
-`mkverobj "1" "2" "123" "(f00)"`
+`mkverobj 1 2 123 "(f00)" VERSION.o`
 
-The status code is `0` for success, or non-zero if an error occurs. Upon successful completion, an object file named `VERSION.o` is generated. You can then pass it to the linker in your build process.
+The status code is `0` for success, or non-zero if an error occurs.
 
 ### Run-time
 
