@@ -36,7 +36,6 @@ int main(int argc, char** argv)
             return print_usage();
 
         version_resource res;
-
         res.major = string_to_uint16(argv[1]);
         res.minor = string_to_uint16(argv[2]);
         res.build = string_to_uint16(argv[3]);
@@ -68,7 +67,6 @@ int main(int argc, char** argv)
                 << (-1 == sysret ? -1 : WEXITSTATUS(sysret)) << std::endl;
             return EXIT_FAILURE;
         }
-
     } catch (std::exception& ex) {
         std::cerr << APP_NAME ": " << ex.what() << std::endl;
         return EXIT_FAILURE;
