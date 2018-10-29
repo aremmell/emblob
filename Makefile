@@ -11,7 +11,7 @@ SRC=mkverobj.cc
 
 CXXFLAGS = -Wpedantic -Wno-psabi -std=c++17 -I.
 
-all: $(OUT)
+all: prep $(OUT)
 
 -include $(OUTDIR)/*.d
 
@@ -21,7 +21,11 @@ $(OUTDIR)/mkverobj.o: $(SRC) $(DEPS)
 $(OUT): $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(CXXFLAGS) $(LDFLAGS)
 
+prep:
+	$(shell mkdir -p $(OUTDIR))
+	@echo build directory created successfully.
+
 clean:
 	rm -f $(OUTDIR)/*
 
-.PHONY: clean
+.PHONY: prep clean
