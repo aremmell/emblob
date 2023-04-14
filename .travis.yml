@@ -1,0 +1,16 @@
+---
+version: ~> 1.0
+language: cpp, c
+branches:
+    only:
+        - master
+script:
+    - make && make examples
+    - build/bin/mkverobj
+    - build/bin/c-example
+    - build/bin/cxx-example
+compiler:
+    - clang
+    - gcc
+    - clang++
+    - g++
