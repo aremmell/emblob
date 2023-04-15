@@ -5,10 +5,10 @@ branches:
     only:
         - master
 script:
-    - make && make examples
+    - make all
     - build/bin/mkverobj
-    - build/bin/c-example
-    - build/bin/cxx-example
+    - build/bin/cexample
+    - build/bin/cxxexample
 compiler:
     - clang
     - gcc
