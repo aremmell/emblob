@@ -1,10 +1,10 @@
 # mkverobj
+
 cli utility and header for link-time embedding of a version resource for use with gcc/g++
 
 ## About
 
 **TL;DR:** `mkverobj` is a simple cli utility that generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and a function to retrieve the compiled version information at runtime.
-
 
 ## Compiling
 
