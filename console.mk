@@ -8,32 +8,32 @@
 #                                                   #
 #####################################################
 
-
 # escape sequences used to create color-coded console messages.
+ # bright-red
+_ERROR_SEQ   := 1;31;49
+# bright-yellow
+_WARNING_SEQ := 1;33;49
+# normal-light green
+_SUCCESS_SEQ := 1;92;49
+# bright-light gray
+_INFO_SEQ    := 1;37;49
+# normal-dark gray
+_DEBUG_SEQ   := 0;90;49
 
-_ERROR_SEQ   := 1;31  # bright-red
-_WARNING_SEQ := 1;33  # bright-yellow
-_SUCCESS_SEQ := 0;92  # normal-light green
-_INFO_SEQ    := 1;37  # bright-light gray
-_DEBUG_SEQ   := 0;90  # normal-dark gray
+export CONSOLE_MSG_ERROR := 5
+
+_MINIMUM_MSG_LEVEL := 1
 
 # corresponding numeric values for each type of console message,
 # listed in descending order of relative importance. error messages
 # are of the highest importance, while debug messages are of the least.
 
-export CONSOLE_MSG_ERROR := 5
-
-_MINIMUM_MSG_LEVEL = 1
-
 define set_min_console_msg_level =
-	# TODO: make sure the incoming value is 1..5 inclusive
 	_MINIMUM_MSG_LEVEL = $(1)
 endef
 
-# TODO
-
 define echo_color =
-	echo "\033[$(1)m$(2)\033[0m"
+	@echo "\x1b[$(1)m$(2)\x1b[0m"
 endef
 
 define echo_error =
@@ -55,7 +55,6 @@ endef
 define echo_debug =
 	$(call echo_color,$(_DEBUG_SEQ),$(1))
 endef
-
 
 # specializations of the above functions which are
 # likely to be used frequently, and are defined here to

@@ -4,78 +4,171 @@
 #                                                   #
 #####################################################
 
-#include helper functions for reporting build progress
-# to the user via the console output.
+# include helper functions for reporting build progress
+# to the user hrough colorized console messages.
 include console.mk
+# TODO: at this time, there will be no install recipe.
+# I have some thinking to do about how to do that reliably.
+#$(call echo_warning,no insall recipe is implemented at this time.)
+#$(call echo_warning,please utilize your locally compiled components in the interim.)
 
-# set up build paths and filenames
-OUTDIR         = build
-INTDIR         = $(OUTDIR)/obj
-BINDIR         = $(OUTDIR)/bin
-MKVEROBJ       = mkverobj
-MKVEROBJ_OBJ   = $(INTDIR)/$(MKVEROBJ).o
-MKVEROBJ_OUT   = $(BINDIR)$(MKVEROBJ)
-MKVEROBJ_SRC   = $(MKVEROBJ).cc
-CEXAMPLE       = c-example
-CEXAMPLE_OBJ   = $(INTDIR)/$(CEXAMPLE).o
-CEXAMPLE_OUT   = $(BINDIR)/$(CEXAMPLE)
-CEXAMPLE_SRC   = $(CEXAMPLE).c
-CXXEXAMPLE     = cxx-example
-CXXEXAMPLE_OBJ = $(INTDIR)/$(CXXEXAMPLE).o
-CXXEXAMPLE_OUT = $(BINDIR)/$(CXXEXAMPLE)
-CXXEXAMPLE_SRC = $(CXXEXAMPLE).cc
-
-# some conditionals; if left undefined/invalid,
-# we'll make some executive decisions
-#ifeq (,$(CFLAGS))
-#else
-#endif
-
-# $1: The variable in question
-# $2: The default value that will be inserted into
-#     the variable if it is missing or invalid.
-#define set_default_if_required =
-#	ifeq(, $(1))
-#	else
-#	endif
-#endef
+# TODO: until I figure out how to use autoconf/automake,
+# and you want to build a debug version:
+#
+#   1.) you will need to define MKVEROBJ_DEBUG on the
+#	    command line, or in the global environment before
+#		running make.
+#	2.) You may open this file in a text editor and modify
+#       the behavior yourself.
+#
+# at this time, unless that variable is set, an optimized
+# release configuration will be used.
 
 # compiler/linker commands
-CFLAGS   = -I.
-CXXFLAGS = -Wpedantic -Wno-psabi -std=c++17 -I.
+CFLAGS    = -Wpedantic -std=c11 -I.
+CXXFLAGS  = -Wpedantic -std=c++17 -I.
+CFLAGS_NDEBUG = -O3 -DNDEBUG
+CFLAGS_DEBUG  = -g -O0 -DDEBUG
+CXXFLAGS_NDEBUG = -O3 -DNDEBUG
+CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
 
-# depdendency graph
-$(OUTDIR)         : prep
-$(INTDIR)         : $(OUTDIR)
-$(BINDIR)         : $(OUTDIR)
-$(CEXAMPLE_OBJ)   : $(CEXAMPLE_SRC)
-$(CXXEXAMPLE_OBJ) : $(CXXEXAMPLE_SRC)
-$(CEXAMPLE_OUT)   : $(CEXAMPLE_OBJ)
-$(CXXEXAMPLE_OUT) : $(CXXEXAMPLE_OBJ)
+#$(call echo_debug,CFLAGS BEFORE: $(CFLAGS))
+#$(call echo_debug,CXXFLAGS BEFORE: $(CXXFLAGS))
 
-# recipes
-all: prep $(MKVEROBJ_OUT) $(CEXAMPLE_OUT) $(CXXEXAMPLE_OUT)
+ifndef (MKVEROBJ_DEBUG)
+#$(call echo_info,MKVEROBJ_DEBUG is undefined; not using debug settings.)
+	CFLAGS   += $(CFLAGS_NDEBUG)
+	CXXFLAGS += $(CXXFLAGS_NDEBUG)
+else
+#$(call echo_warning,MKVEROBJ_DEBUG is defined; debug settings will be used.)
+	CFLAGS   += $(CFLAGS_DEBUG)
+	CXXFLAGS += $(CXXFLAGS_DEBUG)
+endif
+
+ifeq ($(OS),Windows_NT)
+	CFLAGS   += -D_WIN32
+	CXXFLAGS += -D_WIN32
+endif
+
+# relevant input direcgtories. if variables like INCLUDE
+# are empty, there is no reliable way to guess what they
+# might be from within this Makefile, so I'll make guesses.
+ifdef (INCLUDE)
+	CFLAGS   := $(INCLUDE)
+	CXXFLAGS := $(INCLUDE)
+endif
+
+#$(call echo_debug, CFLAGS AFTER: '$(CFLAGS)')
+#$(call echo_debug, CXXFLAGS AFTER: '$(CXXFLAGS)')
+
+# set up build paths and filenames
+BUILDDIR  = build
+INTDIR    = $(BUILDDIR)/obj
+BINDIR    = $(BUILDDIR)/bin
+
+MKVEROBJ   := mkverobj
+CEXAMPLE   := cexample
+CXXEXAMPLE := cxxexample
+
+#
+# mkverobj
+#
+
+# translation units
+TUS_MKVEROBJ := $(MKVEROBJ).cc
+
+# intermediate files
+OBJ_MKVEROBJ = $(INTDIR)/$(MKVEROBJ).o
+
+# binary target
+BIN_MKVEROBJ = $(BINDIR)/$(MKVEROBJ)
+
+#
+# cexample
+#
+
+# tramslation units
+TUS_CEXAMPLE = $(CEXAMPLE).c
+
+# intermediate files
+OBJ_CEXAMPLE = $(INTDIR)/$(CEXAMPLE).o
+
+# binary target
+BIN_CEXAMPLE = $(BINDIR)/$(CEXAMPLE)
+
+#
+# cxxexample
+#
+
+# translation units
+TUS_CXXEXAMPLE = $(CXXEXAMPLE).cc
+
+# intermediate files
+OBJ_CXXEXAMPLE = $(CXXEXAMPLE).o
+
+# binary target
+BIN_CXXEXAMPLE = $(BINDIR)/$(CXXEXAMPLE)
+
+#
+# targets
+#
+
+all: prep $(MKVEROBJ) $(CEXAMPLE) $(CXXEXAMPLE)
 
 -include $(INTDIR)/*.d
 
-# create a list of targets
-ALL_OUT = $(MKVEROBJ_OUT) $(CEXAMPLE_OUT) $(CXXEXAMPLE_OUT)
+$(BUILDDIR) : prep
+$(INTDIR)   : $(BUILDDIR)
+$(BINDIR)   : $(BUILDDIR)
 
-$(MKVEROBJ_OBJ): $(MKVEROBJ_SRC) $(DEPS)
+$(OBJ_MKVEROBJ) : $(INTDIR)
+$(OBJ_CEXAMPLE) : $(INTDIR)
+$(OBJ_CXXEXAMPLE) : $(INTDIR)
+
+$(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
-	$(call echo_info,exported variable is $(CONSOLE_MSG_ERROR))
 
-$(MKVEROBJ_OUT): $(MKVEROBJ_OBJ)
-	$(CXX) -o $@ $(MKVEROBJ_OBJ) $(CXXFLAGS) $(LDFLAGS)
-	$(call echo_build_success,$(MKVEROBJ_OUT))
+$(OBJ_CEXAMPLE) : $(TUS_CEXAMPLE) $(DEPS)
+	$(CC) -MMD -c -o $@ $< $(CFLAGS)
+
+$(OBJ_CXXEXAMPLE) : $(TUS_CXXEXAMPLE) $(DEPS)
+	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
 prep:
-	$(shell mkdir -p $(OUTDIR))
-	$(call echo_build_success,$(OUTDIR))
+ifeq ($(OS),Windows_NT)
+	$(shell if not exist "$(BUILDDIR)\NUL" mkdir "$(BUILDDIR)" && \
+		if not exist "$(BINDIR)\NUL"   mkdir "$(BINDIR)"   && \
+		if not exist "$(INTDIR)\NUL"   mkdir "$(INTDIR)")
+else
+	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
+endif
+	$(call echo_success,initialized INTDIR and BINDIR successfully.)
+
+mkverobj: $(OBJ_MKVEROBJ)
+	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(LDFLAGS)
+	$(call echo_build_success,$(BIN_MKVEROBJ))
+
+cexample: $(OBJ_CEXAMPLE)
+	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(CFLAGS) $(LDFLAGS)
+	$(call echo_build_success,$(BIN_CEXAMPLE))
+
+cxxexample: $(OBJ_CXXEXAMPLE)
+	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(CXXFLAGS) $(LDFLAGS)
+	$(call echo_build_success,$(BIN_CXXEXAMPLE))
+
+# TODO
+#install: mkverobj
+#	 ifeq ($(OS),Windows_NT)
+#	 	$(call echo_error,E_NOTIMPL: no install suppport for Windows yet.)
+#	 else
+#		@echo copying $(OUT_SHARED) to $(INSTALLDIR) and headers to $(INSTALLINC)...
+#		$(shell cp -f $(OUT_SHARED) "$(INSTALLDIR)/" &&
+#		        cp -f *.h *.hh "$(INSTALLINC)/")
+#		@echo installed libsir successfully.
+#	endif
 
 clean:
-	$(shell rm -f $(OUTDIR)/*)
-	$(call echo_success,cleaned $(OUTDIR) successfully.)
+	$(shell [ -d "$(BUILDDIR)" ] && rm -rf "$(BUILDDIR)" >/dev/null 2>&1; \
+		$(call echo_success,INTDIR and BINDIR are cleaned.))
 
-
-.PHONY: prep clean
+.PHONY: clean
