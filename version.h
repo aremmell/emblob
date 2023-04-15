@@ -1,8 +1,8 @@
-/**
+/*
  * @file version.h
  * @brief mkverobj API
  *
- * This file and accompanying source code originated from <https://github.com/ryanlederman/mkverobj>.
+ * This file and accompanying source code originated from <https://github.com/aremmell/mkverobj/>.
  * If you obtained it elsewhere, all bets are off.
  *
  * @author Ryan M. Lederman <lederman@gmail.com>
