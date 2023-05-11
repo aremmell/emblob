@@ -55,7 +55,7 @@ typedef struct
 
 #### Example C program
 
-- Build with: `gcc -Wall -o build/example example.c VERSION.o -I. -std=c11`
+- Build with: `gcc -Wall -o build/cexample cexample.c VERSION.o -I. -std=c11`
 
 ```c
 #include <stdio.h>
@@ -73,7 +73,7 @@ int main (int argc, char** argv)
 
 #### Example C++ program
 
-- Build with: `g++ -Wall -o build/example++ example.cc VERSION.o -I. -std=c++17`
+- Build with: `g++ -Wall -o build/cxxexample cxxexample.cc VERSION.o -I. -std=c++17`
 
 ```cpp
 #include <iostream>
@@ -94,3 +94,5 @@ int main (int argc, char** argv)
 If you are compiling for an architecture different than your build machine, set the environment variable `LD` to the appropriate linker for that platform. Example:
 
 `LD=arm-linux-gnueabihf-ld mkverobj <args>`
+
+> Or, if your `ld` is like the one on macOS, you can just use `-arch <arch_name>`
