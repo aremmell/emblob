@@ -4,9 +4,6 @@
 #                                                   #
 #####################################################
 
-# include colorized console messaging functions.
-include console.mk
-
 # TODO: until I figure out how to use autoconf/automake,
 # and you want to build a debug version:
 #
@@ -35,7 +32,7 @@ CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-CXXLDFLAGS      = -Wl,-lstdc++
+CXXLDFLAGS      = 
 CLDFLAGS        =  
 
 ifndef (MKVEROBJ_DEBUG)
@@ -109,27 +106,21 @@ $(OBJ_CXXEXAMPLE) : $(TUS_CXXEXAMPLE) $(DEPS)
 
 mkverobj: $(OBJ_MKVEROBJ)
 	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(CXXLDFLAGS)
-	$(call echo_build_success,$(BIN_MKVEROBJ))
 
 verfile: mkverobj
 	$(BIN_MKVEROBJ) $(VER_MAJOR) $(VER_MINOR) $(VER_BUILD) "$(VER_NOTES)" "$(VER_OBJFILE)"
-	$(call echo_build_success,$(VER_OBJFILE))
 
 cexample: $(OBJ_CEXAMPLE) $(VER_OBJFILE)
 	$(CC) -o $(BIN_CEXAMPLE) $(VER_OBJFILE) $(OBJ_CEXAMPLE) $(CFLAGS) $(LDFLAGS)
-	$(call echo_build_success,$(BIN_CEXAMPLE))
 
 cxxexample: $(OBJ_CXXEXAMPLE) $(VER_OBJFILE)
 	$(CXX) -o $(BIN_CXXEXAMPLE) $(VER_OBJFILE) $(OBJ_CXXEXAMPLE) $(CXXFLAGS) $(CXXLDFLAGS)
-	$(call echo_build_success,$(BIN_CXXEXAMPLE))
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
-	$(call echo_success,prepped $(INTDIR) and $(BINDIR) successfully.)
 
 clean:
 	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi && \
 			if [ -f "$(VER_OBJFILE)" ]; then rm -f "$(VER_OBJFILE)"; fi)
-	$(call echo_success,cleaned intermediate/binary directories successfully.)	
 
 .PHONY: clean prep
