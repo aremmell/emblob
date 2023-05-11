@@ -4,13 +4,8 @@
 #                                                   #
 #####################################################
 
-# include helper functions for reporting build progress
-# to the user hrough colorized console messages.
+# include colorized console messaging functions.
 include console.mk
-# TODO: at this time, there will be no install recipe.
-# I have some thinking to do about how to do that reliably.
-#$(call echo_warning,no insall recipe is implemented at this time.)
-#$(call echo_warning,please utilize your locally compiled components in the interim.)
 
 # TODO: until I figure out how to use autoconf/automake,
 # and you want to build a debug version:
@@ -24,47 +19,37 @@ include console.mk
 # at this time, unless that variable is set, an optimized
 # release configuration will be used.
 
+# these variables will be stamped into the example applications.
+VER_MAJOR   := 1
+VER_MINOR   := 2
+VER_BUILD   := 3
+VER_NOTES   := This is just an example of what mkverobj can do.
+
+# this is the object file that contains the version data and retrieval code.
+VER_OBJFILE := VERSION.o
+
 # compiler/linker commands
-CFLAGS    = -Wpedantic -std=c11 -I.
-CXXFLAGS  = -Wpedantic -std=c++17 -I.
-CFLAGS_NDEBUG = -O3 -DNDEBUG
-CFLAGS_DEBUG  = -g -O0 -DDEBUG
+CFLAGS          = -Wpedantic -std=c11 -fPIC -I. -I/usr/include 
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I/usr/include -I/usr/include/c++/11
+CFLAGS_NDEBUG   = -O3 -DNDEBUG
+CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-
-#$(call echo_debug,CFLAGS BEFORE: $(CFLAGS))
-#$(call echo_debug,CXXFLAGS BEFORE: $(CXXFLAGS))
+CXXLDFLAGS      = -Wl,-lstdc++
+CLDFLAGS        =  
 
 ifndef (MKVEROBJ_DEBUG)
-#$(call echo_info,MKVEROBJ_DEBUG is undefined; not using debug settings.)
 	CFLAGS   += $(CFLAGS_NDEBUG)
 	CXXFLAGS += $(CXXFLAGS_NDEBUG)
 else
-#$(call echo_warning,MKVEROBJ_DEBUG is defined; debug settings will be used.)
 	CFLAGS   += $(CFLAGS_DEBUG)
 	CXXFLAGS += $(CXXFLAGS_DEBUG)
 endif
 
-ifeq ($(OS),Windows_NT)
-	CFLAGS   += -D_WIN32
-	CXXFLAGS += -D_WIN32
-endif
-
-# relevant input direcgtories. if variables like INCLUDE
-# are empty, there is no reliable way to guess what they
-# might be from within this Makefile, so I'll make guesses.
-ifdef (INCLUDE)
-	CFLAGS   := $(INCLUDE)
-	CXXFLAGS := $(INCLUDE)
-endif
-
-#$(call echo_debug, CFLAGS AFTER: '$(CFLAGS)')
-#$(call echo_debug, CXXFLAGS AFTER: '$(CXXFLAGS)')
-
 # set up build paths and filenames
-BUILDDIR  = build
-INTDIR    = $(BUILDDIR)/obj
-BINDIR    = $(BUILDDIR)/bin
+BUILDDIR  := build
+INTDIR    := $(BUILDDIR)/obj
+BINDIR    := $(BUILDDIR)/bin
 
 MKVEROBJ   := mkverobj
 CEXAMPLE   := cexample
@@ -73,47 +58,28 @@ CXXEXAMPLE := cxxexample
 #
 # mkverobj
 #
-
-# translation units
 TUS_MKVEROBJ := $(MKVEROBJ).cc
-
-# intermediate files
-OBJ_MKVEROBJ = $(INTDIR)/$(MKVEROBJ).o
-
-# binary target
-BIN_MKVEROBJ = $(BINDIR)/$(MKVEROBJ)
+OBJ_MKVEROBJ := $(INTDIR)/$(MKVEROBJ).o
+BIN_MKVEROBJ := $(BINDIR)/$(MKVEROBJ)
 
 #
 # cexample
 #
-
-# tramslation units
-TUS_CEXAMPLE = $(CEXAMPLE).c
-
-# intermediate files
-OBJ_CEXAMPLE = $(INTDIR)/$(CEXAMPLE).o
-
-# binary target
-BIN_CEXAMPLE = $(BINDIR)/$(CEXAMPLE)
+TUS_CEXAMPLE := $(CEXAMPLE).c
+OBJ_CEXAMPLE := $(INTDIR)/$(CEXAMPLE).o
+BIN_CEXAMPLE := $(BINDIR)/$(CEXAMPLE)
 
 #
 # cxxexample
 #
-
-# translation units
-TUS_CXXEXAMPLE = $(CXXEXAMPLE).cc
-
-# intermediate files
-OBJ_CXXEXAMPLE = $(CXXEXAMPLE).o
-
-# binary target
-BIN_CXXEXAMPLE = $(BINDIR)/$(CXXEXAMPLE)
+TUS_CXXEXAMPLE := $(CXXEXAMPLE).cc
+OBJ_CXXEXAMPLE := $(INTDIR)/$(CXXEXAMPLE).o
+BIN_CXXEXAMPLE := $(BINDIR)/$(CXXEXAMPLE)
 
 #
 # targets
 #
-
-all: prep $(MKVEROBJ) $(CEXAMPLE) $(CXXEXAMPLE)
+all: prep compile mkverobj verfile cexample cxxexample
 
 -include $(INTDIR)/*.d
 
@@ -124,7 +90,14 @@ $(BINDIR)   : $(BUILDDIR)
 $(OBJ_MKVEROBJ) : $(INTDIR)
 $(OBJ_CEXAMPLE) : $(INTDIR)
 $(OBJ_CXXEXAMPLE) : $(INTDIR)
+$(VER_OBJFILE) : $(INTDIR)
 
+$(BIN_MKVEROBJ) : $(OBJ_MKVEROBJ)
+$(VER_OBJFILE) : $(BIN_MKVEROBJ)
+$(BIN_CEXAMPLE) : $(VER_OBJFILE)
+$(BIN_CXXEXAMPLE) : $(VER_OBJFILE)
+
+compile: $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE) 
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
@@ -134,41 +107,29 @@ $(OBJ_CEXAMPLE) : $(TUS_CEXAMPLE) $(DEPS)
 $(OBJ_CXXEXAMPLE) : $(TUS_CXXEXAMPLE) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
-prep:
-ifeq ($(OS),Windows_NT)
-	$(shell if not exist "$(BUILDDIR)\NUL" mkdir "$(BUILDDIR)" && \
-		if not exist "$(BINDIR)\NUL"   mkdir "$(BINDIR)"   && \
-		if not exist "$(INTDIR)\NUL"   mkdir "$(INTDIR)")
-else
-	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
-endif
-	$(call echo_success,initialized INTDIR and BINDIR successfully.)
-
 mkverobj: $(OBJ_MKVEROBJ)
-	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(CXXLDFLAGS)
 	$(call echo_build_success,$(BIN_MKVEROBJ))
 
-cexample: $(OBJ_CEXAMPLE)
-	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(CFLAGS) $(LDFLAGS)
+verfile: mkverobj
+	$(BIN_MKVEROBJ) $(VER_MAJOR) $(VER_MINOR) $(VER_BUILD) "$(VER_NOTES)" "$(VER_OBJFILE)"
+	$(call echo_build_success,$(VER_OBJFILE))
+
+cexample: $(OBJ_CEXAMPLE) $(VER_OBJFILE)
+	$(CC) -o $(BIN_CEXAMPLE) $(VER_OBJFILE) $(OBJ_CEXAMPLE) $(CFLAGS) $(LDFLAGS)
 	$(call echo_build_success,$(BIN_CEXAMPLE))
 
-cxxexample: $(OBJ_CXXEXAMPLE)
-	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(CXXFLAGS) $(LDFLAGS)
+cxxexample: $(OBJ_CXXEXAMPLE) $(VER_OBJFILE)
+	$(CXX) -o $(BIN_CXXEXAMPLE) $(VER_OBJFILE) $(OBJ_CXXEXAMPLE) $(CXXFLAGS) $(CXXLDFLAGS)
 	$(call echo_build_success,$(BIN_CXXEXAMPLE))
 
-# TODO
-#install: mkverobj
-#	 ifeq ($(OS),Windows_NT)
-#	 	$(call echo_error,E_NOTIMPL: no install suppport for Windows yet.)
-#	 else
-#		@echo copying $(OUT_SHARED) to $(INSTALLDIR) and headers to $(INSTALLINC)...
-#		$(shell cp -f $(OUT_SHARED) "$(INSTALLDIR)/" &&
-#		        cp -f *.h *.hh "$(INSTALLINC)/")
-#		@echo installed libsir successfully.
-#	endif
+prep:
+	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
+	$(call echo_success,prepped $(INTDIR) and $(BINDIR) successfully.)
 
 clean:
-	$(shell [ -d "$(BUILDDIR)" ] && rm -rf "$(BUILDDIR)" >/dev/null 2>&1; \
-		$(call echo_success,INTDIR and BINDIR are cleaned.))
+	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi && \
+			if [ -f "$(VER_OBJFILE)" ]; then rm -f "$(VER_OBJFILE)"; fi)
+	$(call echo_success,cleaned intermediate/binary directories successfully.)	
 
-.PHONY: clean
+.PHONY: clean prep

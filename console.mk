@@ -33,7 +33,7 @@ define set_min_console_msg_level =
 endef
 
 define echo_color =
-	@echo "\x1b[$(1)m$(2)\x1b[0m"
+	@echo "\033[$(1)m$(2)\033[0m"
 endef
 
 define echo_error =
