@@ -80,6 +80,7 @@ all: prep compile mkverobj verfile cexample cxxexample
 
 -include $(INTDIR)/*.d
 
+depends:
 $(BUILDDIR) : prep
 $(INTDIR)   : $(BUILDDIR)
 $(BINDIR)   : $(BUILDDIR)
@@ -94,7 +95,7 @@ $(VER_OBJFILE) : $(BIN_MKVEROBJ)
 $(BIN_CEXAMPLE) : $(VER_OBJFILE)
 $(BIN_CXXEXAMPLE) : $(VER_OBJFILE)
 
-compile: $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE) 
+compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE) 
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
@@ -104,7 +105,7 @@ $(OBJ_CEXAMPLE) : $(TUS_CEXAMPLE) $(DEPS)
 $(OBJ_CXXEXAMPLE) : $(TUS_CXXEXAMPLE) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
-mkverobj: $(OBJ_MKVEROBJ)
+mkverobj: depends $(OBJ_MKVEROBJ)
 	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(CXXLDFLAGS)
 
 verfile: mkverobj
