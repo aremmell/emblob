@@ -68,7 +68,8 @@ int main(int argc, char** argv)
         // This one works with GNU ld.
         args << " -r binary -o " << argv[5] << " " << TMP_FILE;
 #elif defined(__APPLE__)
-        args << " -v -r -preload -arch x86_64 -o VERSION.o " << " " << TMP_FILE;
+        /*args << " -r -o VERSION.o -sectcreate __DATA __version VERSION.o stub.o";*/
+        args << " -v -r -o VERSION.o stub.o";
 #else
         // TODO: Write a note to the guy and tell him we'll help him
         // get his figured too.
@@ -84,9 +85,9 @@ int main(int argc, char** argv)
             return EXIT_FAILURE;
         }
 
-        if (0 != remove(TMP_FILE))
+        /*if (0 != remove(TMP_FILE))
             std::cerr << APP_NAME << ": WARNING: unable to remove " << TMP_FILE
-                << ": " << strerror(errno) << std::endl;        
+                << ": " << strerror(errno) << std::endl;        */
  
         return EXIT_SUCCESS;
     } catch (exception& ex) {

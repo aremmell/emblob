@@ -25,15 +25,14 @@ VER_NOTES   := This is just an example of what mkverobj can do.
 # this is the object file that contains the version data and retrieval code.
 VER_OBJFILE := VERSION.o
 
-# compiler/linker commands
-CFLAGS          = -Wpedantic -std=c11 -fPIC -I. -I/usr/include 
-CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I/usr/include -I/usr/include/c++/11
+# compiler/linker commands. you're going to want to make sure $INCLUDE 
+# and $LDFLAGS are defined.
+CFLAGS          = -Wpedantic -std=c11 -fPIC -I. -I${INCLUDE}
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I${INCLUDE}
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-CXXLDFLAGS      = 
-CLDFLAGS        =  
 
 ifndef (MKVEROBJ_DEBUG)
 	CFLAGS   += $(CFLAGS_NDEBUG)
@@ -112,10 +111,10 @@ verfile: mkverobj
 	$(BIN_MKVEROBJ) $(VER_MAJOR) $(VER_MINOR) $(VER_BUILD) "$(VER_NOTES)" "$(VER_OBJFILE)"
 
 cexample: $(OBJ_CEXAMPLE) $(VER_OBJFILE)
-	$(CC) -o $(BIN_CEXAMPLE) $(VER_OBJFILE) $(OBJ_CEXAMPLE) $(CFLAGS) $(LDFLAGS)
+	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(VER_OBJFILE) $(CFLAGS) $(LDFLAGS)
 
 cxxexample: $(OBJ_CXXEXAMPLE) $(VER_OBJFILE)
-	$(CXX) -o $(BIN_CXXEXAMPLE) $(VER_OBJFILE) $(OBJ_CXXEXAMPLE) $(CXXFLAGS) $(CXXLDFLAGS)
+	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(VER_OBJFILE) $(CXXFLAGS) $(LDFLAGS)
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
