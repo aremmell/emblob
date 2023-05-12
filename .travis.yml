@@ -1,16 +1,26 @@
 ---
 version: ~> 1.0
-language: cpp, c
+language:
+  - cpp
+  - c
 branches:
-    only:
-        - master
+  only:
+    - master
+os:
+  - linux
+  - osx
+dist:
+  - bionic
+osx_image:
+  - xcode11.3
+arch:
+  - aarch64
+  - arm64
+  - amd64
 script:
-    - make all
-    - build/bin/mkverobj
-    - build/bin/cexample
-    - build/bin/cxxexample
+  - make all
 compiler:
-    - clang
-    - gcc
-    - clang++
-    - g++
+  - clang
+  - gcc
+  - clang++
+  - g++
