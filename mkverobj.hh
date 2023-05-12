@@ -14,8 +14,8 @@
 namespace mkverobj
 {
     constexpr static const char* APP_NAME = "mkverobj";
-    constexpr static const char* TMP_FILE = "VERSION";
-
+    constexpr static const char* TMP_FILE = "tmp_version";
+    
     static inline bool valid_str(const char* str) {
         return nullptr != str && 0 != *str;
     }
@@ -40,7 +40,6 @@ namespace mkverobj
         strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
         strm.flush();
      }
-
 }; // !namespace mkverobj
 
 #endif // !_MKVEROBJ_HH_INCLUDED
