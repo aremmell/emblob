@@ -64,17 +64,42 @@ int main(int argc, char** argv)
         stringstream cmd;
         stringstream args;
 
-#if defined(__gnu_linux__)
-        // This one works with GNU ld.
-        args << " -r binary -o " << argv[5] << " " << TMP_FILE;
+/* #if defined(__gnu_linux__)
+
+        // This one works with GNU ld (ver? distro?).
+        // args << " -r -b binary -o VERSION.o tmp_version";
+        //
+
+        // OK: when the above doesn't work, this did on:
+        // Arch Linux 6.2.14-300.fc38.x86_64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux
+        // and ld v2.39-9.fc38
+        //
+        // but it only put the contents of the version file into VERSION.o. Something
+        // else is still missing:
+        //
+        // /usr/bin/ld: warning: VERSION.o: missing .note.GNU-stack section implies executable stack
+        // /usr/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker
+        // /usr/bin/ld: build/obj/cxxexample.o: in function `get_version_resource()':
+        // cxxexample.cc:(.text+0x7): undefined reference to `_binary_VERSION_start'
+        //
+        // args << " -Ur --format=binary tmp_version -o VERSION.o";
+        //
+
+
 #elif defined(__APPLE__)
-        /*args << " -r -o VERSION.o -sectcreate __DATA __version VERSION.o stub.o";*/
+
+        // -sectcreate is definitely apple-only.
+        //args << " -r -o VERSION.o -sectcreate __DATA __version VERSION.o stub.o";
         args << " -v -r -o VERSION.o stub.o";
+
 #else
-        // TODO: Write a note to the guy and tell him we'll help him
-        // get his figured too.
-#error "Unsupported platform: sorry!"
-#endif
+
+        // TODO: Write something more clever and helpful.
+        #error "Unsupported platform: sorry!"
+
+#endif */
+
+        args << " -Ur --format=binary tmp_version -o VERSION.o";
         cmd << linker << args.str();
 
         int sysret = system(cmd.str().c_str());
