@@ -5,16 +5,17 @@ language:
   - c
 branches:
   only:
-    - master
+    - version-2
 os:
   - linux
   - osx
 dist:
   - bionic
 osx_image:
-  - xcode11.3
+  - xcode14.3
 arch:
   - aarch64
+  - armhf
   - arm64
   - amd64
 script:
