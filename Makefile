@@ -36,7 +36,7 @@ VER_INCFILE := version.S
 # compiler/linker commands. you're going to want to make sure $INCLUDE 
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -v -std=c++20 -fPIC -I.
+CXXFLAGS        = -Wpedantic -v -std=c++17 -fPIC -I.
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
