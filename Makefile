@@ -16,23 +16,6 @@
 # at this time, unless that variable is set, an optimized
 # release configuration will be used.
 
-# these variables will be stamped into the example applications.
-VER_MAJOR   := 1
-VER_MINOR   := 2
-VER_BUILD   := 3
-VER_NOTES   := This is just an example of what mkverobj can do.
-
-# this is the object file that contains the version data and retrieval code.
-VER_OBJFILE := VERSION.o
-
-# this is the temporary file used to contain the raw binary data that is
-# imported into the object file.
-VER_BINFILE := VERSION
-
-# this is an ASM file containing instructions on how to import the raw
-# binary data into the object file.
-VER_INCFILE := version.S
-
 # compiler/linker commands. you're going to want to make sure $INCLUDE 
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
@@ -57,33 +40,43 @@ INTDIR    := $(BUILDDIR)/obj
 BINDIR    := $(BUILDDIR)/bin
 
 MKVEROBJ   := mkverobj
+VERFILE    := version
 CEXAMPLE   := cexample
 CXXEXAMPLE := cxxexample
 
-#
+# these variables will be stamped into the example applications.
+VER_MAJOR   := 1
+VER_MINOR   := 2
+VER_BUILD   := 3
+VER_NOTES   := This is just an example of what mkverobj can do.
+
+# this is the object file that contains the version data and retrieval code.
+OBJ_VERFILE := $(INTDIR)/$(VERFILE).o
+
+# this is the temporary file containing the raw binary data that is
+# imported into OBJ_VERFILE.
+BIN_VERFILE := $(INTDIR)/$(VERFILE).bin
+
+# this is an ASM file containing instructions on how to import 
+# BIN_VERFILE into OBJ_VERFILE.
+ASM_VERFILE := $(INTDIR)/$(VERFILE).S
+
 # mkverobj
-#
 TUS_MKVEROBJ := $(MKVEROBJ).cc
 OBJ_MKVEROBJ := $(INTDIR)/$(MKVEROBJ).o
 BIN_MKVEROBJ := $(BINDIR)/$(MKVEROBJ)
 
-#
 # cexample
-#
 TUS_CEXAMPLE := $(CEXAMPLE).c
 OBJ_CEXAMPLE := $(INTDIR)/$(CEXAMPLE).o
 BIN_CEXAMPLE := $(BINDIR)/$(CEXAMPLE)
 
-#
 # cxxexample
-#
 TUS_CXXEXAMPLE := $(CXXEXAMPLE).cc
 OBJ_CXXEXAMPLE := $(INTDIR)/$(CXXEXAMPLE).o
 BIN_CXXEXAMPLE := $(BINDIR)/$(CXXEXAMPLE)
 
-#
 # targets
-#
 all: clean prep compile mkverobj verfile cexample cxxexample
 
 -include $(INTDIR)/*.d
@@ -96,13 +89,15 @@ $(BINDIR)   : $(BUILDDIR)
 $(OBJ_MKVEROBJ) : $(INTDIR)
 $(OBJ_CEXAMPLE) : $(INTDIR)
 $(OBJ_CXXEXAMPLE) : $(INTDIR)
-$(VER_OBJFILE) : $(INTDIR)
+$(OBJ_VERFILE) : $(INTDIR)
+$(BIN_VERFILE) : $(INTDIR)
+$(ASM_VERFILE) : $(INTDIR)
 
 $(BIN_MKVEROBJ) : $(OBJ_MKVEROBJ)
-$(VER_INCFILE) : $(BIN_MKVEROBJ)
-$(VER_OBJFILE) : $(VER_INCFILE)
-$(BIN_CEXAMPLE) : $(VER_OBJFILE)
-$(BIN_CXXEXAMPLE) : $(VER_OBJFILE)
+$(ASM_VERFILE) : $(BIN_MKVEROBJ)
+$(OBJ_VERFILE) : $(ASM_VERFILE)
+$(BIN_CEXAMPLE) : $(OBJ_VERFILE)
+$(BIN_CXXEXAMPLE) : $(OBJ_VERFILE)
 
 compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE) 
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
@@ -117,23 +112,20 @@ $(OBJ_CXXEXAMPLE) : $(TUS_CXXEXAMPLE) $(DEPS)
 mkverobj: depends $(OBJ_MKVEROBJ)
 	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(LDFLAGS)
 
-verfile: mkverobj $(VER_INCFILE)
-	$(BIN_MKVEROBJ) $(VER_MAJOR) $(VER_MINOR) $(VER_BUILD) "$(VER_NOTES)" "$(VER_OBJFILE)"
+verfile: mkverobj $(ASM_VERFILE)
+	$(BIN_MKVEROBJ) $(VER_MAJOR) $(VER_MINOR) $(VER_BUILD) "$(VER_NOTES)" "$(INTDIR)/$(VERFILE)"
 
-cexample: $(OBJ_CEXAMPLE) $(VER_OBJFILE)
-	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(VER_OBJFILE) $(CFLAGS) $(LDFLAGS)
+cexample: $(OBJ_CEXAMPLE) $(OBJ_VERFILE)
+	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(OBJ_VERFILE) $(CFLAGS) $(LDFLAGS)
 
-cxxexample: $(OBJ_CXXEXAMPLE) $(VER_OBJFILE)
-	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(VER_OBJFILE) $(CXXFLAGS) $(LDFLAGS)
+cxxexample: $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE)
+	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE) $(CXXFLAGS) $(LDFLAGS)
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
 
 clean:
-	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi && \
-			if [ -f "$(VER_BINFILE)" ]; then rm -f "$(VER_BINFILE)"; fi && \
-			if [ -f "$(VER_INCFILE)" ]; then rm -f "$(VER_INCFILE)"; fi && \
-			if [ -f "$(VER_OBJFILE)" ]; then rm -f "$(VER_OBJFILE)"; fi)
+	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi)
 	@echo "Cleaned binary and intermediate files."
 
 .PHONY: clean prep
