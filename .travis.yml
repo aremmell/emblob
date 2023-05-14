@@ -22,7 +22,7 @@ arch:
 script:
   - make all
   - build/bin/cxxexample
-  - build/bin/cexampple
+  - build/bin/cexample
 compiler:
   - gcc
   - g++
