@@ -1,3 +1,4 @@
 build/*
 VERSION*
 .DS_Store
+version.S
