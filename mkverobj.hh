@@ -5,11 +5,9 @@
 #include <cstring>
 #include <cstdio>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include "cmdline.h"
 #include "linkers.hh"
 #include "version.h"
 
