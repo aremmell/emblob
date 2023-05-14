@@ -67,7 +67,7 @@ typedef struct
  *
  * @return const version_resource*
  */
-static inline const version_resource* get_version_resource()
+static inline const version_resource* get_version_resource(void)
 {
     return (version_resource*)&MKVEROBJ_VAR;
 }
@@ -76,7 +76,7 @@ static inline const version_resource* get_version_resource()
  *
  * @return uint16_t
  */
-static inline uint16_t get_version_major()
+static inline uint16_t get_version_major(void)
 {
     return get_version_resource()->major;
 }
@@ -85,7 +85,7 @@ static inline uint16_t get_version_major()
  *
  * @return uint16_t
  */
-static inline uint16_t get_version_minor()
+static inline uint16_t get_version_minor(void)
 {
     return get_version_resource()->minor;
 }
@@ -94,7 +94,7 @@ static inline uint16_t get_version_minor()
  *
  * @return uint16_t
  */
-static inline uint16_t get_version_build()
+static inline uint16_t get_version_build(void)
 {
     return get_version_resource()->build;
 }
@@ -103,7 +103,7 @@ static inline uint16_t get_version_build()
  *
  * @return const char*
  */
-static inline const char* get_version_notes()
+static inline const char* get_version_notes(void)
 {
     return get_version_resource()->notes;
 }
