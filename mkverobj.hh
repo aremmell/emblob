@@ -4,12 +4,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "linkers.hh"
 #include "version.h"
 
 namespace mkverobj
@@ -24,6 +22,11 @@ namespace mkverobj
 
     static inline uint16_t string_to_uint16(const char* str) {
         return static_cast<uint16_t>(std::strtoul(str, nullptr, 10));
+    }
+
+    static bool file_exists(const std::string& filename) {
+        std::ifstream strm(filename);
+        return strm.good();
     }
 
     std::string fmt_string(const char* fmt, ...) {
@@ -69,7 +72,7 @@ namespace mkverobj
         strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
         strm.flush();
 
-        return std::filesystem::exists(filename);
+        return file_exists(filename);
      }
 
      int execute_command(const std::string& cmd, bool echo_stderr = true, bool echo_success = false) {
