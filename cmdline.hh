@@ -16,8 +16,8 @@ namespace mkverobj
 
         command_line() = default;
 
-        bool parse(int argc, char** argv) {
-#           pragma message("TODO: implement command_line::parse")
+        bool parse_and_validate(int argc, char** argv) {
+#           pragma message("TODO: implement command_line::parse_and_validate")
             if (argc < 6)
                 return false;
 
@@ -31,7 +31,7 @@ namespace mkverobj
 
         static void print_usage() {
 #           pragma message("TODO: implement command_line::print_usage")        
-            std::cerr << fmt_string("usage:\n\t%s <major> <minor> <build> <notes> <output file>", APP_NAME) << std::endl;
+            std::cerr << fmt_str("usage:\n\t%s <major> <minor> <build> <notes> <output file>", APP_NAME) << std::endl;
         }
 
         void set_output_filename(const char* filename) {

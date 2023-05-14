@@ -1,6 +1,7 @@
 #ifndef _MKVEROBJ_UTIL_HH_INCLUDED
 #define _MKVEROBJ_UTIL_HH_INCLUDED
 
+#include <cstdint>
 #include <string>
 #include <fstream>
 #include <cstdio>
@@ -12,7 +13,7 @@ namespace mkverobj
 #   pragma message("TODO: move elsewhere")
     constexpr static const char* APP_NAME = "mkverobj";    
 
-    static std::string fmt_string(const char* fmt, ...) {
+    static std::string fmt_str(const char* fmt, ...) {
         va_list args1;
         va_start(args1, fmt);
         va_list args2;

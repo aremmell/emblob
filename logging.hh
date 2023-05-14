@@ -1,8 +1,6 @@
 #ifndef _MKVEROBJ_LOGGING_HH_INCLUDED
 #define _MKVEROBJ_LOGGING_HH_INCLUDED
 
-#include <cstdint>
-#include <string>
 #include <iostream>
 #include <exception>
 #include "util.hh"
@@ -18,7 +16,7 @@ namespace mkverobj
         fatal
     };
 
-    static void log(log_level lvl, const std::string& msg) {
+    static void log_msg(log_level lvl, const std::string& msg) {
 
         if (msg.empty())
             return;
@@ -43,11 +41,11 @@ namespace mkverobj
                 prefix = "[FATAL]";
                 break;
             default:
-                throw new std::runtime_error("invalid log level");
+                throw std::runtime_error("invalid log level");
                 break;
-
-            strm << APP_NAME << " " << prefix << ": " << msg << std::endl;
         }
+
+        strm << APP_NAME << " " << prefix << ": " << msg << std::endl;
     }
 } // !namespace mkverobj
 

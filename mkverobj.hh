@@ -5,32 +5,49 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <functional>
 #include "util.hh"
 #include "logging.hh"
 #include "version.h"
 
 namespace mkverobj
 {   
-    static int execute_shell_command(const std::string& cmd, bool echo_stderr = true, bool echo_success = false) {
+    static bool execute_shell_command(const std::string& cmd, bool echo_stderr = true, bool echo_success = false) {
+        bool retval = false;
 
-        int retval = system(cmd.c_str());
-        if (0 != retval && echo_stderr) {
-            std::cerr << APP_NAME << ": command '" << cmd << "' failed (" << retval << ")" << std::endl;
-        } else if (0 == retval && echo_success) {
-            std::cout << APP_NAME << ": command '" << cmd << "' succeeded" << std::endl;
+        std::cout.flush();
+
+        int sysret = std::system(cmd.c_str());
+        int status = WEXITSTATUS(sysret);
+
+        retval = status == 0;
+
+        if (!retval && echo_stderr) {
+            log_msg(log_level::error, fmt_str("command '%s' failed (status: %d)", cmd.c_str(), status));
+        } else if (retval && echo_success) {
+            log_msg(log_level::info, fmt_str("command '%s' succeeded", cmd.c_str()));
         }
 
         return retval;
     }
 
-    static bool write_binary_version_file(const std::string& filename, const version_resource& res) {
-        std::ofstream strm(filename, std::ios::binary | std::ios::trunc);
+    static std::ofstream::pos_type write_file_contents(const std::string& filename, std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb)
+    {
+        if (!cb)
+            return std::ofstream::pos_type(-1);
+
+        std::ofstream strm(filename, mode);
         strm.exceptions(strm.badbit | strm.failbit);
-        strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
+
+        cb(strm);
         strm.flush();
 
-        return file_exists(filename);
-     }
+        if (strm.good() && file_exists(filename)) {
+            return strm.tellp();
+        }
+
+         return std::ofstream::pos_type(-1);
+    }
     
 } // !namespace mkverobj
 
