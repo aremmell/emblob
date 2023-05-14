@@ -58,10 +58,7 @@ int main(int argc, char** argv)
                     argv[5], errno, strerror(errno)).c_str());
         }
 
-#if defined(__gnu_linux__)
-    #pragma message("NOTIMPL")
-    return EXIT_FAILURE;
-#elif defined(__APPLE__)
+#if defined(__APPLE__) || defined(__gnu_linux__)
 
         ofstream strm(INC_FILE, ios::out | ios::trunc);
         strm.exceptions(strm.badbit | strm.failbit);
@@ -79,18 +76,25 @@ int main(int argc, char** argv)
 
         cout << APP_NAME << ": successfully created " << INC_FILE << endl;
 
- /*        string cc = getenv("CC");
-        if (cc.empty()) {
+        // TODO: figure out the right way to get the compiler if it's not in $CC
+        string cc;
+        char* env_cc = getenv("CC");
+        if (env_cc) {
+            cc = env_cc;
+            cout << APP_NAME << ": using compiler from CC environment variable: '" << cc << "'" << endl;
+        } else {
 #if defined(__clang__)
             cc = "cc";
+#elif defined(__GNUC__)
+            cc = "gcc";
 #else
 #   pragma message("NOTIMPL")
     return EXIT_FAILURE;
 #endif
             cerr << APP_NAME << ": WARNING: CC environment variable not set; defaulting to '" << cc << "'" << endl;
-        } */
+        } 
 
-        string cmd = fmt_string("%s -c -o %s %s", "cc", argv[5], INC_FILE);
+        string cmd = fmt_string("%s -c -o %s %s", cc.c_str(), argv[5], INC_FILE);
         return execute_command(cmd, true, true) == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
 /*
