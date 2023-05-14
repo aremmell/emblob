@@ -49,12 +49,13 @@ int main(int argc, char** argv)
         strncpy(res.notes, argv[4], MAX_VER_NOTES - 1);
 
         if (!write_fake_obj_file(TMP_FILE, res))
-            throw new runtime_error(fmt_string("failed to write binary version file %s: %s", TMP_FILE, strerror(errno)).c_str());
+            throw new runtime_error(fmt_string("failed to write binary version file %s: (%d) %s",
+                TMP_FILE, errno, strerror(errno)).c_str());
 
         // Ensure that the linker object file does not already exist.
         if (filesystem::exists(argv[5])) {
             if (!remove(argv[5]))
-                throw new runtime_error(fmt_string("linker object file %s already exists, and can't be deleted: (%d): %s",
+                throw new runtime_error(fmt_string("linker object file %s already exists, and can't be deleted: (%d) %s",
                     argv[5], errno, strerror(errno)).c_str());
         }
 
@@ -71,8 +72,9 @@ int main(int argc, char** argv)
 
         strm.flush();
 
-        // TODO: if doesn't exist, throw
-        //return filesystem::exists(INC_FILE) ? EXIT_SUCCESS : EXIT_FAILURE;
+        if (!file_exists(INC_FILE))
+            throw new runtime_error(fmt_string("failed to write assembly file %s: (%d) %s",
+                INC_FILE, errno, strerror(errno)).c_str());
 
         cout << APP_NAME << ": successfully created " << INC_FILE << endl;
 
