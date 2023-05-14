@@ -38,77 +38,75 @@ using namespace mkverobj;
 int main(int argc, char** argv)
 {
     try {
-        if (!validate_command_line(argc, argv))
+        if (!parse_cmdline(argc, argv))
             return print_usage();
 
+        // Write binary version data to a temporary file.
         version_resource res;
         res.major = string_to_uint16(argv[1]);
         res.minor = string_to_uint16(argv[2]);
         res.build = string_to_uint16(argv[3]);
         strncpy(res.notes, argv[4], MAX_VER_NOTES - 1);
 
-        write_fake_obj_file(TMP_FILE, res);
+        if (!write_fake_obj_file(TMP_FILE, res))
+            throw new runtime_error(fmt_string("failed to write binary version file %s: %s", TMP_FILE, strerror(errno)).c_str());
 
-        // TODO: don't expect to get LD from the ENV.
-        // - it should probably try finding an ld that is native to the
-        //   platform, but in cases like cross-compiling, it should be optional
-        //   what ld to use, and what commands to send it--otherwise this whole thing is
-        //   worthless.
-        const char* linker = getenv("LD");
-        if (!linker) {
-            linker = "ld";
-            // TODO: don't really need libsir but this has got to go.
-            std::cerr << APP_NAME << ": " << "WARNING: $LD is not set; using 'ld'" << std::endl;
+        // Ensure that the linker object file does not already exist.
+        if (filesystem::exists(argv[5])) {
+            if (!remove(argv[5]))
+                throw new runtime_error(fmt_string("linker object file %s already exists, and can't be deleted: (%d): %s",
+                    argv[5], errno, strerror(errno)).c_str());
         }
 
-        stringstream cmd;
-        stringstream args;
-
-/* #if defined(__gnu_linux__)
-
-        // This one works with GNU ld (ver? distro?).
-        // args << " -r -b binary -o VERSION.o tmp_version";
-        //
-
-        // OK: when the above doesn't work, this did on:
-        // Arch Linux 6.2.14-300.fc38.x86_64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux
-        // and ld v2.39-9.fc38
-        //
-        // but it only put the contents of the version file into VERSION.o. Something
-        // else is still missing:
-        //
-        // /usr/bin/ld: warning: VERSION.o: missing .note.GNU-stack section implies executable stack
-        // /usr/bin/ld: NOTE: This behaviour is deprecated and will be removed in a future version of the linker
-        // /usr/bin/ld: build/obj/cxxexample.o: in function `get_version_resource()':
-        // cxxexample.cc:(.text+0x7): undefined reference to `_binary_VERSION_start'
-        //
-        // args << " -Ur --format=binary tmp_version -o VERSION.o";
-        //
-
-
+#if defined(__gnu_linux__)
+    #pragma message("NOTIMPL")
+    return EXIT_FAILURE;
 #elif defined(__APPLE__)
 
-        // -sectcreate is definitely apple-only.
-        //args << " -r -o VERSION.o -sectcreate __DATA __version VERSION.o stub.o";
-        args << " -v -r -o VERSION.o stub.o";
+        ofstream strm(INC_FILE, ios::out | ios::trunc);
+        strm.exceptions(strm.badbit | strm.failbit);
 
+        strm << ".global _version_data" << endl;
+        strm << "_version_data:" << endl;
+        strm << ".incbin \"" << TMP_FILE << "\"" << endl;
+        strm << ".global _sizeof__version_data" << endl;
+        strm << ".set _sizeof__version_data, . - _version_data" << endl;
+
+        strm.flush();
+
+        // TODO: if doesn't exist, throw
+        //return filesystem::exists(INC_FILE) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+        cout << APP_NAME << ": successfully created " << INC_FILE << endl;
+
+ /*        string cc = getenv("CC");
+        if (cc.empty()) {
+#if defined(__clang__)
+            cc = "cc";
 #else
+#   pragma message("NOTIMPL")
+    return EXIT_FAILURE;
+#endif
+            cerr << APP_NAME << ": WARNING: CC environment variable not set; defaulting to '" << cc << "'" << endl;
+        } */
 
-        // TODO: Write something more clever and helpful.
-        #error "Unsupported platform: sorry!"
+        string cmd = fmt_string("%s -c -o %s %s", "cc", argv[5], INC_FILE);
+        return execute_command(cmd, true, true) == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
-#endif */
+/*
+.global _version_data
 
-        args << " -Ur --format=binary tmp_version -o VERSION.o";
-        cmd << linker << args.str();
+_version_data:
+.incbin "VERSION"
 
-        int sysret = system(cmd.str().c_str());
-
-        if (0 != sysret) {
-            std::cerr << APP_NAME << ": executing '" << cmd.str() << "' failed: "
-                << (-1 == sysret ? -1 : WEXITSTATUS(sysret)) << std::endl;
-            return EXIT_FAILURE;
-        }
+.global _sizeof__version_data
+.set _sizeof__version_data, . - _version_data
+*/
+        
+#else
+    #pragma message("NOTIMPL")
+    return EXIT_FAILURE;
+#endif
 
         /*if (0 != remove(TMP_FILE))
             std::cerr << APP_NAME << ": WARNING: unable to remove " << TMP_FILE

@@ -1,5 +1,4 @@
-
-## TODO in this mofo
+# TODO in this mofo
 
 - [ ] last things fuckin' first: we have to figure out how to get the macOS linker to do the same shit.
 - [ ] the logging is fucked.
@@ -12,7 +11,7 @@
 
 - [ ] better instructions when printing usage
 
-- [ ] rename it.
+- [ ] rename it. mvs?
 
 ------
 
