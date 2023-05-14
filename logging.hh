@@ -7,7 +7,7 @@
 
 namespace mkverobj
 {
-    enum class log_level : uint8_t
+    enum class log_lvl : uint8_t
     {
         debug,
         info,
@@ -16,28 +16,28 @@ namespace mkverobj
         fatal
     };
 
-    static void log_msg(log_level lvl, const std::string& msg) {
+    static void log_msg(log_lvl lvl, const std::string& msg) {
 
         if (msg.empty())
             return;
 
         std::string prefix;
-        std::ostream& strm = (lvl == log_level::error || lvl == log_level::fatal) ? std::cerr : std::cout;
+        std::ostream& strm = (lvl == log_lvl::error || lvl == log_lvl::fatal) ? std::cerr : std::cout;
 
         switch (lvl) {
-            case log_level::debug:
+            case log_lvl::debug:
                 prefix = "[DEBUG]";
                 break;
-            case log_level::info:
+            case log_lvl::info:
                 prefix = "[INFO]";
                 break;
-            case log_level::warning:
+            case log_lvl::warning:
                 prefix = "[WARNING]";
                 break;
-            case log_level::error:
+            case log_lvl::error:
                 prefix = "[ERROR]";
                 break;
-            case log_level::fatal:
+            case log_lvl::fatal:
                 prefix = "[FATAL]";
                 break;
             default:

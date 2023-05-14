@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
                 fmt_str("failed to write %s: %s", bin_file.c_str(), strerror(errno)).c_str()
             );
 
-        log_msg(log_level::info, fmt_str("successfully created %s (%lu bytes)",
+        log_msg(log_lvl::info, fmt_str("successfully created %s (%lu bytes)",
             bin_file.c_str(), static_cast<size_t>(wrote)));
 
 #if defined(__APPLE__) || defined(__gnu_linux__)
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
                 fmt_str("failed to write %s: %s", asm_file.c_str(), strerror(errno)).c_str()
             );
 
-        log_msg(log_level::info, fmt_str("successfully created %s (%lu bytes)",
+        log_msg(log_lvl::info, fmt_str("successfully created %s (%lu bytes)",
             asm_file.c_str(), static_cast<size_t>(wrote)));
 
 #       pragma message("research correct compiler detection")
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
         char *env_cc = getenv("CC");
         if (env_cc) {
             cc = env_cc;
-            log_msg(log_level::info, fmt_str("using compiler from CC environment variable: '%s'", cc.c_str()));
+            log_msg(log_lvl::info, fmt_str("using compiler from CC environment variable: '%s'", cc.c_str()));
         } else {
 #           pragma message("pull up compiler selection")
 
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 #           pragma message("NOTIMPL")
             return EXIT_FAILURE;
 #endif
-            log_msg(log_level::warning, fmt_str("CC environment variable not set; defaulting to '%s'", cc.c_str()));
+            log_msg(log_lvl::warning, fmt_str("CC environment variable not set; defaulting to '%s'", cc.c_str()));
         }
 
         auto obj_file = cmd_line.get_obj_output_filename();
@@ -119,10 +119,10 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
 #endif
     } catch (exception& ex) {
-        log_msg(log_level::fatal, fmt_str("top-level exception caught: %s", ex.what()));
+        log_msg(log_lvl::fatal, fmt_str("top-level exception caught: %s", ex.what()));
         retval = EXIT_FAILURE;
     }
 
-    log_msg(log_level::debug, fmt_str("exiting with status %d", retval));
+    log_msg(log_lvl::debug, fmt_str("exiting with status %d", retval));
     return retval;
 }
