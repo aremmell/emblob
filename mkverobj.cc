@@ -35,8 +35,7 @@
 using namespace std;
 using namespace mkverobj;
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     try {
         if (!parse_cmdline(argc, argv))
             return print_usage();
@@ -50,13 +49,16 @@ int main(int argc, char** argv)
 
         if (!write_fake_obj_file(TMP_FILE, res))
             throw new runtime_error(fmt_string("failed to write binary version file %s: (%d) %s",
-                TMP_FILE, errno, strerror(errno)).c_str());
+                                               TMP_FILE, errno, strerror(errno))
+                                        .c_str());
 
         // Ensure that the linker object file does not already exist.
-        if (filesystem::exists(argv[5])) {
+        if (file_exists(argv[5]))
+        {
             if (!remove(argv[5]))
                 throw new runtime_error(fmt_string("linker object file %s already exists, and can't be deleted: (%d) %s",
-                    argv[5], errno, strerror(errno)).c_str());
+                                                   argv[5], errno, strerror(errno))
+                                            .c_str());
         }
 
 #if defined(__APPLE__) || defined(__gnu_linux__)
@@ -74,52 +76,57 @@ int main(int argc, char** argv)
 
         if (!file_exists(INC_FILE))
             throw new runtime_error(fmt_string("failed to write assembly file %s: (%d) %s",
-                INC_FILE, errno, strerror(errno)).c_str());
+                                               INC_FILE, errno, strerror(errno)).c_str());
 
         cout << APP_NAME << ": successfully created " << INC_FILE << endl;
 
         // TODO: figure out the right way to get the compiler if it's not in $CC
         string cc;
-        char* env_cc = getenv("CC");
-        if (env_cc) {
+        char *env_cc = getenv("CC");
+        if (env_cc)
+        {
             cc = env_cc;
             cout << APP_NAME << ": using compiler from CC environment variable: '" << cc << "'" << endl;
-        } else {
+        }
+        else
+        {
 #if defined(__clang__)
             cc = "cc";
 #elif defined(__GNUC__)
             cc = "gcc";
 #else
-#   pragma message("NOTIMPL")
-    return EXIT_FAILURE;
+#pragma message("NOTIMPL")
+            return EXIT_FAILURE;
 #endif
             cerr << APP_NAME << ": WARNING: CC environment variable not set; defaulting to '" << cc << "'" << endl;
-        } 
+        }
 
         string cmd = fmt_string("%s -c -o %s %s", cc.c_str(), argv[5], INC_FILE);
         return execute_command(cmd, true, true) == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
-/*
-.global _version_data
+        /*
+        .global _version_data
 
-_version_data:
-.incbin "VERSION"
+        _version_data:
+        .incbin "VERSION"
 
-.global _sizeof__version_data
-.set _sizeof__version_data, . - _version_data
-*/
-        
+        .global _sizeof__version_data
+        .set _sizeof__version_data, . - _version_data
+        */
+
 #else
-    #pragma message("NOTIMPL")
-    return EXIT_FAILURE;
+#pragma message("NOTIMPL")
+        return EXIT_FAILURE;
 #endif
 
         /*if (0 != remove(TMP_FILE))
             std::cerr << APP_NAME << ": WARNING: unable to remove " << TMP_FILE
                 << ": " << strerror(errno) << std::endl;        */
- 
+
         return EXIT_SUCCESS;
-    } catch (exception& ex) {
+    }
+    catch (exception &ex)
+    {
         std::cerr << APP_NAME << ": " << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
