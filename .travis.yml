@@ -7,7 +7,7 @@ branches:
     - version-2
 os:
   - linux
-#TODO: put back - osx
+  - osx
 dist:
   - bionic
 osx_image:
@@ -22,7 +22,5 @@ script:
   - build/bin/cxxexample
   - build/bin/cexampple
 compiler:
-  - clang
   - gcc
-  - clang++
   - g++
