@@ -42,7 +42,7 @@
 #   define MKVEROBJ_EXTERNAL extern
 #endif
 
-MKVEROBJ_EXTERNAL uint8_t version_data;
+MKVEROBJ_EXTERNAL uint8_t _version_data;
 
 /** maximum length of notes field. */
 #define MAX_VER_NOTES 256
@@ -62,7 +62,7 @@ typedef struct
  */
 static inline const version_resource* get_version_resource(void)
 {
-    return (version_resource*)&version_data;
+    return (version_resource*)&_version_data;
 }
 
 /** @brief retrieves major version number.
