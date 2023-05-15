@@ -3,7 +3,12 @@
 
 #include <cstring>
 #include <iostream>
+#include <functional>
+#include <vector>
+#include <regex>
+#include <limits>
 #include "util.hh"
+#include "logging.hh"
 
 namespace mkverobj
 {
@@ -17,7 +22,6 @@ namespace mkverobj
         command_line() = default;
 
         bool parse_and_validate(int argc, char** argv) {
-#           pragma message("TODO: implement command_line::parse_and_validate")
             if (argc < 6)
                 return false;
 
@@ -48,9 +52,55 @@ namespace mkverobj
 
         std::string get_obj_output_filename() const {
             return _output_filename + EXT_OBJ;
-        }        
+        }
 
         private:
+            /*struct config
+            {
+                struct arg_value
+                {
+                    std::string value;
+                };
+
+                struct arg
+                {
+                    int index = 0;
+                    std::string flag;
+                    std::string short_flag;
+                    std::string description;
+                    bool required = false;
+                    int expected_values = 1;           
+                    std::vector<arg_value> values;
+                    std::function<bool(const arg_value& value, [[out]] std::string& msg)> validator;
+                };
+            };*/
+
+            static bool _version_number_validator(const std::string& val, [[out]] std::string& msg) {
+
+                msg.clear();
+
+                if (val.empty()) {
+                    msg = "is required.";
+                    return false;
+                }
+
+                try {
+                    // all digits, not greater than 65535
+                    auto max_value = static_cast<unsigned long>(std::numeric_limits<uint16_t>::max());
+                    std::basic_regex expr("/^[0-9]{1,5}$/");
+                    if (!std::regex_match(val, expr) || std::strtoul(val.c_str(), nullptr, 10) > max_value) {
+                        msg = "must be a number between 0 and 65535.";
+                        return false;
+                    }
+                } catch (std::regex_error& e) {
+                    log_msg(log_lvl::error, fmt_str("regex error: %s", e.what()));
+                    return false;
+                }
+
+                return true;
+            };                      
+
+            //config _config;
             std::string _output_filename;
     };
 } // !namespace mkverobj
