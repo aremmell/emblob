@@ -1,26 +1,28 @@
----
 version: ~> 1.0
 language:
   - cpp
   - c
 branches:
-  only:
+  except:
     - master
+  only:
+    - version-2
 os:
   - linux
   - osx
 dist:
   - bionic
 osx_image:
-  - xcode11.3
+  - xcode14.3
 arch:
   - aarch64
+  - armhf
   - arm64
   - amd64
 script:
   - make all
+  - build/bin/cxxexample
+  - build/bin/cexample
 compiler:
-  - clang
   - gcc
-  - clang++
   - g++
