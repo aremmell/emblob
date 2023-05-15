@@ -3,10 +3,8 @@ language:
   - cpp
   - c
 branches:
-  except:
-    - master
   only:
-    - version-2
+    - master
 os:
   - linux
   - osx
