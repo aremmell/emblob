@@ -79,7 +79,10 @@
 			"compare": "cpp",
 			"concepts": "cpp",
 			"filesystem": "cpp",
-			"algorithm": "cpp"
+			"algorithm": "cpp",
+			"regex": "cpp",
+			"__tree": "cpp",
+			"map": "cpp"
 		}
 	}
 }
