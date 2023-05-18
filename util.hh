@@ -11,7 +11,9 @@
 
 namespace mkverobj
 {
-    constexpr static const char* APP_NAME = "mkverobj";
+#define CONST_STATIC_STRING static constexpr const char*
+
+    CONST_STATIC_STRING APP_NAME = "mkverobj";
 
     static std::string fmt_str(const char* fmt, ...) {
         va_list args1;

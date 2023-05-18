@@ -113,7 +113,7 @@ mkverobj: depends $(OBJ_MKVEROBJ)
 	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(LDFLAGS)
 
 verfile: mkverobj $(ASM_VERFILE)
-	$(BIN_MKVEROBJ) --major $(VER_MAJOR) --minor $(VER_MINOR) --build $(VER_BUILD) --notes "$(VER_NOTES)" --output "$(INTDIR)/$(VERFILE)"
+	$(BIN_MKVEROBJ) --major $(VER_MAJOR) --minor $(VER_MINOR) --build $(VER_BUILD) --notes "$(VER_NOTES)" --outfile "$(INTDIR)/$(VERFILE)"
 
 cexample: $(OBJ_CEXAMPLE) $(OBJ_VERFILE)
 	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(OBJ_VERFILE) $(CFLAGS) $(LDFLAGS)

@@ -15,31 +15,31 @@ namespace mkverobj
     class command_line
     {
     public:
-        constexpr static const char* EXT_BIN = ".bin";
-        constexpr static const char* EXT_ASM = ".S";
-        constexpr static const char* EXT_OBJ = ".o";
-        constexpr static const char* DEF_OUTPUT_FILE = "__version";
+        CONST_STATIC_STRING EXT_BIN = ".bin";
+        CONST_STATIC_STRING EXT_ASM = ".S";
+        CONST_STATIC_STRING EXT_OBJ = ".o";
+        CONST_STATIC_STRING DEF_OUTPUT_FILE = "__version";
 
-        static constexpr const char* flag_major = "--major";
-        static constexpr const char* s_flag_major = "-maj";
+        CONST_STATIC_STRING FLAG_MAJOR = "--major";
+        CONST_STATIC_STRING S_FLAG_MAJOR = "-maj";
 
-        static constexpr const char* flag_minor = "--minor";
-        static constexpr const char* s_flag_minor = "-min";
+        CONST_STATIC_STRING FLAG_MINOR = "--minor";
+        CONST_STATIC_STRING S_FLAG_MINOR = "-min";
 
-        static constexpr const char* flag_build = "--build";
-        static constexpr const char* s_flag_build = "-b";
+        CONST_STATIC_STRING FLAG_BUILD = "--build";
+        CONST_STATIC_STRING S_FLAG_BUILD = "-b";
 
-        static constexpr const char* flag_notes = "--notes";
-        static constexpr const char* s_flag_notes = "-n";
+        CONST_STATIC_STRING FLAG_NOTES = "--notes";
+        CONST_STATIC_STRING S_FLAG_NOTES = "-n";
 
-        static constexpr const char* flag_output_file = "--output";
-        static constexpr const char* s_flag_output_file = "-o";
+        CONST_STATIC_STRING FLAG_OUTPUT_FILE = "--outfile";
+        CONST_STATIC_STRING S_FLAG_OUTPUT_FILE = "-o";
 
-        static constexpr const char* flag_log_level = "--log-level";
-        static constexpr const char* s_flag_log_level = "-l";
+        CONST_STATIC_STRING FLAG_LOG_LEVEL = "--log-level";
+        CONST_STATIC_STRING S_FLAG_LOG_LEVEL = "-l";
 
-        static constexpr const char* flag_help = "--help";
-        static constexpr const char* s_flag_help = "-h";             
+        CONST_STATIC_STRING FLAG_HELP = "--help";
+        CONST_STATIC_STRING S_FLAG_HELP = "-h";             
 
         command_line() = default;
 
@@ -62,7 +62,7 @@ namespace mkverobj
                     return false;
                 }
 
-                if (a->flag == flag_help) {
+                if (a->flag == FLAG_HELP) {
                     [[maybe_unused]] int p = print_usage();
                     return true;
                 }
@@ -99,19 +99,19 @@ namespace mkverobj
         }
 
         uint16_t get_major_version() const {
-            return string_to_uint16(_config.get_value(flag_major).c_str());
+            return string_to_uint16(_config.get_value(FLAG_MAJOR).c_str());
         }
 
         uint16_t get_minor_version() const {
-            return string_to_uint16(_config.get_value(flag_minor).c_str());
+            return string_to_uint16(_config.get_value(FLAG_MINOR).c_str());
         }     
 
         uint16_t get_build_version() const {
-            return string_to_uint16(_config.get_value(flag_build).c_str());
+            return string_to_uint16(_config.get_value(FLAG_BUILD).c_str());
         }     
 
         std::string get_notes() const {
-            return _config.get_value(flag_notes);
+            return _config.get_value(FLAG_NOTES);
         }
 
         std::string get_bin_output_filename() const {
@@ -127,7 +127,7 @@ namespace mkverobj
         }        
 
         log_lvl get_logging_level() const {
-            return log_lvl_from_string(_config.get_value(flag_log_level));
+            return log_lvl_from_string(_config.get_value(FLAG_LOG_LEVEL));
         }
 
         private:
@@ -176,7 +176,7 @@ namespace mkverobj
                         if (!options_str.empty())
                             retval += " : " + options_str;;
 
-                        if (!required && flag != flag_help) {
+                        if (!required && flag != FLAG_HELP) {
                             retval += " (optional";
 
                             if (!default_value.empty())
@@ -230,24 +230,24 @@ namespace mkverobj
                 }                                                                                           
 
                 std::vector<arg> args = {
-                    { flag_major, s_flag_major, "Major version number", "", "", {}, true, true, false, false, &_version_number_validator },
-                    { flag_minor, s_flag_minor, "Minor version number", "", "", {}, true, true, false, false, &_version_number_validator },
-                    { flag_build, s_flag_build, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
-                    { flag_notes, s_flag_notes, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
-                    { flag_output_file, s_flag_output_file, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
-                    { flag_log_level, s_flag_log_level, "Console logging verbosity", "", log_lvl_to_string(log_lvl::info), {
+                    { FLAG_MAJOR, S_FLAG_MAJOR, "Major version number", "", "", {}, true, true, false, false, &_version_number_validator },
+                    { FLAG_MINOR, S_FLAG_MINOR, "Minor version number", "", "", {}, true, true, false, false, &_version_number_validator },
+                    { FLAG_BUILD, S_FLAG_BUILD, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
+                    { FLAG_NOTES, S_FLAG_NOTES, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
+                    { FLAG_OUTPUT_FILE, S_FLAG_OUTPUT_FILE, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
+                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", log_lvl_to_string(log_lvl::info), {
                         log_lvl_to_string(log_lvl::debug),
                         log_lvl_to_string(log_lvl::info),
                         log_lvl_to_string(log_lvl::warning),
                         log_lvl_to_string(log_lvl::error),
                         log_lvl_to_string(log_lvl::fatal),
                     }, false, false, false, false, &_log_level_validator },
-                    { flag_help, s_flag_help, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
+                    { FLAG_HELP, S_FLAG_HELP, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
                 };
             };
 
             std::string _get_output_filename(const char *ext) const {
-                std::string val = _config.get_value(flag_output_file);
+                std::string val = _config.get_value(FLAG_OUTPUT_FILE);
                 if (!val.empty())
                     return val + ext;
                 else
