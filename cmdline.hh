@@ -9,6 +9,7 @@
 #include <limits>
 #include "util.hh"
 #include "logger.hh"
+#include "platform.hh"
 
 namespace mkverobj
 {
@@ -126,7 +127,7 @@ namespace mkverobj
             return _get_output_filename(EXT_OBJ);
         }        
 
-        logger::level get_logging_level() const {
+        logger::level get_log_level() const {
             return logger::level_from_string(_config.get_value(FLAG_LOG_LEVEL));
         }
 
@@ -241,7 +242,7 @@ namespace mkverobj
                         logger::level_to_string(logger::level::warning),
                         logger::level_to_string(logger::level::error),
                         logger::level_to_string(logger::level::fatal),
-                    }, false, false, false, false, &_log_level_validator },
+                    }, false, true, false, false, &_log_level_validator },
                     { FLAG_HELP, S_FLAG_HELP, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
                 };
             };
@@ -319,6 +320,7 @@ namespace mkverobj
             config _config;
             std::string _output_filename;
     };
+
 } // !namespace mkverobj
 
 #endif // !_MKVEROBJ_CMDLINE_HH_INCLUDED
