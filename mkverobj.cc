@@ -38,21 +38,25 @@ using namespace mkverobj;
 
 int main(int argc, char** argv) {
 
-    int retval = EXIT_FAILURE;
+    [[maybe_unused]] int retval = EXIT_FAILURE;
     command_line cmd_line;
 
     try {
-        if (!cmd_line.parse_and_validate(argc, argv)) {
-            command_line::print_usage();
-            return retval;
-        }   
+        if (!cmd_line.parse_and_validate(argc, argv))
+            return cmd_line.print_usage();
 
         // Write binary version data to a temporary file.
         version_resource res;
-        res.major = string_to_uint16(argv[1]);
-        res.minor = string_to_uint16(argv[2]);
-        res.build = string_to_uint16(argv[3]);
-        strncpy(res.notes, argv[4], MAX_VER_NOTES - 1);
+        res.major = cmd_line.get_major_version();
+        res.minor = cmd_line.get_minor_version();
+        res.build = cmd_line.get_build_version();
+
+        std::string notes = cmd_line.get_notes();
+        if (!notes.empty())
+            strncpy(res.notes, notes.c_str(), MAX_VER_NOTES - 1);
+
+        log_msg(log_lvl::info, fmt_str("Writing version info {%hu, %hu, %hu, '%s'} to %s...",
+            res.major, res.minor, res.build, res.notes, cmd_line.get_bin_output_filename().c_str()));
 
         auto bin_file = cmd_line.get_bin_output_filename();
         auto openmode = ios::out | ios::binary | ios::trunc;

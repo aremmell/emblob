@@ -7,8 +7,8 @@
 
 namespace mkverobj
 {
-    enum class log_lvl : uint8_t
-    {
+    enum class log_lvl : uint8_t {
+        invalid = 0,
         debug,
         info,
         warning,
@@ -16,36 +16,55 @@ namespace mkverobj
         fatal
     };
 
-    static void log_msg(log_lvl lvl, const std::string& msg) {
+    static constexpr const char* LOG_LVL_INVALID = "invalid";
+    static constexpr const char* LOG_LVL_DEBUG   = "debug";
+    static constexpr const char* LOG_LVL_INFO    = "info";
+    static constexpr const char* LOG_LVL_WARNING = "warning";
+    static constexpr const char* LOG_LVL_ERROR   = "error";
+    static constexpr const char* LOG_LVL_FATAL   = "fatal";
 
-        if (msg.empty())
-            return;
-
-        std::string prefix;
-        std::ostream& strm = (lvl == log_lvl::error || lvl == log_lvl::fatal) ? std::cerr : std::cout;
-
+    static std::string log_lvl_to_string(log_lvl lvl, bool prefix = false) {
         switch (lvl) {
             case log_lvl::debug:
-                prefix = "[DEBUG]";
-                break;
+                return prefix ? "[DEBUG]" : LOG_LVL_DEBUG;
             case log_lvl::info:
-                prefix = "[INFO]";
-                break;
+                return prefix ? "[INFO]" : LOG_LVL_INFO;
             case log_lvl::warning:
-                prefix = "[WARNING]";
-                break;
+                return prefix ? "[WARNING]" : LOG_LVL_WARNING;
             case log_lvl::error:
-                prefix = "[ERROR]";
-                break;
+                return prefix ? "[ERROR]" : LOG_LVL_ERROR;
             case log_lvl::fatal:
-                prefix = "[FATAL]";
-                break;
+                return prefix ? "[FATAL]" : LOG_LVL_FATAL;
+            case log_lvl::invalid:
             default:
-                throw std::runtime_error("invalid log level");
-                break;
+                return LOG_LVL_INVALID;
         }
+    }
 
-        strm << APP_NAME << " " << prefix << ": " << msg << std::endl;
+    static log_lvl log_lvl_from_string(const std::string& str) {
+        std::string lstr = string_to_lower(str);
+
+        if (lstr == LOG_LVL_DEBUG)
+            return log_lvl::debug;
+        else if (lstr == LOG_LVL_INFO)
+            return log_lvl::info;
+        else if (lstr == LOG_LVL_WARNING)
+            return log_lvl::warning;
+        else if (lstr == LOG_LVL_ERROR)
+            return log_lvl::error;
+        else if (lstr == LOG_LVL_FATAL)
+            return log_lvl::fatal;
+        else
+            return log_lvl::invalid;
+    }
+
+    static void log_msg(log_lvl lvl, const std::string& msg) {
+
+        if (msg.empty() || lvl == log_lvl::invalid)
+            return;
+
+        std::ostream& strm = (lvl == log_lvl::error || lvl == log_lvl::fatal) ? std::cerr : std::cout;
+        strm << APP_NAME << " " << log_lvl_to_string(lvl, true) << ": " << msg << std::endl;
     }
 } // !namespace mkverobj
 

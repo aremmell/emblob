@@ -1,6 +1,7 @@
 #ifndef _MKVEROBJ_UTIL_HH_INCLUDED
 #define _MKVEROBJ_UTIL_HH_INCLUDED
 
+#include "platform.hh"
 #include <cstdint>
 #include <string>
 #include <fstream>
@@ -10,8 +11,7 @@
 
 namespace mkverobj
 {
-#   pragma message("TODO: move elsewhere")
-    constexpr static const char* APP_NAME = "mkverobj";    
+    constexpr static const char* APP_NAME = "mkverobj";
 
     static std::string fmt_str(const char* fmt, ...) {
         va_list args1;
@@ -35,6 +35,16 @@ namespace mkverobj
 
         std::string retval(buf);
         delete[] buf;
+        return retval;
+    }
+
+    std::string string_to_lower(const std::string& str) {
+        std::string retval = str;
+
+        std::for_each(retval.begin(), retval.end(), [](char& c) {
+            c = std::tolower(c);
+        });
+
         return retval;
     }
 

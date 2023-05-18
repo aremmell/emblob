@@ -26,12 +26,12 @@ CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
 LDFLAGS         = 
 
-ifndef (MKVEROBJ_DEBUG)
-	CFLAGS   += $(CFLAGS_NDEBUG)
-	CXXFLAGS += $(CXXFLAGS_NDEBUG)
-else
+ifeq ($(MKVEROBJ_DEBUG),1)
 	CFLAGS   += $(CFLAGS_DEBUG)
 	CXXFLAGS += $(CXXFLAGS_DEBUG)
+else
+	CFLAGS   += $(CFLAGS_NDEBUG)
+	CXXFLAGS += $(CXXFLAGS_NDEBUG)	
 endif
 
 # set up build paths and filenames
