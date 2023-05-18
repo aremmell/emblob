@@ -303,7 +303,7 @@ namespace mkverobj
                 try {
                     // all digits, not greater than 65535
                     auto max_value = static_cast<unsigned long>(std::numeric_limits<uint16_t>::max());
-                    std::basic_regex expr("^[0-9]{1,5}$");
+                    std::regex expr("^[0-9]{1,5}$");
                     if (!std::regex_match(val, expr) || std::strtoul(val.c_str(), nullptr, 10) > max_value) {
                         msg = "must be a number between 0 and 65535.";
                         return false;
