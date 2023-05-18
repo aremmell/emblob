@@ -7,7 +7,7 @@
 #include <string>
 #include <functional>
 #include "util.hh"
-#include "logging.hh"
+#include "logger.hh"
 #include "version.h"
 
 namespace mkverobj
@@ -23,9 +23,9 @@ namespace mkverobj
         retval = status == 0;
 
         if (!retval && echo_stderr) {
-            log_msg(log_lvl::error, fmt_str("command '%s' failed (status: %d)", cmd.c_str(), status));
+            g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
         } else if (retval && echo_success) {
-            log_msg(log_lvl::info, fmt_str("command '%s' succeeded", cmd.c_str()));
+            g_logger->info("command '%s' succeeded", cmd.c_str());
         }
 
         return retval;

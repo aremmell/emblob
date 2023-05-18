@@ -6,8 +6,8 @@
 #include <string>
 #include <fstream>
 #include <cstdio>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 namespace mkverobj
 {

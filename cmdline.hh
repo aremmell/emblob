@@ -8,7 +8,7 @@
 #include <regex>
 #include <limits>
 #include "util.hh"
-#include "logging.hh"
+#include "logger.hh"
 
 namespace mkverobj
 {
@@ -126,8 +126,8 @@ namespace mkverobj
             return _get_output_filename(EXT_OBJ);
         }        
 
-        log_lvl get_logging_level() const {
-            return log_lvl_from_string(_config.get_value(FLAG_LOG_LEVEL));
+        logger::level get_logging_level() const {
+            return logger::level_from_string(_config.get_value(FLAG_LOG_LEVEL));
         }
 
         private:
@@ -235,12 +235,12 @@ namespace mkverobj
                     { FLAG_BUILD, S_FLAG_BUILD, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
                     { FLAG_NOTES, S_FLAG_NOTES, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
                     { FLAG_OUTPUT_FILE, S_FLAG_OUTPUT_FILE, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
-                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", log_lvl_to_string(log_lvl::info), {
-                        log_lvl_to_string(log_lvl::debug),
-                        log_lvl_to_string(log_lvl::info),
-                        log_lvl_to_string(log_lvl::warning),
-                        log_lvl_to_string(log_lvl::error),
-                        log_lvl_to_string(log_lvl::fatal),
+                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", logger::level_to_string(logger::level::info), {
+                        logger::level_to_string(logger::level::debug),
+                        logger::level_to_string(logger::level::info),
+                        logger::level_to_string(logger::level::warning),
+                        logger::level_to_string(logger::level::error),
+                        logger::level_to_string(logger::level::fatal),
                     }, false, false, false, false, &_log_level_validator },
                     { FLAG_HELP, S_FLAG_HELP, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
                 };
@@ -263,7 +263,7 @@ namespace mkverobj
                     return false;
                 }
 
-                if (log_lvl::invalid == log_lvl_from_string(val)) {
+                if (logger::level::invalid == logger::level_from_string(val)) {
                     msg = fmt_str("%s is not a valid log level.", val.c_str());
                     return false;
                 }
@@ -309,7 +309,7 @@ namespace mkverobj
                         return false;
                     }
                 } catch (std::regex_error& e) {
-                    log_msg(log_lvl::error, fmt_str("regex error: %s", e.what()));
+                    g_logger->error("regex exception: %s", e.what());
                     return false;
                 }
 

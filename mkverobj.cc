@@ -38,14 +38,17 @@ using namespace mkverobj;
 
 int main(int argc, char** argv) {
 
-    [[maybe_unused]] int retval = EXIT_FAILURE;
-    command_line cmd_line;
+    auto _exit_main = [&](int code) -> int {
+        g_logger->debug("exiting with status %d", code);
+        return code;
+    };
 
     try {
+        command_line cmd_line;
+
         if (!cmd_line.parse_and_validate(argc, argv))
             return cmd_line.print_usage();
 
-        // Write binary version data to a temporary file.
         version_resource res;
         res.major = cmd_line.get_major_version();
         res.minor = cmd_line.get_minor_version();
@@ -55,8 +58,8 @@ int main(int argc, char** argv) {
         if (!notes.empty())
             strncpy(res.notes, notes.c_str(), MAX_VER_NOTES - 1);
 
-        log_msg(log_lvl::info, fmt_str("Writing version info {%hu, %hu, %hu, '%s'} to %s...",
-            res.major, res.minor, res.build, res.notes, cmd_line.get_bin_output_filename().c_str()));
+        g_logger->info("Writing version info {%hu, %hu, %hu, '%s'} to %s...", res.major,
+            res.minor, res.build, res.notes, cmd_line.get_bin_output_filename().c_str());
 
         auto bin_file = cmd_line.get_bin_output_filename();
         auto openmode = ios::out | ios::binary | ios::trunc;
@@ -64,16 +67,15 @@ int main(int argc, char** argv) {
             strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
         });
 
-        if (wrote == -1)
-            throw runtime_error(
-                fmt_str("failed to write %s: %s", bin_file.c_str(), strerror(errno)).c_str()
-            );
+        if (wrote == -1) {
+            g_logger->fatal("failed to write %s: %s", bin_file.c_str(), platform::get_error_message(errno).c_str());
+            return _exit_main(EXIT_FAILURE);
+        }
 
-        log_msg(log_lvl::info, fmt_str("successfully created %s (%lu bytes)",
-            bin_file.c_str(), static_cast<size_t>(wrote)));
+        g_logger->info("successfully created %s (%lu bytes)", bin_file.c_str(),
+            static_cast<size_t>(wrote));
 
 #if defined(__APPLE__) || defined(__gnu_linux__)
-
         auto asm_file = cmd_line.get_asm_output_filename();
         openmode = ios::out | ios::trunc;
         wrote = write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
@@ -84,13 +86,14 @@ int main(int argc, char** argv) {
             strm << ".set _sizeof__version_data, . - _version_data" << endl;
         });
 
-        if (wrote == -1)
-            throw runtime_error(
-                fmt_str("failed to write %s: %s", asm_file.c_str(), strerror(errno)).c_str()
-            );
+        if (wrote == -1) {
+            g_logger->fatal("failed to write %s: %s", asm_file.c_str(),
+                platform::get_error_message(errno).c_str());
+            return _exit_main(EXIT_FAILURE);
+        }
 
-        log_msg(log_lvl::info, fmt_str("successfully created %s (%lu bytes)",
-            asm_file.c_str(), static_cast<size_t>(wrote)));
+        g_logger->info("successfully created %s (%lu bytes)",
+            asm_file.c_str(), static_cast<size_t>(wrote));
 
 #       pragma message("research correct compiler detection")
 
@@ -98,7 +101,7 @@ int main(int argc, char** argv) {
         char *env_cc = getenv("CC");
         if (env_cc) {
             cc = env_cc;
-            log_msg(log_lvl::info, fmt_str("using compiler from CC environment variable: '%s'", cc.c_str()));
+            g_logger->info("using compiler from CC environment variable: '%s'", cc.c_str());
         } else {
 #           pragma message("pull up compiler selection")
 
@@ -108,25 +111,24 @@ int main(int argc, char** argv) {
             cc = "gcc";
 #else
 #           pragma message("NOTIMPL")
-            return EXIT_FAILURE;
+            return _exit_main(EXIT_FAILURE);
 #endif
-            log_msg(log_lvl::warning, fmt_str("CC environment variable not set; defaulting to '%s'", cc.c_str()));
+            g_logger->warning("CC environment variable not set; defaulting to '%s'", cc.c_str());
         }
 
         auto obj_file = cmd_line.get_obj_output_filename();
         auto cmd = fmt_str("%s -c -o %s %s", cc.c_str(), obj_file.c_str(), asm_file.c_str());
         bool asm_to_obj = execute_shell_command(cmd, true, true);
 
-        retval = asm_to_obj ? EXIT_SUCCESS : EXIT_FAILURE;
+        return _exit_main(asm_to_obj ? EXIT_SUCCESS : EXIT_FAILURE);
 #else
 #       pragma message("NOTIMPL")
-        return EXIT_FAILURE;
+        return _exit_main(EXIT_FAILURE);
 #endif
     } catch (exception& ex) {
-        log_msg(log_lvl::fatal, fmt_str("top-level exception caught: %s", ex.what()));
-        retval = EXIT_FAILURE;
+        g_logger->fatal("top-level exception caught: %s", ex.what());
+        return _exit_main(EXIT_FAILURE);
     }
 
-    log_msg(log_lvl::debug, fmt_str("exiting with status %d", retval));
-    return retval;
+    return _exit_main(EXIT_SUCCESS);
 }
