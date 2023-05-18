@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <cstdio>
+#include <stdarg.h>
 
 namespace mkverobj
 {
