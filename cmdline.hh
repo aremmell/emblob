@@ -234,7 +234,7 @@ namespace mkverobj
                     { flag_minor, s_flag_minor, "Minor version number", "", "", {}, true, true, false, false, &_version_number_validator },
                     { flag_build, s_flag_build, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
                     { flag_notes, s_flag_notes, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
-                    { flag_output_file, s_flag_output_file, "Output file name", "", DEF_OUTPUT_FILE, {}, false, false, false, false, &_output_filename_validator },
+                    { flag_output_file, s_flag_output_file, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
                     { flag_log_level, s_flag_log_level, "Console logging verbosity", "", log_lvl_to_string(log_lvl::info), {
                         log_lvl_to_string(log_lvl::debug),
                         log_lvl_to_string(log_lvl::info),
