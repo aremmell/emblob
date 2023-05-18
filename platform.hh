@@ -36,7 +36,7 @@
 #   define __HAVE_STDC_SECURE_OR_EXT1__
 #endif
 
-#if defined(__MACOS__) || defined(__BSD__) || ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE)
+#if defined(__MACOS__) || defined(__BSD__) || (_POSIX_C_SOURCE >= 200112L && ! _GNU_SOURCE)
 #   define __HAVE_XSI_STRERROR_R__
 #elif defined(_GNU_SOURCE)
 #   define __HAVE_GNU_STRERROR_R__
