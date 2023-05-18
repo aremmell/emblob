@@ -5,22 +5,26 @@ language:
 branches:
   only:
     - master
-os:
-  - linux
-  - osx
 dist:
   - bionic
-osx_image:
-  - xcode14.3
-arch:
-  - aarch64
-  - armhf
-  - arm64
-  - amd64
+jobs:
+  include:
+    - os: linux
+      arch: amd64
+      compiler: gcc
+    - os: linux
+      arch: amd64
+      compiler: clang
+    - os: linux
+      arch: arm64
+      compiler: gcc
+    - os: linux
+      arch: arm64
+      compiler: clang
+    - os: osx
+      osx_image: xcode14.2
+      compiler: clang
 script:
   - make all
   - build/bin/cxxexample
   - build/bin/cexample
-compiler:
-  - gcc
-  - g++
