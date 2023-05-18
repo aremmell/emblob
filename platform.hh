@@ -107,7 +107,7 @@ namespace mkverobj
 
             /* std::filesystem, where are you? */
             FILE *f = nullptr;
-            errno_t err = 0;
+            int err = 0;
             
 #if defined(__HAVE_STDC_SECURE_LIB__)
             err = fopen_s(&f, fname.c_str(), "wx");
