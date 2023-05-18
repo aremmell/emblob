@@ -32,22 +32,44 @@
 
 #include "mkverobj.hh"
 #include "cmdline.hh"
+#include "appstate.hh"
+#include "util.hh"
+#include "version.h"
 
 using namespace std;
 using namespace mkverobj;
 
 int main(int argc, char** argv) {
 
-    auto _exit_main = [&](int code) -> int {
-        g_logger->debug("exiting with status %d", code);
+    app_state state;
+    command_line cmd_line;
+
+    auto _exit_main = [&](int code) {
+        if (code != EXIT_SUCCESS) {
+            /* If exiting with an error code, clean up any files created;
+               don't want to leave things in a half-assed state. */
+            if (state.created_bin_file)
+                delete_file_on_unclean_exit(cmd_line.get_bin_output_filename());
+            if (state.created_asm_file)
+                delete_file_on_unclean_exit(cmd_line.get_asm_output_filename());
+            if (state.created_obj_file)
+                delete_file_on_unclean_exit(cmd_line.get_obj_output_filename());                
+        }
+
+        g_logger->debug("exiting with status: %d (%s)", code,
+            code == EXIT_SUCCESS ? "success" : "failure");
         return code;
     };
 
     try {
-        command_line cmd_line;
-
         if (!cmd_line.parse_and_validate(argc, argv))
-            return cmd_line.print_usage();
+            return _exit_main(cmd_line.print_usage());
+
+        g_logger->set_log_level(cmd_line.get_log_level());
+
+        std::string compiler = platform::detect_c_compiler();
+        if (compiler.empty())
+            return _exit_main(EXIT_FAILURE);            
 
         version_resource res;
         res.major = cmd_line.get_major_version();
@@ -58,24 +80,26 @@ int main(int argc, char** argv) {
         if (!notes.empty())
             strncpy(res.notes, notes.c_str(), MAX_VER_NOTES - 1);
 
-        g_logger->info("Writing version info {%hu, %hu, %hu, '%s'} to %s...", res.major,
-            res.minor, res.build, res.notes, cmd_line.get_bin_output_filename().c_str());
+        std::string bin_file = cmd_line.get_bin_output_filename();
+        g_logger->info("writing version data {%hu, %hu, %hu, '%s'} to %s...", res.major,
+            res.minor, res.build, res.notes, bin_file.c_str());
 
-        auto bin_file = cmd_line.get_bin_output_filename();
         auto openmode = ios::out | ios::binary | ios::trunc;
         auto wrote = write_file_contents(bin_file, openmode, [&](ostream& strm) -> void {
             strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
         });
 
         if (wrote == -1) {
-            g_logger->fatal("failed to write %s: %s", bin_file.c_str(), platform::get_error_message(errno).c_str());
+            g_logger->fatal("failed to write %s: %s", bin_file.c_str(),
+                platform::get_error_message(errno).c_str());
             return _exit_main(EXIT_FAILURE);
         }
 
         g_logger->info("successfully created %s (%lu bytes)", bin_file.c_str(),
             static_cast<size_t>(wrote));
+        state.created_bin_file = true;
 
-#if defined(__APPLE__) || defined(__gnu_linux__)
+#if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
         auto asm_file = cmd_line.get_asm_output_filename();
         openmode = ios::out | ios::trunc;
         wrote = write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
@@ -92,43 +116,78 @@ int main(int argc, char** argv) {
             return _exit_main(EXIT_FAILURE);
         }
 
-        g_logger->info("successfully created %s (%lu bytes)",
-            asm_file.c_str(), static_cast<size_t>(wrote));
+        g_logger->info("successfully created %s (%lu bytes)", asm_file.c_str(), 
+            static_cast<size_t>(wrote));
+        state.created_asm_file = true;
 
-#       pragma message("research correct compiler detection")
+        std::string obj_file = cmd_line.get_obj_output_filename();
+        auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());
+        bool asm_to_obj = execute_shell_command(cmd);
 
-        string cc;
-        char *env_cc = getenv("CC");
-        if (env_cc) {
-            cc = env_cc;
-            g_logger->info("using compiler from CC environment variable: '%s'", cc.c_str());
-        } else {
-#           pragma message("pull up compiler selection")
-
-#if defined(__clang__)
-            cc = "cc";
-#elif defined(__GNUC__)
-            cc = "gcc";
-#else
-#           pragma message("NOTIMPL")
-            return _exit_main(EXIT_FAILURE);
-#endif
-            g_logger->warning("CC environment variable not set; defaulting to '%s'", cc.c_str());
-        }
-
-        auto obj_file = cmd_line.get_obj_output_filename();
-        auto cmd = fmt_str("%s -c -o %s %s", cc.c_str(), obj_file.c_str(), asm_file.c_str());
-        bool asm_to_obj = execute_shell_command(cmd, true, true);
+        if (asm_to_obj)
+            state.created_obj_file = true;
 
         return _exit_main(asm_to_obj ? EXIT_SUCCESS : EXIT_FAILURE);
 #else
-#       pragma message("NOTIMPL")
+        g_logger->fatal("support for this platform/OS has not been implemented; please contact the author.");
         return _exit_main(EXIT_FAILURE);
 #endif
-    } catch (exception& ex) {
-        g_logger->fatal("top-level exception caught: %s", ex.what());
+    } catch (const exception& ex) {
+        g_logger->fatal("caught top-level exception: %s", ex.what());
         return _exit_main(EXIT_FAILURE);
     }
 
     return _exit_main(EXIT_SUCCESS);
 }
+
+namespace mkverobj
+{
+    bool execute_shell_command(const std::string& cmd) {
+        bool retval = false;
+
+        std::cout.flush();
+
+        int sysret = std::system(cmd.c_str());
+        int status = WEXITSTATUS(sysret);
+
+        retval = status == 0;
+
+        if (!retval) {
+            g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
+        } else {
+            g_logger->info("command '%s' succeeded", cmd.c_str());
+        }
+
+        return retval;
+    }
+
+    std::ofstream::pos_type write_file_contents(const std::string& fname,
+        std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb)
+    {
+        if (!cb)
+            return std::ofstream::pos_type(-1);
+
+        try {
+            std::ofstream strm(fname, mode);
+            strm.exceptions(strm.badbit | strm.failbit);
+
+            cb(strm);
+            strm.flush();
+
+            if (strm.good())
+                return strm.tellp();
+        } catch (const std::exception& ex) {
+            g_logger->error("caught exception while writing to '%s': %s", fname.c_str(), ex.what());
+        }
+
+        return std::ofstream::pos_type(-1);
+    }
+
+    void delete_file_on_unclean_exit(const std::string& fname) {
+        if (0 != remove(fname.c_str()))
+            g_logger->error("failed to delete '%s': %s", fname.c_str(),
+                platform::get_error_message(errno).c_str());
+        else
+            g_logger->info("deleted '%s'", fname.c_str());
+    }
+} // !namespace mkverobj

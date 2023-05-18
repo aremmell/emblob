@@ -1,13 +1,9 @@
 #ifndef _MKVEROBJ_UTIL_HH_INCLUDED
 #define _MKVEROBJ_UTIL_HH_INCLUDED
 
-#include "platform.hh"
-#include <cstdint>
 #include <string>
 #include <fstream>
 #include <cstdio>
-#include <stdarg.h>
-#include <stdlib.h>
 
 namespace mkverobj
 {
@@ -48,15 +44,6 @@ namespace mkverobj
         });
 
         return retval;
-    }
-
-    static bool file_exists(const std::string& filename) {
-        std::ifstream strm(filename);
-        return strm.good();
-    }
-
-    static bool delete_file(const std::string& filename) {
-        return 0 == std::remove(filename.c_str());
     }
 
     static inline bool valid_str(const char* str) {

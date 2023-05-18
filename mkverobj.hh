@@ -6,48 +6,15 @@
 #include <fstream>
 #include <string>
 #include <functional>
-#include "util.hh"
-#include "logger.hh"
-#include "version.h"
 
 namespace mkverobj
 {   
-    static bool execute_shell_command(const std::string& cmd, bool echo_stderr = true, bool echo_success = false) {
-        bool retval = false;
+    bool execute_shell_command(const std::string& cmd);
 
-        std::cout.flush();
+    std::ofstream::pos_type write_file_contents(const std::string& fname,
+        std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb);
 
-        int sysret = std::system(cmd.c_str());
-        int status = WEXITSTATUS(sysret);
-
-        retval = status == 0;
-
-        if (!retval && echo_stderr) {
-            g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
-        } else if (retval && echo_success) {
-            g_logger->info("command '%s' succeeded", cmd.c_str());
-        }
-
-        return retval;
-    }
-
-    static std::ofstream::pos_type write_file_contents(const std::string& filename, std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb)
-    {
-        if (!cb)
-            return std::ofstream::pos_type(-1);
-
-        std::ofstream strm(filename, mode);
-        strm.exceptions(strm.badbit | strm.failbit);
-
-        cb(strm);
-        strm.flush();
-
-        if (strm.good() && file_exists(filename)) {
-            return strm.tellp();
-        }
-
-         return std::ofstream::pos_type(-1);
-    }
+    void delete_file_on_unclean_exit(const std::string& fname);
     
 } // !namespace mkverobj
 

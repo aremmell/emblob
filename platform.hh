@@ -8,6 +8,7 @@
 #   define __MACOS__
 #   define MKVEROBJ_PLATFORM macOS
 #elif defined(__linux__)
+#   define __LINUS__
 #   define MKVEROBJ_PLATFORM Linux
 #elif defined(_WIN32)
 #   define MKVEROBJ_PLATFORM Windows
@@ -25,10 +26,15 @@
 #endif
 
 #include <sys/types.h>
+#include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <inttypes.h>
 #include <string>
+#include <cstdint>
+#include "logger.hh"
 
 #if !defined(_WIN32) && defined(__STDC_LIB_EXT1__)
 #   define __HAVE_STDC_SECURE_OR_EXT1__
@@ -71,7 +77,7 @@ namespace mkverobj
             success = finderr == 0;
 #endif
             if (!success)
-                snprintf(buf, MAX_ERRORMSG, "Got error %d while trying to look up error %d", finderr, err);
+                snprintf(buf, MAX_ERRORMSG, "got error %d while trying to look up error %d", finderr, err);
 
             return buf;
 #elif defined(__HAVE_GNU_STRERROR_R__)
@@ -85,11 +91,21 @@ namespace mkverobj
 #endif
         }
 
+        static bool file_exists(const std::string& fname) {
+#pragma message("TODO: this is disgusting. Use stat or something.")        
+            std::ifstream strm(fname);
+            return strm.good();
+        }
+
+        static bool delete_file(const std::string& fname) {
+            return 0 == std::remove(fname.c_str());
+        }
+
         static bool is_valid_output_filename(const std::string& fname, /* [[out]] */ std::string& err_msg) {
             bool created = false;
             err_msg.clear();
 
-            /* std::filesystem is not exactly ubiquitous, so we can't rely on it here (yes, in the year 2023). */
+            /* std::filesystem, where are you? */
             FILE *f = nullptr;
             errno_t err = 0;
             
@@ -108,13 +124,27 @@ namespace mkverobj
                 fclose(f);
                 f = nullptr;
 
-                if (0 != remove(fname.c_str()))
+                if (!delete_file(fname))
                     err_msg = get_error_message(errno);
             } else {
                 err_msg = get_error_message(err);
             }
 
             return created;
+        }
+
+        static std::string detect_c_compiler() {
+#if defined(__clang__)
+            g_logger->info("detected C compiler 'clang' (v%s) from preprocessor", STR_MACRO(__clang_version__));
+            return "clang";
+#elif defined(__GNUC__)
+            g_logger->info("detected C compiler 'gcc' (v%s.%s.%s) from preprocessor", STR_MACRO(__GNUC__),
+                STR_MACRO(__GNUC_MINOR__), STR_MACRO(__GNUC_PATCHLEVEL__));
+            return "gcc";
+#else
+            g_logger->fatal("unable to detect C compiler; please contact the author, or submit a pull request.");
+            return std::string();
+#endif
         }
     };
 } // !namespace mkverobj
