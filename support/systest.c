@@ -11,7 +11,7 @@ void handle_result(bool pass, const char* desc) {
         printf("\t" GREEN("PASS: %s") "\n", desc);
         num_succeeded++;
     } else {
-        printf("\t" RED("FAIL: %s") "\n", desc);
+        fprintf(stderr, "\t" RED("FAIL: %s") "\n", desc);
     }
 
     num_attempted++;
@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
 #endif
 #endif
 
+    printf("\t" BLUE("~~~~~~~~~~ <systest> ~~~~~~~~~~") "\n");
+
     //
     // begin feature tests
     //
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
     //
 
     /* file existence: one file we know exists, and one we know doesn't. */
-    const char* exists = "../LICENSE";
+    const char* exists = "../../LICENSE";
     const char* doesntexist = "a_s_d_f_foobar.baz";
 
     /* these will assert() and log errors to the console if they are wrong, too. */
@@ -82,9 +84,11 @@ int main(int argc, char *argv[]) {
     handle_result(exist1 && !exist2, "file_exists");
 
     if (num_succeeded != num_attempted)
-        printf("\t" BLUE("--- %d of %d tests passed ---\n"), num_succeeded, num_attempted);
+        printf("\t" WHITE("--- %d of %d tests passed ---\n"), num_succeeded, num_attempted);
     else
         printf("\t" GREEN("--- all %d tests passed! ---\n"), num_attempted);
+
+    printf("\t" BLUE("~~~~~~~~~~ </systest> ~~~~~~~~~~") "\n");
 
     return num_succeeded > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -94,18 +98,36 @@ int main(int argc, char *argv[]) {
 //
 bool file_exists(const char* path, bool really_exists) {
     bool retval = false;
+
 #if defined(_WIN32)
-    retval = (TRUE != PathFileExists(path));
+    retval = (TRUE == PathFileExists(path));
 #else
-    if (access(path, F_OK) != 0) {
+#if defined(SYSTEST_USE_ACCESS)
+    int ret = access(path, F_OK);
+    if (0 != ret) {
+        retval = false;
+    } else {
+        retval = true;
+    }
+#elif defined(SYSTEST_USE_STAT)
+    struct stat st = {0};
+    int ret = stat(path, &st);
+    if (0 != ret) {
+        if (ENOENT != errno) {
+            handle_error(errno, "stat(): ret != 0 && ENOENT != errno");
+        } else {
+            printf("stat() returned != 0, but errno = %s\n", strerror(errno));
+        }
         retval = false;
     } else {
         retval = true;
     }
 #endif
+#endif
 
     if (retval != really_exists) {
-        handle_problem("detecting a file's existence failed");
+        handle_problem("file: %s, really_exists: %s, errno: %s", path, bool_to_str(really_exists),
+            strerror(errno));
         assert(retval == really_exists);
     }
 
@@ -116,9 +138,17 @@ bool file_exists(const char* path, bool really_exists) {
 // utility functions
 //
 void _handle_error(int err, const char* msg, const char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)"), file, line, func, strerror(err), msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", get_basename(file), line, func, strerror(err), msg);
 }
 
 void _handle_problem(const char* msg, const char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: %s"), file, line, func, msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", get_basename(file), line, func, msg);
+}
+
+const char* get_basename(const char* filename) {
+#if defined(_WIN32)
+    return PathFindFileName(filename);
+#else
+    return basename((char*)filename);
+#endif
 }

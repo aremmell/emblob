@@ -6,6 +6,7 @@
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #   include <unistd.h>
+#   include <libgen.h>
 
 #   define STRFMT(clr, s) clr s "\033[0m"
 #   define RED(s) STRFMT("\033[1;91m", s)
@@ -31,6 +32,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -54,7 +56,16 @@ void _handle_error(int err, const char* msg, const char* file, int line, const c
 #define handle_error(err, msg) _handle_error(err, msg, __FILE__, __LINE__, __func__);
 
 void _handle_problem(const char* msg, const char* file, int line, const char* func);
-#define handle_problem(problem) _handle_problem(problem, __FILE__, __LINE__, __func__);
+#define handle_problem(problem, ...)  \
+    char buf[512] = {0}; \
+    snprintf(buf, 512, problem, __VA_ARGS__); \
+    _handle_problem(buf, __FILE__, __LINE__, __func__);
+
+/* returns a pointer to the character after the last slash. */
+const char* get_basename(const char* filename);
+
+/* converts bool -> const char* */
+#define bool_to_str(b) b ? "true" : "false"
 
 #ifdef __cplusplus
 }

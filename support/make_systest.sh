@@ -14,7 +14,7 @@ out_bin_dir="${current_dir}/../build/bin"
 out_obj_dir="${current_dir}/../build/obj"
 out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
-_c_flags="-O2 -Wall -std=c11 -DNDEBUG"
+_c_flags="-O2 -Wall -std=c11 -DNDEBUG -DSYSTEST_USE_STAT"
 
 # $1 = boolean; if true, do not prompt to run the program
 # $2 = boolean; if true, do not execute the program after building

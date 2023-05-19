@@ -107,8 +107,17 @@ namespace mkverobj
             if (TRUE != PathFileExists(fname.c_str()))
                 return false;
 #else
-            if (0 != access(fname.c_str(), F_OK))
+            struct stat st = {0};
+            if (0 != stat(fname.c_str(), &st)) {
+                if (errno != ENOENT) {
+                    /* questionable; we'd better log this as a warning.
+                     * it may be the case that we need to use access() as a backup here. */
+                    g_logger->warning("stat(%s) failed, but errno is not ENOENT, it's: '%s' (%d)",
+                        fname.c_str(), get_error_message(errno).c_str(), errno);
+                }
+
                 return false;
+            }
 #endif
             return true;
         }
