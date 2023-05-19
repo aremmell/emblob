@@ -9,8 +9,6 @@
 
 namespace mkverobj
 {   
-    bool execute_shell_command(const std::string& cmd);
-
     std::ofstream::pos_type write_file_contents(const std::string& fname,
         std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb);
 

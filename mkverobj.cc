@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
 
         std::string obj_file = cmd_line.get_obj_output_filename();
         auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());
-        bool asm_to_obj = execute_shell_command(cmd);
+        bool asm_to_obj = platform::execute_system_command(cmd);
 
         if (asm_to_obj)
             state.created_obj_file = true;
@@ -142,25 +142,6 @@ int main(int argc, char** argv) {
 
 namespace mkverobj
 {
-    bool execute_shell_command(const std::string& cmd) {
-        bool retval = false;
-
-        std::cout.flush();
-
-        int sysret = std::system(cmd.c_str());
-        int status = WEXITSTATUS(sysret);
-
-        retval = status == 0;
-
-        if (!retval) {
-            g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
-        } else {
-            g_logger->info("command '%s' succeeded", cmd.c_str());
-        }
-
-        return retval;
-    }
-
     std::ofstream::pos_type write_file_contents(const std::string& fname,
         std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb)
     {

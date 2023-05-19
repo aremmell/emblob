@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <string.h>
 #include <inttypes.h>
+#include <assert.h>
 #include <string>
 #include <cstdint>
 #include "logger.hh"
@@ -138,17 +139,56 @@ namespace mkverobj
         }
 
         static std::string detect_c_compiler() {
-#if defined(__clang__)
-            g_logger->info("detected C compiler 'clang' (v%s) from preprocessor", STR_MACRO(__clang_version__));
-            return "clang";
-#elif defined(__GNUC__)
-            g_logger->info("detected C compiler 'gcc' (v%s.%s.%s) from preprocessor", STR_MACRO(__GNUC__),
-                STR_MACRO(__GNUC_MINOR__), STR_MACRO(__GNUC_PATCHLEVEL__));
-            return "gcc";
-#else
-            g_logger->fatal("unable to detect C compiler; please contact the author, or submit a pull request.");
-            return std::string();
-#endif
+            char* from_env = getenv("CC");
+            if (valid_str(from_env)) {
+                g_logger->info("detected C compiler '%s' from environment variable 'CC'", from_env);
+                return from_env;
+            }
+
+            /* I think the best bet here is to assume that if we run 'cc' it will work
+             * 90% of the time (have to check windows).
+             * 
+             * if i'm able to run system commands, i can run 'which cc' and then 'cc --version'
+             * to get some information about the compiler. 
+             * 
+             * if i'm not able to run system commands, i am out of ideas for the moment. */
+
+            g_logger->warning("unable to detect C compiler; defaulting to 'cc'");
+            return "cc";            
+        }
+
+        static bool is_system_command_available() {
+            int ret = std::system(nullptr);
+            if (ret == 0) {
+                g_logger->error("system() is NOT available for command processing!");
+                return false;
+            }
+
+            g_logger->debug("system() is available for command processing");
+            return true;
+        }
+
+        static bool execute_system_command(const std::string& cmd) {
+            bool retval = false;
+
+            if (is_system_command_available()) {
+                std::cout.flush();
+
+                int sysret = std::system(cmd.c_str());
+                int status = WEXITSTATUS(sysret);
+
+                retval = status == 0;
+
+                std::cout.flush();
+
+                if (!retval) {
+                    g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
+                } else {
+                    g_logger->info("command '%s' succeeded", cmd.c_str());
+                }            
+            }
+
+            return retval;
         }
     };
 } // !namespace mkverobj

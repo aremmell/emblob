@@ -126,7 +126,11 @@ namespace mkverobj
         }        
 
     private:
+#if defined(DEBUG)
+        level _level = level::debug;
+#else    
         level _level = level::info;
+#endif
     };
 
     typedef std::unique_ptr<logger> logger_ptr;
