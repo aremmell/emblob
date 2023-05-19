@@ -1,12 +1,11 @@
-#ifdef __STDC_LIB_EXT1_CHECK__
-#   define __STDC_WANT_LIB_EXT1__ 1
-#endif
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
+#include "systest.h"
 
 int num_succeeded = 0;
 
@@ -15,10 +14,10 @@ void handle_result(bool pass, const char* desc) {
      * to parse the output of this program to determine support,
      * it will be much easier. */
     if (pass) {
-        printf("PASS: %s\n", desc);
+        printf(GREEN("PASS: %s") "\n", desc);
         num_succeeded++;
     } else {
-        printf("FAIL: %s\n", desc);
+        printf(RED("FAIL: %s") "\n", desc);
     }
 }
 
@@ -38,7 +37,7 @@ bool check_sysconf(int val, const char* desc) {
 }
 
 bool check_system() {
-    printf("Checking system(NULL)...");
+    printf("Checking system(NULL)...\n");
 
     if (0 == system(NULL)) {
         printf("system() is NOT available to execute commands!\n");
@@ -50,7 +49,7 @@ bool check_system() {
 }
 
 int main(int argc, char *argv[]) {
-#if defined(__STDC_LIB_EXT1_CHECK__) && defined(__STDC_LIB_EXT1__)
+#if defined(__STDC_LIB_EXT1__)
     printf("__STDC_LIB_EXT1__ is set!\n");
 #endif
 

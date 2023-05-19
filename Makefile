@@ -77,7 +77,7 @@ OBJ_CXXEXAMPLE := $(INTDIR)/$(CXXEXAMPLE).o
 BIN_CXXEXAMPLE := $(BINDIR)/$(CXXEXAMPLE)
 
 # targets
-all: clean prep compile mkverobj verfile cexample cxxexample
+all: clean prep compile mkverobj verfile systest cexample cxxexample
 
 -include $(INTDIR)/*.d
 
@@ -121,7 +121,7 @@ cexample: $(OBJ_CEXAMPLE) $(OBJ_VERFILE)
 cxxexample: $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE)
 	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE) $(CXXFLAGS) $(LDFLAGS)
 
-systest: prep
+systest: verfile
 	./support/make_systest.sh --no-prompt
 
 prep:

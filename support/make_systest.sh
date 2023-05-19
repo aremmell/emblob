@@ -16,7 +16,8 @@ out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
 _c_flags="-O2 -Wall -std=c11 -DNDEBUG"
 
-# $1 = boolean. if true, do not prompt to run the program
+# $1 = boolean; if true, do not prompt to run the program
+# $2 = boolean; if true, do not execute the program after building
 compile_systest() {
 	if [[ -f ${outfile} ]]; then
 		rm -f ${outfile}
@@ -32,26 +33,56 @@ compile_systest() {
 		echo_success "Successfully built ${out_bin_dir_relative}/${name}. Platform info: $(get_clean_uname)"
 	fi
 
+	local _exec=true
+
+	if [ ${2} = true ]; then
+		echo_info "Skipping execution due to --no-execute."
+		_exec=false
+	fi
+
 	if [[ ${1} = true ]]; then
 		echo_info "Skipping prompt due to --no-prompt."
 	else
 		prompt_get "Would you like to run ${name} now? (y/n):" "y"
 		if [[ ${prompt_val} == "y" || ${prompt_val} = "Y" ]]; then
-			${outfile}
+			_exec=true
 		fi
 	fi
+
+	if [[ ${_exec} = true ]]; then
+		echo_info "Executing ${name}..."
+		${outfile}
+	fi
+}
+
+print_help() {
+	echo -e "Usage: $0\n\t[--no-prompt]\tWon't prompt for user input to execute ${name}." \
+			"\n\t[--no-execute]\tWon't execute ${name} after building." \
+			"\n\t[--help|-h]\tPrints this help message."	
 }
 
 _args=("$@")
 _no_prompt=false
+_no_execute=false
 
-case ${_args[0]} in
-	"--no-prompt")
-		_no_prompt=true
-		;;
-	*)
-		echo "Usage: $0 [--no-prompt]\tWon't prompt for user input, and won't run ${name}."
-		;;
-esac
+for i in "${_args[@]}"; do
+	case ${i} in
+		"--no-prompt")
+			_no_prompt=true
+			;;
+		"--no-execute")
+			_no_execute=true
+			;;
+		"--help" | "-h")
+			print_help
+			exit 0
+			;;
+		*)
+			echo "Unknown argument: ${i}"
+			print_help
+			exit 1
+			;;
+	esac
+done
 
-compile_systest "${_no_prompt}"
+compile_systest "${_no_prompt}" "${_no_execute}"
