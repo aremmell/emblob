@@ -14,7 +14,7 @@ out_bin_dir="${current_dir}/../build/bin"
 out_obj_dir="${current_dir}/../build/obj"
 out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
-_c_flags="-O2 -Wall -std=c11 -DNDEBUG"
+_c_flags="-g -Wall -std=c11 -DDEBUG"
 
 # $1 = boolean; if true, do not prompt to run the program
 # $2 = boolean; if true, do not execute the program after building
@@ -27,8 +27,10 @@ compile_systest() {
 
 	cc -o ${out_obj_dir}/${name}.o -c ${current_dir}/${name}.c ${_c_flags} && cc -o ${out_bin_dir}/${name} ${out_obj_dir}/${name}.o ${_c_flags}
 
-	if [[ $? -ne 0 ]]; then
-		echo_error "Failed to build! Exit code: $?"
+	_err=$?
+	if [[ $_err -ne 0 ]]; then
+		echo_error "Failed to build! Exit code: $_err"
+		return 1
 	else
 		echo_success "Successfully built ${out_bin_dir_relative}/${name}. Platform info: $(get_clean_uname)"
 	fi
