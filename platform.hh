@@ -103,9 +103,14 @@ namespace mkverobj
         }
 
         static bool file_exists(const std::string& fname) {
-#pragma message("TODO: this is disgusting. Use stat or something.")        
-            std::ifstream strm(fname);
-            return strm.good();
+#if defined(_WIN32)
+            if (TRUE != PathFileExists(fname.c_str()))
+                return false;
+#else
+            if (0 != access(fname.c_str(), F_OK))
+                return false;
+#endif
+            return true;
         }
 
         static bool delete_file(const std::string& fname) {
