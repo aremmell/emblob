@@ -19,7 +19,7 @@
 # compiler/linker commands. you're going to want to make sure $INCLUDE 
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -v -std=c++17 -fPIC -I.
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I.
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
@@ -120,6 +120,9 @@ cexample: $(OBJ_CEXAMPLE) $(OBJ_VERFILE)
 
 cxxexample: $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE)
 	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE) $(CXXFLAGS) $(LDFLAGS)
+
+systest: prep
+	./support/make_systest.sh --no-prompt
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
