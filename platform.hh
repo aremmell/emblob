@@ -25,6 +25,10 @@
 #   define __WANT_STDC_SECURE_LIB__ 1
 #endif
 
+/* so far have only needed this on FreeBSD, but i wouldn't
+ * be surprised to find more platforms that don't define the wait
+ * macros if you just include stdlib.h */
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdlib.h>
