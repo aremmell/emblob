@@ -12,6 +12,7 @@ fi
 name=systest
 out_bin_dir="${current_dir}/../build/bin"
 out_obj_dir="${current_dir}/../build/obj"
+out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
 _c_flags="-O2 -Wall -std=c11 -DNDEBUG"
 
@@ -28,7 +29,7 @@ compile_systest() {
 	if [[ $? -ne 0 ]]; then
 		echo_error "Failed to build! Exit code: $?"
 	else
-		echo_success "Successfully built ${outfile}. Platform info: $(get_clean_uname)"
+		echo_success "Successfully built ${out_bin_dir_relative}/${name}. Platform info: $(get_clean_uname)"
 	fi
 
 	if [[ ${1} = true ]]; then
