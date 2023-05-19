@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstdio>
 #include <stdarg.h>
+#include <algorithm>
 
 namespace mkverobj
 {
