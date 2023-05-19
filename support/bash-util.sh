@@ -15,6 +15,12 @@ get_script_dir() {
     return $(dirname "$(readlink -f "$0")")
 }
 
+# echoes information from uname in a more
+# readable and relevant way than -a
+get_clean_uname() {
+	echo "$(uname -s) $(uname -r) ($(uname -m)/$(uname -p))"
+}
+
 # text styling
 clr_none='\033[0m'
 clr_verbose='\033[0;37m'
