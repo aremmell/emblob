@@ -25,11 +25,17 @@
 #   define __WANT_STDC_SECURE_LIB__ 1
 #endif
 
-/* so far have only needed this on FreeBSD, but i wouldn't
- * be surprised to find more platforms that don't define the wait
- * macros if you just include stdlib.h */
-#include <sys/wait.h>
+#if !defined (_WIN32)
+#   include <sys/wait.h>
+#   include <unistd.h>
+#else
+#   define WIN32_LEAN_AND_MEAN
+#   define WINVER 0x0A00
+#   define _WIN32_WINNT 0x0A00
+#   include <windows.h>
+#endif
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>

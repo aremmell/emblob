@@ -1,6 +1,7 @@
 #ifndef _MKVEROBJ_HH_INCLUDED
 #define _MKVEROBJ_HH_INCLUDED
 
+#include "platform.hh"
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
