@@ -44,6 +44,43 @@ bool check_system() {
     }
 }
 
+/*bool check_fopen() {
+    printf("Checking if _fopen exists...\n");
+
+    FILE* f = fopen("foo.tmp", "w");
+    if (!f) {
+        handle_error(errno, "fopen('foo.tmp')");
+        return false;
+    }
+
+    int fd = _fileno(f);
+    if (-1 == fd) {
+        handle_error(errno, "_fileno(f)");
+    }
+
+    fclose(f);
+    f = NULL;
+
+    if (0 != remove("foo.tmp"))
+        handle_error(errno, "remove('foo.tmp')");
+
+    return -1 != fd;
+}*/
+
+bool check_z_printf() {
+    char buf[256] = {0};
+    size_t n = 10;
+    snprintf(buf, 256, "printing a size_t with the value ten: '%zu'", n);
+    printf("%s\n", buf);
+
+    if (NULL != strstr(buf, "10")) {
+        printf("Found '10' in the format string.\n");
+        return true;
+    }
+
+    return false;
+}
+
 int main(int argc, char *argv[]) {
 #if !defined(_WIN32)
 #if defined(__STDC_LIB_EXT1__)
@@ -68,6 +105,20 @@ int main(int argc, char *argv[]) {
     // system()
     ret = check_system();
     handle_result(ret, "system()");
+
+    /* whether or not Microsoft was correct when they said:
+     * 'warning C4996: 'fileno': The POSIX name for this item is deprecated.
+     * Instead, use the ISO C and C++ conformant name: _fileno'
+    ret = check_fopen();
+    handle_result(ret, "_fopen()");
+
+       doesn't look like it: 'error: call to undeclared function '_fileno';
+       ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]'
+    */
+
+    // can you use a 'z' prefix in a printf-style specifier for size_t portably?
+    ret = check_z_printf();
+    handle_result(ret, "z prefix in *printf");
 
     //
     // begin portability tests
