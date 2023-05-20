@@ -153,27 +153,18 @@ bool file_exists(const char* path, bool really_exists) {
 #if defined(_WIN32)
     retval = (TRUE == PathFileExists(path));
 #else
-#if defined(SYSTEST_USE_ACCESS)
-    int ret = access(path, F_OK);
-    if (0 != ret) {
-        retval = false;
-    } else {
-        retval = true;
-    }
-#elif defined(SYSTEST_USE_STAT)
     struct stat st = {0};
     int ret = stat(path, &st);
     if (0 != ret) {
         if (ENOENT != errno) {
             handle_error(errno, "stat(): ret != 0 && ENOENT != errno");
         } else {
-            printf("stat() returned != 0, but errno = %s\n", strerror(errno));
+            printf("stat() returned != 0, but errno = % (%s)\n", errno, strerror(errno));
         }
         retval = false;
     } else {
         retval = true;
     }
-#endif
 #endif
 
     if (retval != really_exists) {
