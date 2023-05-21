@@ -159,7 +159,7 @@ bool file_exists(const char* path, bool really_exists) {
         if (ENOENT != errno) {
             handle_error(errno, "stat(): ret != 0 && ENOENT != errno");
         } else {
-            printf("stat() returned != 0, but errno = % (%s)\n", errno, strerror(errno));
+            printf("stat() returned != 0, but errno = %d (%s)\n", errno, strerror(errno));
         }
         retval = false;
     } else {
