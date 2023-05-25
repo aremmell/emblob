@@ -122,6 +122,18 @@ namespace mkverobj
             return true;
         }
 
+        /* file size in bytes, or -1 upon failure */
+        static off_t file_size(const std::string fname) {
+            if (fname.empty())
+                return -1;
+
+#if defined(_WIN32)
+
+#else
+#endif
+            return off_t();
+        }
+
         static bool delete_file(const std::string& fname) {
             return 0 == std::remove(fname.c_str());
         }
