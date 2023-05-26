@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     // at the moment. just need to understand
     // their behavior on different platforms.
     //
-    handle_error(EINVAL, "testing error handler");
+
     ret = check_filesystem_api(argv[0]);
     handle_result(ret, "filesystem api");
 
