@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     // at the moment. just need to understand
     // their behavior on different platforms.
     //
-    ret = check_filesystem_api("/Users/ryan/Documents/Development/mkverobj/build/bin/systest");
+    ret = check_filesystem_api(argv[0]);
     handle_result(ret, "filesystem api");
 
     //
