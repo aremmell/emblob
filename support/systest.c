@@ -63,9 +63,9 @@ bool check_filesystem_api(char* thisfile) {
 
     printf("thisfile = '%s'\n", thisfile);
 
-    char buf[SYSTEST_MAXPATH] = {0};
-    all_passed &= systest_getcwd(buf, SYSTEST_MAXPATH);
-    printf("cwd = '%s'\n", buf);
+    char path[SYSTEST_MAXPATH] = {0};
+    all_passed &= systest_getcwd(path, SYSTEST_MAXPATH);
+    printf("cwd = '%s'\n", path);
 
     char* bname = systest_getbasename(thisfile);
     printf("basename = '%s'\n", bname);
@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
     // at the moment. just need to understand
     // their behavior on different platforms.
     //
+    handle_error(EINVAL, "testing error handler");
     ret = check_filesystem_api(argv[0]);
     handle_result(ret, "filesystem api");
 
@@ -175,12 +176,13 @@ bool file_exists(const char* path, bool really_exists) {
 }
 
 bool systest_getcwd(char* restrict dir, size_t size) {
-    if (!dir)
-        handle_error(EINVAL, "dir is invalid")
+    if (!dir) {
+        handle_error(EINVAL, "dir is NULL")
         return false;
+    }
 
     if (0 == size || size > SYSTEST_MAXPATH) {
-        handle_error(EINVAL, "size is invalid")
+        handle_error(EINVAL, "size is 0 || > SYSTEST_MAXPATH")
         return false;
     }
 
@@ -189,8 +191,6 @@ bool systest_getcwd(char* restrict dir, size_t size) {
     if (NULL == cwd) {
         handle_error(errno, "getcwd() failed");
         return false;
-    } else {
-        printf("getcwd() = '%s'\n", cwd);
     }
 #else
     if (NULL == _getcwd(dir, (int)size)) {

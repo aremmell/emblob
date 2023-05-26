@@ -80,10 +80,11 @@ void _handle_error(int err, const char* msg, char* file, int line, const char* f
 #define handle_error(err, msg) _handle_error(err, msg, __FILE__, __LINE__, __func__);
 
 void _handle_problem(const char* msg, char* file, int line, const char* func);
+
+static char _handle_problem_buf[512] = {0};
 #define handle_problem(problem, ...)  \
-    char buf[512] = {0}; \
-    snprintf(buf, 512, problem, __VA_ARGS__); \
-    _handle_problem(buf, __FILE__, __LINE__, __func__);
+    snprintf(_handle_problem_buf, 512, problem, __VA_ARGS__); \
+    _handle_problem(_handle_problem_buf, __FILE__, __LINE__, __func__);
 
 /* converts bool -> const char* */
 #define bool_to_str(b) b ? "true" : "false"
