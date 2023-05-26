@@ -44,29 +44,6 @@ bool check_system() {
     }
 }
 
-/*bool check_fopen() {
-    printf("Checking if _fopen exists...\n");
-
-    FILE* f = fopen("foo.tmp", "w");
-    if (!f) {
-        handle_error(errno, "fopen('foo.tmp')");
-        return false;
-    }
-
-    int fd = _fileno(f);
-    if (-1 == fd) {
-        handle_error(errno, "_fileno(f)");
-    }
-
-    fclose(f);
-    f = NULL;
-
-    if (0 != remove("foo.tmp"))
-        handle_error(errno, "remove('foo.tmp')");
-
-    return -1 != fd;
-}*/
-
 bool check_z_printf() {
     char buf[256] = {0};
     size_t n = 10;
@@ -79,6 +56,29 @@ bool check_z_printf() {
     }
 
     return false;
+}
+
+bool check_filesystem_api(char* thisfile) {
+    bool all_passed = true;
+
+    printf("thisfile = '%s'\n", thisfile);
+
+    char buf[SYSTEST_MAXPATH] = {0};
+    all_passed &= systest_getcwd(buf, SYSTEST_MAXPATH);
+    printf("cwd = '%s'\n", buf);
+
+    char* bname = systest_getbasename(thisfile);
+    printf("basename = '%s'\n", bname);
+    all_passed &= 0 != strcmp(bname, ".");
+
+    char* dir = systest_getdirname(thisfile);
+    printf("dirname = '%s'\n", dir);
+    all_passed &= 0 != strcmp(bname, ".");
+
+    char* appdir = systest_getappdir();
+    printf("appdir = '%s'\n", appdir);
+
+    return all_passed;
 }
 
 int main(int argc, char *argv[]) {
@@ -106,19 +106,17 @@ int main(int argc, char *argv[]) {
     ret = check_system();
     handle_result(ret, "system()");
 
-    /* whether or not Microsoft was correct when they said:
-     * 'warning C4996: 'fileno': The POSIX name for this item is deprecated.
-     * Instead, use the ISO C and C++ conformant name: _fileno'
-    ret = check_fopen();
-    handle_result(ret, "_fopen()");
-
-       doesn't look like it: 'error: call to undeclared function '_fileno';
-       ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]'
-    */
-
     // can you use a 'z' prefix in a printf-style specifier for size_t portably?
     ret = check_z_printf();
     handle_result(ret, "z prefix in *printf");
+
+    //
+    // these are just for collection of data
+    // at the moment. just need to understand
+    // their behavior on different platforms.
+    //
+    ret = check_filesystem_api("/Users/ryan/Documents/Development/mkverobj/build/bin/systest");
+    handle_result(ret, "filesystem api");
 
     //
     // begin portability tests
@@ -176,21 +174,99 @@ bool file_exists(const char* path, bool really_exists) {
     return retval;
 }
 
+bool systest_getcwd(char* restrict dir, size_t size) {
+    if (!dir)
+        handle_error(EINVAL, "dir is invalid")
+        return false;
+
+    if (0 == size || size > SYSTEST_MAXPATH) {
+        handle_error(EINVAL, "size is invalid")
+        return false;
+    }
+
+#if !defined(_WIN32)
+    char* cwd = getcwd(dir, size);
+    if (NULL == cwd) {
+        handle_error(errno, "getcwd() failed");
+        return false;
+    } else {
+        printf("getcwd() = '%s'\n", cwd);
+    }
+#else
+    if (NULL == _getcwd(dir, (int)size)) {
+        handle_error(errno, "_getcwd() failed");
+        return false;
+    }
+#endif
+
+    return true;
+}
+
+char* systest_getbasename(char* path) {
+    if (!path || !*path)
+        return ".";
+
+#if !defined(_WIN32)
+    /* https://www.man7.org/linux/man-pages/man3/basename.3.html
+
+       The functions dirname() and basename() break a null-terminated
+       pathname string into directory and filename components.  In the
+       usual case, dirname() returns the string up to, but not
+       including, the final '/', and basename() returns the component
+       following the final '/'.  Trailing '/' characters are not counted
+       as part of the pathname.
+
+       If path does not contain a slash, dirname() returns the string
+       "." while basename() returns a copy of path.  If path is the
+       string "/", then both dirname() and basename() return the string
+       "/".  If path is a null pointer or points to an empty string,
+       then both dirname() and basename() return the string ".".    
+    */
+    return basename(path);    
+#else
+    return PathFindFileNameA(path);
+#endif
+}
+
+char* systest_getdirname(char* path) {
+    if (!path || !*path)
+        return ".";
+
+#if !defined(_WIN32)
+    return dirname(path);
+#else
+    HRESULT ret = PathCchRemoveFileSpec(path, strnlen(path, SIR_MAXPATH));
+    if (S_OK != ret) {
+        handle_error(ret, "PathCchRemoveFileSpec() failed");
+
+    return path;
+#endif
+}
+
+char* systest_getappdir(void) {
+
+#if !defined(_WIN32)
+    /* TBD. */
+    return ".";
+#else
+    char filename[SIR_MAXPATH] = {0};
+    DWORD ret = GetModuleFileName(NULL, filename, SIR_MAXPATH);
+    if (0 == ret) {
+        handle_error(GetLastError(), "GetModuleFileName() failed");
+        return ".";
+    }
+    return _sir_getdirname(filename);
+#endif        
+}
+
 //
 // utility functions
 //
-void _handle_error(int err, const char* msg, const char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", get_basename(file), line, func, strerror(err), msg);
+void _handle_error(int err, const char* msg, char* file, int line, const char* func) {
+    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", systest_getbasename(file), line, func, strerror(err), msg);
 }
 
-void _handle_problem(const char* msg, const char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", get_basename(file), line, func, msg);
+void _handle_problem(const char* msg, char* file, int line, const char* func) {
+    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", systest_getbasename(file), line, func, msg);
 }
 
-const char* get_basename(const char* filename) {
-#if defined(_WIN32)
-    return PathFindFileName(filename);
-#else
-    return basename((char*)filename);
-#endif
-}

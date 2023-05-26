@@ -7,6 +7,21 @@
 #   include <sys/stat.h>
 #   include <unistd.h>
 #   include <libgen.h>
+#   include <limits.h>
+
+#if defined(__APPLE__)
+#   include <sys/param.h>
+#endif
+
+#if defined(PATH_MAX)
+#   define SYSTEST_MAXPATH PATH_MAX
+#elif defined(FILENAME_MAX)
+#   define SYSTEST_MAXPATH FILENAME_MAX
+#elif defined(MAXPATHLEN)
+#   define SYSTEST_MAXPATH MAXPATHLEN
+#else
+#   define SYSTEST_MAXPATH 1024
+#endif
 
 #   define STRFMT(clr, s) clr s "\033[0m"
 #   define RED(s) STRFMT("\033[1;91m", s)
@@ -20,6 +35,10 @@
 #   define _WIN32_WINNT 0x0A00
 #   include <windows.h>
 #   include <shlwapi.h>
+#   include <pathcch.h>
+
+#   define SYSTEST_MAXPATH MAX_PATH
+
 #   define RED(s) s
 #   define GREEN(s) s
 #   define WHITE(s) s
@@ -46,23 +65,25 @@ extern "C" {
 //
 bool file_exists(const char* path, bool really_exists);
 
+bool systest_getcwd(char* restrict dir, size_t size);
+char* systest_getbasename(char* path);
+char* systest_getdirname(char* path);
+char* systest_getappdir(void);
+
 //
 // utility functions
 //
 
 /* this is strictly for use when encountering an actual failure of a system call. 
  * use handle_problem to report things other than error numbers. */
-void _handle_error(int err, const char* msg, const char* file, int line, const char* func);
+void _handle_error(int err, const char* msg, char* file, int line, const char* func);
 #define handle_error(err, msg) _handle_error(err, msg, __FILE__, __LINE__, __func__);
 
-void _handle_problem(const char* msg, const char* file, int line, const char* func);
+void _handle_problem(const char* msg, char* file, int line, const char* func);
 #define handle_problem(problem, ...)  \
     char buf[512] = {0}; \
     snprintf(buf, 512, problem, __VA_ARGS__); \
     _handle_problem(buf, __FILE__, __LINE__, __func__);
-
-/* returns a pointer to the character after the last slash. */
-const char* get_basename(const char* filename);
 
 /* converts bool -> const char* */
 #define bool_to_str(b) b ? "true" : "false"
