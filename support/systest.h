@@ -1,27 +1,32 @@
 #ifndef _SYSTEST_H_INCLUDED
 #define _SYSTEST_H_INCLUDED
 
+#if defined(__APPLE__)
+#   include <mach-o/dyld.h>
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#   define __BSD__
+#   define _BSD_SOURCE
+#endif
+
 #if !defined(_WIN32)
+#   define _GNU_SOURCE
 #   define __STDC_WANT_LIB_EXT1__ 1
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #   include <unistd.h>
 #   include <libgen.h>
 #   include <limits.h>
+#   include <fcntl.h>
 
-#if defined(__APPLE__)
-#   include <sys/param.h>
-#endif
+#   if defined(PATH_MAX)
+#       define SYSTEST_MAXPATH PATH_MAX
+#   else
+#       define SYSTEST_MAXPATH 1024
+#   endif
 
-#if defined(PATH_MAX)
-#   define SYSTEST_MAXPATH PATH_MAX
-#elif defined(FILENAME_MAX)
-#   define SYSTEST_MAXPATH FILENAME_MAX
-#elif defined(MAXPATHLEN)
-#   define SYSTEST_MAXPATH MAXPATHLEN
-#else
-#   define SYSTEST_MAXPATH 1024
-#endif
+#   if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200112L || ((__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 19 ) && _BSD_SOURCE)
+#       define __HAVE_UNISTD_READLINK__
+#   endif
 
 #   define STRFMT(clr, s) clr s "\033[0m"
 #   define RED(s) STRFMT("\033[1;91m", s)
@@ -66,9 +71,9 @@ extern "C" {
 bool file_exists(const char* path, bool really_exists);
 
 bool systest_getcwd(char* restrict dir, size_t size);
+bool systest_getappdir(char* buffer, size_t size);
 char* systest_getbasename(char* path);
-char* systest_getdirname(char* path);
-char* systest_getappdir(void);
+char* systest_getdirname(char* path); 
 
 //
 // utility functions

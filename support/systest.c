@@ -61,7 +61,7 @@ bool check_z_printf() {
 bool check_filesystem_api(char* thisfile) {
     bool all_passed = true;
 
-    printf("thisfile = '%s'\n", thisfile);
+    printf("argv[0] = '%s'\n", thisfile);
 
     char path[SYSTEST_MAXPATH] = {0};
     all_passed &= systest_getcwd(path, SYSTEST_MAXPATH);
@@ -73,11 +73,11 @@ bool check_filesystem_api(char* thisfile) {
 
     char* dir = systest_getdirname(thisfile);
     printf("dirname = '%s'\n", dir);
-    all_passed &= 0 != strcmp(bname, ".");
+    all_passed &= 0 != strcmp(dir, ".");
 
-    char* appdir = systest_getappdir();
-    printf("appdir = '%s'\n", appdir);
-
+    all_passed &= systest_getappdir(path, SYSTEST_MAXPATH);
+    printf("appdir = '%s'\n", path);
+    
     return all_passed;
 }
 
@@ -181,25 +181,101 @@ bool systest_getcwd(char* restrict dir, size_t size) {
         return false;
     }
 
-    if (0 == size || size > SYSTEST_MAXPATH) {
-        handle_error(EINVAL, "size is 0 || > SYSTEST_MAXPATH")
+    if (size < SYSTEST_MAXPATH) {
+        handle_error(EINVAL, "size is < SYSTEST_MAXPATH")
         return false;
     }
 
-#if !defined(_WIN32)
-    char* cwd = getcwd(dir, size);
-    if (NULL == cwd) {
-        handle_error(errno, "getcwd() failed");
-        return false;
-    }
-#else
+#if defined(__linux__)
+#   if defined(_GNU_SOURCE)
+        char* cur = get_current_dir_name();
+        strncpy(dir, cur, strnlen(cur, SYSTEST_MAXPATH));
+#   else
+        char* cwd = getcwd(dir, size);
+        if (NULL == cwd) {
+            handle_error(errno, "getcwd() failed");
+            return false;
+        }
+        return true;
+#   endif
+#elif defined(__APPLE__)
+#elif defined(_WIN32)
+    /* _WIN32 */
     if (NULL == _getcwd(dir, (int)size)) {
         handle_error(errno, "_getcwd() failed");
         return false;
     }
+#elif defined(__BSD__)
+#else
 #endif
 
+    return false;
+}
+
+bool systest_getappdir(char* buffer, size_t size) {
+    // TODO: come up with some minimal fallback; at least look at argv[0] if
+    // the method chosen doesn't work.
+    //
+    // also, probably going to need a version of this that returns the app name as well,
+    // in order to test path splitting (basename/dirname)
+
+    if (!buffer) {
+        handle_error(EINVAL, "buffer is NULL")
+        return false;
+    }
+
+    if (size < SYSTEST_MAXPATH) {
+        handle_error(EINVAL, "size is < SYSTEST_MAXPATH")
+        return false;
+    }
+
+#if defined(__linux__)
+#   if defined(__HAVE_UNISTD_READLINK__)
+
+    ssize_t read = readlink("/proc/self/exe", buffer, size);
+    if (-1 == read) {
+        handle_error(errno, "readlink() failed!");
+        return false;
+    } else if (read > (ssize_t)size) {
+        handle_error(ENOBUFS, "readlink() failed (buffer too small)!");
+        return false;
+    }
+
+    systest_getdirname(buffer);
+
     return true;
+#   else
+#   pragma message("what to use as backup when readlink isn't available?")
+#   endif
+#elif defined(__APPLE__)
+    
+    uint32_t size32 = (uint32_t)size;
+    if (0 != _NSGetExecutablePath(buffer, &size32)) {
+        /* buffer is too small; need size32 bytes */
+        handle_error(ENOBUFS, "_NSGetExecutablePath() failed (buffer too small)!");
+        return false;
+    }
+
+    return true;
+
+#elif defined(_WIN32)
+
+    if (0 == GetModuleFileName(NULL, buffer, size)) {
+        handle_error(GetLastError(), "GetModuleFileName() failed");
+        return false;
+    }
+
+    systest_getdirname(buffer);
+    
+    return true;
+
+#elif defined(__BSD__)
+#else
+#   error "No " __func__ " support for your platform; please contact the author."
+#endif
+#   pragma messsage("TODO: BSD support")
+
+    return false;
 }
 
 char* systest_getbasename(char* path) {
@@ -237,27 +313,14 @@ char* systest_getdirname(char* path) {
 #else
     HRESULT ret = PathCchRemoveFileSpec(path, strnlen(path, SIR_MAXPATH));
     if (S_OK != ret) {
-        handle_error(ret, "PathCchRemoveFileSpec() failed");
+        handle_error(ret, "PathCchRemoveFileSpec() failed!");
+        return ".";
+    }
 
     return path;
 #endif
 }
 
-char* systest_getappdir(void) {
-
-#if !defined(_WIN32)
-    /* TBD. */
-    return ".";
-#else
-    char filename[SIR_MAXPATH] = {0};
-    DWORD ret = GetModuleFileName(NULL, filename, SIR_MAXPATH);
-    if (0 == ret) {
-        handle_error(GetLastError(), "GetModuleFileName() failed");
-        return ".";
-    }
-    return _sir_getdirname(filename);
-#endif        
-}
 
 //
 // utility functions
