@@ -1,16 +1,22 @@
 #ifndef _SYSTEST_H_INCLUDED
 #define _SYSTEST_H_INCLUDED
 
-#if defined(__APPLE__)
-#   include <mach-o/dyld.h>
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
-#   define __BSD__
-#   define _BSD_SOURCE
-#endif
-
 #if !defined(_WIN32)
+#   if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#       define __BSD__
+#       define _BSD_SOURCE
+#   endif
+
+#   define _DEFAULT_SOURCE
 #   define _GNU_SOURCE
+#   define _POSIX_C_SOURCE 200809L
+#   define _XOPEN_SOURCE 500
 #   define __STDC_WANT_LIB_EXT1__ 1
+
+#   if defined(__BSD__) || (defined(__GLIBC__) && (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19 && defined(_BSD_SOURCE)))
+#       define __HAVE_UNISTD_READLINK__
+#   endif
+
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #   include <unistd.h>
@@ -22,11 +28,6 @@
 #       define SYSTEST_MAXPATH PATH_MAX
 #   else
 #       define SYSTEST_MAXPATH 1024
-#   endif
-
-#   if (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500) || (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L)
-       || ((defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 19) && defined(_BSD_SOURCE))
-#       define __HAVE_UNISTD_READLINK__
 #   endif
 
 #   define STRFMT(clr, s) clr s "\033[0m"
@@ -61,6 +62,10 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
+
+#if defined(__APPLE__)
+#   include <mach-o/dyld.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

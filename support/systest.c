@@ -110,18 +110,49 @@ bool check_filesystem_api(void) {
     return all_passed;
 }
 
-int main(int argc, char *argv[]) {
+void check_build_env() {
 #if !defined(_WIN32)
 #if defined(__STDC_LIB_EXT1__)
-    printf("__STDC_LIB_EXT1__ is set!\n");
-#endif
+    printf("__STDC_LIB_EXT1__ is defined\n");
 #else
+    printf("__STDC_LIB_EXT1__ NOT defined\n");
+#endif
+#if defined(__GLIBC__)
+    printf("Using GNU libc version: %u.%u\n" __GLIBC__, __GLIBC__MINOR__)
+#else
+    printf("Not using GNU libc\n");
+#endif
+#if defined(__linux__) && defined(__HAVE_UNISTD_READLINK__)
+    printf("__HAVE_UNISTD_READLINK__ is defined");
+#else
+    printf("__HAVE_UNISTD_READLINK__ NOT defined");
+#endif
+#else // _WIN32
 #if defined(__STDC_SECURE_LIB__)
-    printf("__STDC_SECURE_LIB__ is set!\n");
+    printf("__STDC_SECURE_LIB__ is defined\n");
+#else
+    printf("__STDC_SECURE_LIB__ NOT defined\n");
 #endif
+#endif    
+}
+
+void check_platform()
+{
+#if !defined(_WIN32)
+#else
 #endif
+}
+
+int main(int argc, char *argv[]) {
 
     printf("\t" BLUE("~~~~~~~~~~ <systest> ~~~~~~~~~~") "\n");
+
+    //
+    // begin environment tests
+    //
+
+    check_build_env();
+    check_platform();
 
     //
     // begin feature tests
