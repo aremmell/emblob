@@ -13,8 +13,12 @@
 #   define _XOPEN_SOURCE 700
 #   define __STDC_WANT_LIB_EXT1__ 1
 
-#   if (defined(__GLIBC__) && (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19 && defined(_BSD_SOURCE)))
-#       define __HAVE_UNISTD_READLINK__
+#   if defined(__GLIBC__)
+#       if (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19) && defined(_BSD_SOURCE)
+#           define __HAVE_UNISTD_READLINK__
+#       else
+#           define __HAVE_UNISTD_READLINK__
+#       endif
 #   endif
 
 #   include <sys/types.h>

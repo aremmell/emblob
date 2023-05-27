@@ -118,7 +118,7 @@ void check_build_env() {
     printf("__STDC_LIB_EXT1__ NOT defined\n");
 #endif
 #if defined(__GLIBC__)
-    printf("Using GNU libc version: %u.%u\n" __GLIBC__, __GLIBC__MINOR__)
+    printf("Using GNU libc version: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
 #else
     printf("Not using GNU libc\n");
 #endif
@@ -308,7 +308,7 @@ bool systest_getappfilename(char* buffer, size_t size) {
 
     retval = true;
 #   else
-#       error __func__ ": unable to resolve readlink(); see man readlink and its feature test macro requirements."
+#       error "unable to resolve readlink(); see man readlink and its feature test macro requirements."
 #   endif
 #elif defined(__FreeBSD__)
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
@@ -328,7 +328,7 @@ bool systest_getappfilename(char* buffer, size_t size) {
         retval = true;
     }
 #else
-#   error __func__ ": "no implementation for your platform; please contact the author."
+#   error "no implementation for your platform; please contact the author."
 #endif
 #else /* _WIN32 */
     if (0 == GetModuleFileName(NULL, buffer, size)) {
