@@ -281,6 +281,7 @@ bool systest_getcwd(char* restrict dir, size_t size) {
 bool systest_getappfilename(char* buffer, size_t size) {
     // TODO: come up with some minimal fallback; at least look at argv[0] if
     // the method chosen doesn't work.
+
     if (!buffer) {
         handle_error(EINVAL, "buffer is NULL")
         return false;
@@ -304,7 +305,6 @@ bool systest_getappfilename(char* buffer, size_t size) {
         handle_error(ENOBUFS, "readlink() failed (buffer too small)!");
         retval = false;
     }
-
     retval = true;
 #   else
 #       error "unable to resolve readlink(); see man readlink and its feature test macro requirements."
@@ -383,7 +383,6 @@ char* systest_getdirname(char* restrict path) {
     if (S_OK != ret) {
         handle_error(ret, "PathCchRemoveFileSpec() failed!");
     }
-
     return path;
 #endif
 }
@@ -395,10 +394,10 @@ char* systest_getdirname(char* restrict path) {
 
 
 void _handle_error(int err, const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", file, line, func, strerror(err), msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", systest_getbasename(file), line, func, strerror(err), msg);
 }
 
 void _handle_problem(const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", file, line, func, msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", systest_getbasename(file), line, func, msg);
 }
 
