@@ -123,9 +123,9 @@ void check_build_env() {
     printf("Not using GNU libc\n");
 #endif
 #if defined(__linux__) && defined(__HAVE_UNISTD_READLINK__)
-    printf("__HAVE_UNISTD_READLINK__ is defined");
+    printf("__HAVE_UNISTD_READLINK__ is defined\n");
 #else
-    printf("__HAVE_UNISTD_READLINK__ NOT defined");
+    printf("__HAVE_UNISTD_READLINK__ NOT defined\n");
 #endif
 #else // _WIN32
 #if defined(__STDC_SECURE_LIB__)
@@ -307,7 +307,7 @@ bool systest_getappfilename(char* buffer, size_t size) {
 #   else
 #   error "no readlink(); don't have an implementation for " __func__
 #   endif
-#   elif defined(__APPLE__)
+#elif defined(__APPLE__)
     uint32_t size32 = (uint32_t)size;
     if (0 != _NSGetExecutablePath(buffer, &size32)) {
         /* buffer is too small; need size32 bytes */
@@ -316,11 +316,6 @@ bool systest_getappfilename(char* buffer, size_t size) {
     } else {
         retval = true;
     }
-#   elif defined(__BSD__)
-#   error "TODO: BSD support"
-#   else
-#   error "no support for your platform; please contact the author.
-#   endif
 #else
     /* _WIN32 */
     if (0 == GetModuleFileName(NULL, buffer, size)) {
@@ -346,7 +341,7 @@ bool systest_getappdir(char* restrict buffer, size_t size) {
 
 char* systest_getbasename(char* restrict path) {
     if (!path || !*path) {
-        handle_error(EINVAL, "path is NULL")
+        handle_error(EINVAL, "path is an invalid string")
         return ".";
     }
 
