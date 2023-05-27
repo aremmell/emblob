@@ -178,18 +178,23 @@ int main(int argc, char *argv[]) {
     // begin portability tests
     //
 
-    /* file existence: one file we know exists, and one we know doesn't. */
-    const char* exists = "../../LICENSE";
-    const char* doesntexist = "a_s_d_f_foobar.baz";
+    /* file existence: some we know exist, and some we know don't. */
+    static const char* exist1   = "../../LICENSE";
+    static const char* exist2   = "./i_exist";
+    static const char* noexist1 = "a_s_d_f_foobar.baz";
+    static const char* noexist2 = "idontexist";
 
     /* these will assert() and log errors to the console if they are wrong, too. */
-    bool exist1 = file_exists(exists, true);
-    bool exist2 = file_exists(doesntexist, false);
+    bool file_exist_result = true;
+    file_exist_result &= file_exists(exist1, true);
+    file_exist_result &= !file_exists(noexist1, false);
+    file_exist_result &= file_exists(exist2, true);
+    file_exist_result &= !file_exists(noexist2, false);
 
-    handle_result(exist1 && !exist2, "file_exists");
+    handle_result(file_exist_result, "file_exists");
 
     if (num_succeeded != num_attempted)
-        printf("\t" WHITE("--- %d of %d tests passed ---\n"), num_succeeded, num_attempted);
+        printf("\t" WHITE("--- %d/%d tests passed ---\n"), num_succeeded, num_attempted);
     else
         printf("\t" GREEN("--- all %d tests passed! ---\n"), num_attempted);
 
@@ -207,7 +212,7 @@ int main(int argc, char *argv[]) {
 bool file_exists(const char* path, bool really_exists) {
 
     if (!path || !*path) {
-        handle_error(EINVAL, "path is not a valid string");
+        handle_error(EINVAL, "path is an invalid string");
         return false;
     }
 
@@ -220,9 +225,9 @@ bool file_exists(const char* path, bool really_exists) {
     int ret = stat(path, &st);
     if (0 != ret) {
         if (ENOENT != errno) {
-            handle_error(errno, "stat(): ret != 0 && ENOENT != errno");
+            handle_error(errno, "stat() failed && ENOENT != errno");
         } else {
-            printf("stat() returned != 0, but errno = %d (%s)\n", errno, strerror(errno));
+            printf("stat() failed, errno = %d (%s)\n", errno, strerror(errno));
         }
         retval = false;
     } else {

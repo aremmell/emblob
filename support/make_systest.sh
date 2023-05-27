@@ -16,6 +16,13 @@ out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
 _c_flags="-O2 -Wall -std=c11 -DNDEBUG"
 
+# creates some files in the same dir as
+# systest; used to test relative path file existence functionality.
+create_test_files() {
+	local file1="${out_bin_dir}/i_exist"
+	touch "${file1}" && echo_success "Created ${file1}"
+}
+
 # $1 = boolean; if true, do not prompt to run the program
 # $2 = boolean; if true, do not execute the program after building
 compile_systest() {
@@ -33,6 +40,10 @@ compile_systest() {
 		return 1
 	else
 		echo_success "Successfully built ${out_bin_dir_relative}/${name}. Platform info: $(get_clean_uname)"
+	fi
+
+	if ! create_test_files; then
+		echo_error "Couldn't create test file(s). Expect file existence tests to fail!"
 	fi
 
 	local _exec=true
