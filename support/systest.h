@@ -24,7 +24,7 @@
 #       define SYSTEST_MAXPATH 1024
 #   endif
 
-#   if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200112L || ((__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 19 ) && _BSD_SOURCE)
+#   if (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500) || (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) || ((defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 19) && _BSD_SOURCE)
 #       define __HAVE_UNISTD_READLINK__
 #   endif
 
