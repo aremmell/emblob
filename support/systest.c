@@ -58,25 +58,54 @@ bool check_z_printf() {
     return false;
 }
 
-bool check_filesystem_api(char* thisfile) {
+bool check_filesystem_api(void) {
     bool all_passed = true;
 
-    printf("argv[0] = '%s'\n", thisfile);
+    /* ==== get app file name path (absolute path of binary file) ==== */
+    char tmp_path[SYSTEST_MAXPATH] = {0};
+    all_passed &= systest_getappfilename(tmp_path, SYSTEST_MAXPATH);
+    printf(WHITE("systest_getappfilename() = '%s'") "\n", tmp_path);
+    /* ==== */
 
-    char path[SYSTEST_MAXPATH] = {0};
-    all_passed &= systest_getcwd(path, SYSTEST_MAXPATH);
-    printf("cwd = '%s'\n", path);
+    /* ==== get base name (file name component of a path)  ==== */
+    char* basenametest = strdup(tmp_path);
+    if (!basenametest) {
+        handle_error(errno, "strdup() failed!");
+        return false;
+    }
 
-    char* bname = systest_getbasename(thisfile);
-    printf("basename = '%s'\n", bname);
-    all_passed &= 0 != strcmp(bname, ".");
+    char* basenameresult = systest_getbasename(basenametest);
+    all_passed &= (strlen(basenameresult) > 0 && 0 != strcmp(basenameresult, "."));
+    printf(WHITE("systest_getbasename() = '%s'") "\n", basenameresult);
+    free(basenametest);
+    basenametest = NULL;
+    /* ==== */
 
-    char* dir = systest_getdirname(thisfile);
-    printf("dirname = '%s'\n", dir);
-    all_passed &= 0 != strcmp(dir, ".");
+    /* ==== get dir name (directory structure component of a path)  ==== */
+    char* dirnametest = strdup(tmp_path);
+    if (!dirnametest) {
+        handle_error(errno, "strdup() failed!");
+        return false;
+    }
 
-    all_passed &= systest_getappdir(path, SYSTEST_MAXPATH);
-    printf("appdir = '%s'\n", path);
+    char* dirnameresult = systest_getdirname(dirnametest);
+    all_passed &= (strlen(dirnameresult) > 0 && 0 != strcmp(dirnameresult, ".")); 
+    printf(WHITE("systest_getdirname() = '%s'") "\n", dirnameresult);
+    free(dirnametest);
+    dirnametest = NULL;    
+    /* ==== */
+
+    /* ==== get app dir path (absolute path of directory containing binary file) ==== */
+    memset(tmp_path, '\0', SYSTEST_MAXPATH);    
+    all_passed &= systest_getappdir(tmp_path, SYSTEST_MAXPATH);
+    printf(WHITE("systest_getappdir() = '%s'") "\n", tmp_path);
+    /* ==== */
+
+    /* ==== get current working directory (not necessarily the same ass app directory) ==== */
+    memset(tmp_path, '\0', SYSTEST_MAXPATH);    
+    all_passed &= systest_getcwd(tmp_path, SYSTEST_MAXPATH);
+    printf(WHITE("systest_getcwd() = '%s'") "\n", tmp_path);
+    /* ==== */
     
     return all_passed;
 }
@@ -116,7 +145,7 @@ int main(int argc, char *argv[]) {
     // their behavior on different platforms.
     //
 
-    ret = check_filesystem_api(argv[0]);
+    ret = check_filesystem_api();
     handle_result(ret, "filesystem api");
 
     //
@@ -143,10 +172,19 @@ int main(int argc, char *argv[]) {
     return num_succeeded > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+
 //
 // portability test implementations
 //
+
+
 bool file_exists(const char* path, bool really_exists) {
+
+    if (!path || !*path) {
+        handle_error(EINVAL, "path is not a valid string");
+        return false;
+    }
+
     bool retval = false;
 
 #if defined(_WIN32)
@@ -186,39 +224,33 @@ bool systest_getcwd(char* restrict dir, size_t size) {
         return false;
     }
 
-#if defined(__linux__)
-#   if defined(_GNU_SOURCE)
-        char* cur = get_current_dir_name();
-        strncpy(dir, cur, strnlen(cur, SYSTEST_MAXPATH));
+#if !defined(_WIN32)
+#   if defined(__linux__) && defined(_GNU_SOURCE)
+    char* cur = get_current_dir_name();
+    strncpy(dir, cur, strnlen(cur, SYSTEST_MAXPATH));
 #   else
-        char* cwd = getcwd(dir, size);
-        if (NULL == cwd) {
-            handle_error(errno, "getcwd() failed");
-            return false;
-        }
-        return true;
+    char* cwd = getcwd(dir, size);
+    if (NULL == cwd) {
+        handle_error(errno, "getcwd() failed");
+        return false;
+    }
+    return true;
 #   endif
-#elif defined(__APPLE__)
-#elif defined(_WIN32)
+#elif defined(__BSD__)
+#else
     /* _WIN32 */
     if (NULL == _getcwd(dir, (int)size)) {
         handle_error(errno, "_getcwd() failed");
         return false;
     }
-#elif defined(__BSD__)
-#else
 #endif
 
     return false;
 }
 
-bool systest_getappdir(char* buffer, size_t size) {
+bool systest_getappfilename(char* buffer, size_t size) {
     // TODO: come up with some minimal fallback; at least look at argv[0] if
     // the method chosen doesn't work.
-    //
-    // also, probably going to need a version of this that returns the app name as well,
-    // in order to test path splitting (basename/dirname)
-
     if (!buffer) {
         handle_error(EINVAL, "buffer is NULL")
         return false;
@@ -229,86 +261,83 @@ bool systest_getappdir(char* buffer, size_t size) {
         return false;
     }
 
-#if defined(__linux__)
-#   if defined(__HAVE_UNISTD_READLINK__)
+    bool retval = false;
 
+#if !defined(_WIN32)
+#   if defined(__linux__)
+#   if defined(__HAVE_UNISTD_READLINK__)
     ssize_t read = readlink("/proc/self/exe", buffer, size);
     if (-1 == read) {
         handle_error(errno, "readlink() failed!");
-        return false;
+        retval = false;
     } else if (read > (ssize_t)size) {
         handle_error(ENOBUFS, "readlink() failed (buffer too small)!");
-        return false;
+        retval = false;
     }
-
-    systest_getdirname(buffer);
-
-    return true;
 #   else
-#   pragma message("what to use as backup when readlink isn't available?")
+#   error "no readlink(); don't have an implementation!"
 #   endif
-#elif defined(__APPLE__)
-
+#   elif defined(__APPLE__)
     uint32_t size32 = (uint32_t)size;
     if (0 != _NSGetExecutablePath(buffer, &size32)) {
         /* buffer is too small; need size32 bytes */
         handle_error(ENOBUFS, "_NSGetExecutablePath() failed (buffer too small)!");
-        return false;
+        retval = false;
+    } else {
+        retval = true;
     }
-
-    systest_getdirname(buffer);    
-
-    return true;
-
-#elif defined(_WIN32)
-
+#   elif defined(__BSD__)
+#   error "TODO: BSD support"
+#   else
+#   error "no support for your platform; please contact the author.
+#   endif
+#else
+    /* _WIN32 */
     if (0 == GetModuleFileName(NULL, buffer, size)) {
         handle_error(GetLastError(), "GetModuleFileName() failed");
-        return false;
+        retval = false;
+    } else {
+        retval = true;
     }
-
-    systest_getdirname(buffer);
-    
-    return true;
-
-#elif defined(__BSD__)
-#else
-#   error "No " __func__ " support for your platform; please contact the author."
 #endif
-#   pragma messsage("TODO: BSD support")
+
+    return retval;
+}
+
+bool systest_getappdir(char* restrict buffer, size_t size) {
+    char tmp[SYSTEST_MAXPATH] = {0};
+    if (systest_getappfilename(tmp, SYSTEST_MAXPATH)) {
+        strncpy(buffer, systest_getdirname(tmp), strnlen(tmp, size));
+        return true;
+    }
 
     return false;
 }
 
-char* systest_getbasename(char* path) {
-    if (!path || !*path)
+char* systest_getbasename(char* restrict path) {
+    if (!path || !*path) {
+        handle_error(EINVAL, "path is NULL")
         return ".";
+    }
+
+    if (path[0] == '/' && path[1] == '\0')
+        return "/";
 
 #if !defined(_WIN32)
-    /* https://www.man7.org/linux/man-pages/man3/basename.3.html
-
-       The functions dirname() and basename() break a null-terminated
-       pathname string into directory and filename components.  In the
-       usual case, dirname() returns the string up to, but not
-       including, the final '/', and basename() returns the component
-       following the final '/'.  Trailing '/' characters are not counted
-       as part of the pathname.
-
-       If path does not contain a slash, dirname() returns the string
-       "." while basename() returns a copy of path.  If path is the
-       string "/", then both dirname() and basename() return the string
-       "/".  If path is a null pointer or points to an empty string,
-       then both dirname() and basename() return the string ".".    
-    */
-    return basename(path);    
+    return basename(path);
 #else
     return PathFindFileNameA(path);
 #endif
 }
 
-char* systest_getdirname(char* path) {
-    if (!path || !*path)
+char* systest_getdirname(char* restrict path) {
+    if (!path || !*path) {
+        handle_error(EINVAL, "path is an invalid string")
         return ".";
+    }
+
+    if (path[0] == '/' && path[1] == '\0')
+        return "/";
 
 #if !defined(_WIN32)
     return dirname(path);
@@ -316,7 +345,6 @@ char* systest_getdirname(char* path) {
     HRESULT ret = PathCchRemoveFileSpec(path, strnlen(path, SIR_MAXPATH));
     if (S_OK != ret) {
         handle_error(ret, "PathCchRemoveFileSpec() failed!");
-        return ".";
     }
 
     return path;
@@ -327,11 +355,13 @@ char* systest_getdirname(char* path) {
 //
 // utility functions
 //
+
+
 void _handle_error(int err, const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", systest_getbasename(file), line, func, strerror(err), msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", file, line, func, strerror(err), msg);
 }
 
 void _handle_problem(const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", systest_getbasename(file), line, func, msg);
+    fprintf(stderr, RED("ERROR: %s:%d in %s: %s") "\n", file, line, func, msg);
 }
 

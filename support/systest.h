@@ -70,10 +70,11 @@ extern "C" {
 //
 bool file_exists(const char* path, bool really_exists);
 
-bool systest_getcwd(char* restrict dir, size_t size);
-bool systest_getappdir(char* buffer, size_t size);
-char* systest_getbasename(char* path);
-char* systest_getdirname(char* path); 
+bool systest_getcwd(char* restrict buffer, size_t size);
+bool systest_getappfilename(char* restrict buffer, size_t size);
+bool systest_getappdir(char* restrict buffer, size_t size);
+char* systest_getbasename(char* restrict path);
+char* systest_getdirname(char* restrict path); 
 
 //
 // utility functions
