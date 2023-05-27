@@ -248,13 +248,15 @@ bool systest_getappdir(char* buffer, size_t size) {
 #   pragma message("what to use as backup when readlink isn't available?")
 #   endif
 #elif defined(__APPLE__)
-    
+
     uint32_t size32 = (uint32_t)size;
     if (0 != _NSGetExecutablePath(buffer, &size32)) {
         /* buffer is too small; need size32 bytes */
         handle_error(ENOBUFS, "_NSGetExecutablePath() failed (buffer too small)!");
         return false;
     }
+
+    systest_getdirname(buffer);    
 
     return true;
 
