@@ -295,8 +295,7 @@ bool systest_getappfilename(char* buffer, size_t size) {
     bool retval = false;
 
 #if !defined(_WIN32)
-#   if defined(__linux__)
-#   if defined(__HAVE_UNISTD_READLINK__)
+#   if (defined(__GLIBC__) && defined(__HAVE_UNISTD_READLINK__)) || defined(__BSD__)
     ssize_t read = readlink("/proc/self/exe", buffer, size);
     if (-1 == read) {
         handle_error(errno, "readlink() failed!");
@@ -306,7 +305,7 @@ bool systest_getappfilename(char* buffer, size_t size) {
         retval = false;
     }
 #   else
-#   error "no readlink(); don't have an implementation!"
+#   error "no readlink(); don't have an implementation for " __func__
 #   endif
 #   elif defined(__APPLE__)
     uint32_t size32 = (uint32_t)size;

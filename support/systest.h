@@ -13,7 +13,7 @@
 #   define _XOPEN_SOURCE 500
 #   define __STDC_WANT_LIB_EXT1__ 1
 
-#   if defined(__BSD__) || (defined(__GLIBC__) && (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19 && defined(_BSD_SOURCE)))
+#   if (defined(__GLIBC__) && (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19 && defined(_BSD_SOURCE)))
 #       define __HAVE_UNISTD_READLINK__
 #   endif
 
