@@ -46,6 +46,7 @@
 #   include <windows.h>
 #   include <shlwapi.h>
 #   include <pathcch.h>
+#   include <direct.h>
 
 #   define SYSTEST_MAXPATH MAX_PATH
 
@@ -78,13 +79,13 @@ extern "C" {
 //
 // portability test implementations
 //
-bool file_exists(const char* path, bool really_exists);
+bool file_exists(const char* restrict path, bool really_exists);
 
 bool systest_getcwd(char* restrict buffer, size_t size);
 bool systest_getappfilename(char* restrict buffer, size_t size);
 bool systest_getappdir(char* restrict buffer, size_t size);
 char* systest_getbasename(char* restrict path);
-char* systest_getdirname(char* restrict path); 
+char* systest_getdirname(char* path); 
 
 //
 // utility functions

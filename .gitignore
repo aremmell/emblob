@@ -1,3 +1,9 @@
+# output files
 build/*
+
+# annoying macOS files
 .DS_Store
 
+# Visual Studio files
+.vs/
+*.user

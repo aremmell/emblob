@@ -1,5 +1,9 @@
 #include "systest.h"
 
+#if defined(_WIN32)
+#   pragma comment(lib, "Shlwapi.lib")
+#endif
+
 int num_attempted = 0;
 int num_succeeded = 0;
 
@@ -17,6 +21,7 @@ void handle_result(bool pass, const char* desc) {
     num_attempted++;
 }
 
+#if !defined(_WIN32)
 bool check_sysconf(int val, const char* desc) {
     printf("checking sysconf(%d) (\"%s\")...\n", val, desc);
 
@@ -30,6 +35,17 @@ bool check_sysconf(int val, const char* desc) {
     }
 
     return ret;
+}
+#endif
+
+bool check_popen() {
+#if !defined(_WIN32)
+    return check_sysconf(_SC_2_VERSION, "popen() and pclose()");
+#else
+    /* https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/popen-wpopen */
+    printf("windows has _popen()/_pclose().\n");
+    return true;
+#endif
 }
 
 bool check_system() {
@@ -154,7 +170,7 @@ int main(int argc, char *argv[]) {
     //
 
     // popen() and pclose()
-    bool ret = check_sysconf(_SC_2_VERSION, "popen() and pclose()");
+    bool ret = check_popen();
     handle_result(ret, "popen() and pclose()");
 
     // system()
@@ -184,7 +200,7 @@ int main(int argc, char *argv[]) {
     static const char* noexist1 = "a_s_d_f_foobar.baz";
     static const char* noexist2 = "idontexist";
 
-    /* these will assert() and log errors to the console if they are wrong, too. */
+    /* these log errors to the console if they are wrong, too. */
     bool file_exist_result = true;
     file_exist_result &= file_exists(exist1, true);
     file_exist_result &= !file_exists(noexist1, false);
@@ -209,7 +225,7 @@ int main(int argc, char *argv[]) {
 //
 
 
-bool file_exists(const char* path, bool really_exists) {
+bool file_exists(const char* restrict path, bool really_exists) {
 
     if (!path || !*path) {
         handle_error(EINVAL, "path is an invalid string");
@@ -219,7 +235,7 @@ bool file_exists(const char* path, bool really_exists) {
     bool retval = false;
 
 #if defined(_WIN32)
-    retval = (TRUE == PathFileExists(path));
+    retval = (TRUE == PathFileExistsA(path));
 #else
     struct stat st = {0};
     int ret = stat(path, &st);
@@ -235,11 +251,9 @@ bool file_exists(const char* path, bool really_exists) {
     }
 #endif
 
-    if (retval != really_exists) {
+    if (retval != really_exists)
         handle_problem("file: %s, really_exists: %s, errno: %s", path, bool_to_str(really_exists),
             strerror(errno));
-        assert(retval == really_exists);
-    }
 
     return retval;
 }
@@ -273,12 +287,11 @@ bool systest_getcwd(char* restrict dir, size_t size) {
         handle_error(errno, "_getcwd() failed");
         return false;
     }
+    return true;
 #endif
-
-    return false;
 }
 
-bool systest_getappfilename(char* buffer, size_t size) {
+bool systest_getappfilename(char* restrict buffer, size_t size) {
     // TODO: come up with some minimal fallback; at least look at argv[0] if
     // the method chosen doesn't work.
 
@@ -330,8 +343,8 @@ bool systest_getappfilename(char* buffer, size_t size) {
 #   error "no implementation for your platform; please contact the author."
 #endif
 #else /* _WIN32 */
-    if (0 == GetModuleFileName(NULL, buffer, size)) {
-        handle_error(GetLastError(), "GetModuleFileName() failed");
+    if (0 == GetModuleFileNameA(NULL, buffer, (DWORD)size)) {
+        handle_error(GetLastError(), "GetModuleFileNameA() failed");
         retval = false;
     } else {
         retval = true;
@@ -367,7 +380,7 @@ char* systest_getbasename(char* restrict path) {
 #endif
 }
 
-char* systest_getdirname(char* restrict path) {
+char* systest_getdirname(char* path) {
     if (!path || !*path) {
         handle_error(EINVAL, "path is an invalid string")
         return ".";
@@ -379,10 +392,9 @@ char* systest_getdirname(char* restrict path) {
 #if !defined(_WIN32)
     return dirname(path);
 #else
-    HRESULT ret = PathCchRemoveFileSpec(path, strnlen(path, SIR_MAXPATH));
-    if (S_OK != ret) {
-        handle_error(ret, "PathCchRemoveFileSpec() failed!");
-    }
+    BOOL ret = PathRemoveFileSpecA((LPSTR)path);
+    if (TRUE != ret)
+        handle_error(GetLastError(), "PathRemoveFileSpecA() failed!");
     return path;
 #endif
 }
