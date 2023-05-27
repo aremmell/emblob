@@ -13,20 +13,19 @@
 #   define _XOPEN_SOURCE 700
 #   define __STDC_WANT_LIB_EXT1__ 1
 
-#   if defined(__GLIBC__)
-#       if (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19) && defined(_BSD_SOURCE)
-#           define __HAVE_UNISTD_READLINK__
-#       else
-#           define __HAVE_UNISTD_READLINK__
-#       endif
-#   endif
-
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #   include <unistd.h>
 #   include <libgen.h>
 #   include <limits.h>
 #   include <fcntl.h>
+
+#   if defined(__GLIBC__)
+#       if (__GLIBC__ >= 2 && __GLIBC_MINOR__ > 19)  || \
+           (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19) && defined(_BSD_SOURCE)
+#           define __HAVE_UNISTD_READLINK__
+#       endif
+#   endif
 
 #   if defined(PATH_MAX)
 #       define SYSTEST_MAXPATH PATH_MAX

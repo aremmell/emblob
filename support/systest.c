@@ -112,27 +112,22 @@ bool check_filesystem_api(void) {
 
 void check_build_env() {
 #if !defined(_WIN32)
-#if defined(__STDC_LIB_EXT1__)
+#   if defined(__STDC_LIB_EXT1__)
     printf("__STDC_LIB_EXT1__ is defined\n");
-#else
+#   else
     printf("__STDC_LIB_EXT1__ NOT defined\n");
-#endif
-#if defined(__GLIBC__)
+#   endif
+#   if defined(__GLIBC__)
     printf("Using GNU libc version: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
-#else
+#   else
     printf("Not using GNU libc\n");
-#endif
-#if defined(__linux__) && defined(__HAVE_UNISTD_READLINK__)
-    printf("__HAVE_UNISTD_READLINK__ is defined\n");
-#else
-    printf("__HAVE_UNISTD_READLINK__ NOT defined\n");
-#endif
+#   endif
 #else // _WIN32
-#if defined(__STDC_SECURE_LIB__)
+#   if defined(__STDC_SECURE_LIB__)
     printf("__STDC_SECURE_LIB__ is defined\n");
-#else
+#   else
     printf("__STDC_SECURE_LIB__ NOT defined\n");
-#endif
+#   endif
 #endif    
 }
 
