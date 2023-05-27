@@ -64,6 +64,8 @@
 
 #if defined(__APPLE__)
 #   include <mach-o/dyld.h>
+#elif defined(__FreeBSD__)
+#   include <sys/sysctl.h>
 #endif
 
 #ifdef __cplusplus

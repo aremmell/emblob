@@ -295,7 +295,8 @@ bool systest_getappfilename(char* buffer, size_t size) {
     bool retval = false;
 
 #if !defined(_WIN32)
-#   if (defined(__GLIBC__) && defined(__HAVE_UNISTD_READLINK__)) || defined(__BSD__)
+#if  defined(__linux__)
+#   if defined(__HAVE_UNISTD_READLINK__)
     ssize_t read = readlink("/proc/self/exe", buffer, size);
     if (-1 == read) {
         handle_error(errno, "readlink() failed!");
@@ -304,9 +305,19 @@ bool systest_getappfilename(char* buffer, size_t size) {
         handle_error(ENOBUFS, "readlink() failed (buffer too small)!");
         retval = false;
     }
+
+    retval = true;
 #   else
-#   error "no readlink(); don't have an implementation for " __func__
+#       error __func__ ": unable to resolve readlink(); see man readlink and its feature test macro requirements."
 #   endif
+#elif defined(__FreeBSD__)
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    if (0 != sysctl(mib, 4, buffer, &size, NULL, 0)) {
+        handle_error(errno, "sysctl() failed!");
+        retval = false;
+    } else {
+        retval = true;
+    }
 #elif defined(__APPLE__)
     uint32_t size32 = (uint32_t)size;
     if (0 != _NSGetExecutablePath(buffer, &size32)) {
@@ -317,13 +328,15 @@ bool systest_getappfilename(char* buffer, size_t size) {
         retval = true;
     }
 #else
-    /* _WIN32 */
+#   error __func__ ": "no implementation for your platform; please contact the author."
+#endif
+#else /* _WIN32 */
     if (0 == GetModuleFileName(NULL, buffer, size)) {
         handle_error(GetLastError(), "GetModuleFileName() failed");
         retval = false;
     } else {
         retval = true;
-    }
+    } 
 #endif
 
     return retval;
