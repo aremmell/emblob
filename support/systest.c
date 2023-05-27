@@ -262,7 +262,6 @@ bool systest_getcwd(char* restrict dir, size_t size) {
     }
     return true;
 #   endif
-#elif defined(__BSD__)
 #else
     /* _WIN32 */
     if (NULL == _getcwd(dir, (int)size)) {
