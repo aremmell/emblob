@@ -10,7 +10,7 @@
 #   define _DEFAULT_SOURCE
 #   define _GNU_SOURCE
 #   define _POSIX_C_SOURCE 200809L
-#   define _XOPEN_SOURCE 500
+#   define _XOPEN_SOURCE 700
 #   define __STDC_WANT_LIB_EXT1__ 1
 
 #   if (defined(__GLIBC__) && (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19 && defined(_BSD_SOURCE)))
@@ -54,7 +54,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
