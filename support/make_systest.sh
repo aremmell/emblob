@@ -52,9 +52,8 @@ compile_systest() {
 	fi
 
 	if [[ ${_exec} = true ]]; then
-		echo_info "Changing directory to ${out_bin_dir_relative} and executing ${name}..."
-		cd "${out_bin_dir}" || error_exit "Failed to change directories; bailing."
-		./${name}
+		echo_info "Executing ${out_bin_dir_relative}/${name}..."
+		${outfile}
 	fi
 }
 
