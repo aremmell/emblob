@@ -3,6 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
+                "${workspaceFolder}/",
                 "${workspaceFolder}/**",
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
             ],
@@ -18,6 +19,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/",
                 "${workspaceFolder}/**"
             ],
             "defines": [],
