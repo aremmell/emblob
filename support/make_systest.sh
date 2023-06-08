@@ -63,20 +63,28 @@ compile_systest() {
 	fi
 
 	if [[ ${_exec} = true ]]; then
-		echo_info "Executing ${out_bin_dir_relative}/${name}..."
-		${outfile}
+		if [[ ${3} = true ]]; then
+			echo_info "Executing ${out_bin_dir_relative}/${name}..."
+			${outfile}
+		else
+			echo_info "Changing directory to ${out_bin_dir_relative} and executing ${name}..."
+			cd "${out_bin_dir}" || error_exit "Failed to change directories; bailing."
+			./${name}		
+		fi
 	fi
 }
 
 print_help() {
 	echo -e "Usage: $0\n\t[--no-prompt]\tWon't prompt for user input to execute ${name}." \
 			"\n\t[--no-execute]\tWon't execute ${name} after building." \
+			"\n\t[--no-cd]\tWon't change directories to ${out_bin_dir_relative} before executing ${name}." \
 			"\n\t[--help|-h]\tPrints this help message."	
 }
 
 _args=("$@")
 _no_prompt=false
 _no_execute=false
+_no_cd=false
 
 for i in "${_args[@]}"; do
 	case ${i} in
@@ -85,6 +93,9 @@ for i in "${_args[@]}"; do
 			;;
 		"--no-execute")
 			_no_execute=true
+			;;
+		"--no-cd")
+			_no_cd=true
 			;;
 		"--help" | "-h")
 			print_help
@@ -98,4 +109,4 @@ for i in "${_args[@]}"; do
 	esac
 done
 
-compile_systest "${_no_prompt}" "${_no_execute}"
+compile_systest "${_no_prompt}" "${_no_execute}" "${_no_cd}"
