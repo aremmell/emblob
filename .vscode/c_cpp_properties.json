@@ -5,14 +5,15 @@
             "includePath": [
                 "${workspaceFolder}/",
                 "${workspaceFolder}/**",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
+                "/usr/local/include"
             ],
             "defines": [],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],
             "compilerPath": "/usr/bin/clang",
-            "cStandard": "c17",
+            "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "macos-clang-x64"
         },
@@ -24,8 +25,8 @@
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "gnu11",
-            "cppStandard": "gnu++17",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
         }        
     ],
