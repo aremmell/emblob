@@ -71,6 +71,8 @@
 
 #if defined(__clang__)
 # define __file__ __FILE_NAME__
+#elif defined(__GNUC__)
+# define __file__ __FILE_NAME__
 #else
 # define __file__ __FILE__
 #endif

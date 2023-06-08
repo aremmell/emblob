@@ -480,9 +480,10 @@ bool systest_ispathrelative(const char* restrict path, bool* restrict relative) 
 
 
 void _handle_error(int err, const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, RED("ERROR: %s:%d in %s: error = '%s' (%s)") "\n", file, line, func, strerror(err), msg);
+    fprintf(stderr, RED("ERROR: %s (%s:%d): %s (%s)") "\n",
+        func, file, line, msg, strerror(err));
 }
 
 void _self_log(const char* msg, char* file, int line, const char* func) {
-    fprintf(stderr, WHITE("%s:%d in %s: %s") "\n", file, line, func, msg);
+    fprintf(stderr, WHITE("%s (%s:%d): %s") "\n", func, file, line, msg);
 }
