@@ -32,6 +32,7 @@
 # else
 #  define SYSTEST_MAXPATH 1024
 # endif
+# define SIR_PATH_SEP '/'
 #else // _WIN32
 # define __WANT_STDC_SECURE_LIB__ 1
 # define WIN32_LEAN_AND_MEAN
@@ -43,6 +44,7 @@
 # include <direct.h>
 
 # define SYSTEST_MAXPATH MAX_PATH
+# define SIR_PATH_SEP '\\'
 #endif
 
 #define STRFMT(clr, s) clr s "\033[0m"
@@ -74,7 +76,7 @@
 #elif defined(__GNUC__)
 # define __file__ __FILE_NAME__
 #else
-# define __file__ __FILE__
+# define __file__ (strrchr(__FILE__, SIR_PATH_SEP) ? strrchr(__FILE__, SIR_PATH_SEP) + 1 : __FILE__)
 #endif
 
 #ifdef __cplusplus
