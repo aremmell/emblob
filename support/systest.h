@@ -69,6 +69,12 @@
 #   include <sys/sysctl.h>
 #endif
 
+#if defined(__clang__)
+# define __file__ __FILE_NAME__
+#else
+# define __file__ __FILE__
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -134,14 +140,14 @@ bool systest_ispathrelative(const char* restrict path, bool* restrict relative);
 /* this is strictly for use when encountering an actual failure of a system call. 
  * use self_log to report things other than error numbers. */
 void _handle_error(int err, const char* msg, char* file, int line, const char* func);
-#define handle_error(err, msg) _handle_error(err, msg, __FILE__, __LINE__, __func__);
+#define handle_error(err, msg) _handle_error(err, msg, __file__, __LINE__, __func__);
 
 void _self_log(const char* msg, char* file, int line, const char* func);
 
 static char _self_log_buf[512] = {0};
 #define self_log(...)  \
     snprintf(_self_log_buf, 512, __VA_ARGS__); \
-    _self_log(_self_log_buf, __FILE__, __LINE__, __func__);
+    _self_log(_self_log_buf, __file__, __LINE__, __func__);
 
 #define bool_to_str(b) (b ? "true" : "false")
 #define prn_str(str) (str ? str : "NULL")

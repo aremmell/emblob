@@ -160,23 +160,30 @@ bool check_filesystem_api(void) {
 
 void check_build_env() {
 #if !defined(_WIN32)
-#   if defined(__STDC_LIB_EXT1__)
-    printf("__STDC_LIB_EXT1__ is defined\n");
-#   else
-    printf("__STDC_LIB_EXT1__ NOT defined\n");
-#   endif
-#   if defined(__GLIBC__)
+# if defined(__STDC_LIB_EXT1__)
+   printf("__STDC_LIB_EXT1__ is defined\n");
+# else
+   printf("__STDC_LIB_EXT1__ NOT defined\n");
+# endif
+# if defined(__GLIBC__)
     printf("Using GNU libc version: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
-#   else
+# else
     printf("Not using GNU libc\n");
-#   endif
+# endif
 #else // _WIN32
-#   if defined(__STDC_SECURE_LIB__)
-    printf("__STDC_SECURE_LIB__ is defined\n");
-#   else
-    printf("__STDC_SECURE_LIB__ NOT defined\n");
-#   endif
-#endif    
+# if defined(__STDC_SECURE_LIB__)
+   printf("__STDC_SECURE_LIB__ is defined\n");
+# else
+   printf("__STDC_SECURE_LIB__ NOT defined\n");
+# endif
+#endif
+#if defined(__clang__)
+    printf("Using clang\n");
+#elif defined(__GNUC__)
+    printf("Using GCC\n");
+#else
+    printf("Using unknown toolset\n");
+#endif
 }
 
 void check_platform()
@@ -465,180 +472,6 @@ bool systest_ispathrelative(const char* restrict path, bool* restrict relative) 
     return true;
 #endif    
 }
-
-/* bool file_exists(const char* restrict path, bool really_exists) {
-
-    if (!path || !*path) {
-        handle_error(EINVAL, "path is an invalid string");
-        return false;
-    }
-
-    bool retval = false;
-
-#if defined(_WIN32)
-    retval = (TRUE == PathFileExistsA(path));
-#else
-    struct stat st = {0};
-    int ret = stat(path, &st);
-    if (0 != ret) {
-        if (ENOENT != errno) {
-            handle_error(errno, "stat() failed && ENOENT != errno");
-        } else {
-            printf("stat() failed, errno = %d (%s)\n", errno, strerror(errno));
-        }
-        retval = false;
-    } else {
-        retval = true;
-    }
-#endif
-
-    if (retval != really_exists)
-        self_log("file: %s, really_exists: %s, errno: %s", path, bool_to_str(really_exists),
-            strerror(errno));
-
-    return retval;
-}
-
-bool systest_getcwd(char* restrict dir, size_t size) {
-    if (!dir) {
-        handle_error(EINVAL, "dir is NULL")
-        return false;
-    }
-
-    if (size < SYSTEST_MAXPATH) {
-        handle_error(EINVAL, "size is < SYSTEST_MAXPATH")
-        return false;
-    }
-
-#if !defined(_WIN32)
-#   if defined(__linux__) && defined(_GNU_SOURCE)
-    char* cur = get_current_dir_name();
-    strncpy(dir, cur, strnlen(cur, SYSTEST_MAXPATH));
-#   else
-    char* cwd = getcwd(dir, size);
-    if (NULL == cwd) {
-        handle_error(errno, "getcwd() failed");
-        return false;
-    }
-    return true;
-#   endif
-#else
-    /* _WIN32 * /
-    if (NULL == _getcwd(dir, (int)size)) {
-        handle_error(errno, "_getcwd() failed");
-        return false;
-    }
-    return true;
-#endif
-}
-
-bool systest_getappfilename(char* restrict buffer, size_t size) {
-    // TODO: come up with some minimal fallback; at least look at argv[0] if
-    // the method chosen doesn't work.
-
-    if (!buffer) {
-        handle_error(EINVAL, "buffer is NULL")
-        return false;
-    }
-
-    if (size < SYSTEST_MAXPATH) {
-        handle_error(EINVAL, "size is < SYSTEST_MAXPATH")
-        return false;
-    }
-
-    bool retval = false;
-
-#if !defined(_WIN32)
-#if  defined(__linux__)
-#   if defined(__HAVE_UNISTD_READLINK__)
-    ssize_t read = readlink("/proc/self/exe", buffer, size);
-    if (-1 == read) {
-        handle_error(errno, "readlink() failed!");
-        retval = false;
-    } else if (read > (ssize_t)size) {
-        handle_error(ENOBUFS, "readlink() failed (buffer too small)!");
-        retval = false;
-    }
-    retval = true;
-#   else
-#       error "unable to resolve readlink(); see man readlink and its feature test macro requirements."
-#   endif
-#elif defined(__FreeBSD__)
-    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
-    if (0 != sysctl(mib, 4, buffer, &size, NULL, 0)) {
-        handle_error(errno, "sysctl() failed!");
-        retval = false;
-    } else {
-        retval = true;
-    }
-#elif defined(__APPLE__)
-    uint32_t size32 = (uint32_t)size;
-    if (0 != _NSGetExecutablePath(buffer, &size32)) {
-        /* buffer is too small; need size32 bytes * /
-        handle_error(ENOBUFS, "_NSGetExecutablePath() failed (buffer too small)!");
-        retval = false;
-    } else {
-        retval = true;
-    }
-#else
-#   error "no implementation for your platform; please contact the author."
-#endif
-#else /* _WIN32 * /
-    if (0 == GetModuleFileNameA(NULL, buffer, (DWORD)size)) {
-        handle_error(GetLastError(), "GetModuleFileNameA() failed");
-        retval = false;
-    } else {
-        retval = true;
-    } 
-#endif
-
-    return retval;
-}
-
-bool systest_getappdir(char* restrict buffer, size_t size) {
-    char tmp[SYSTEST_MAXPATH] = {0};
-    if (systest_getappfilename(tmp, SYSTEST_MAXPATH)) {
-        strncpy(buffer, systest_getdirname(tmp), strnlen(tmp, size));
-        return true;
-    }
-
-    return false;
-}
-
-char* systest_getbasename(char* restrict path) {
-    if (!path || !*path) {
-        handle_error(EINVAL, "path is an invalid string")
-        return ".";
-    }
-
-    if (path[0] == '/' && path[1] == '\0')
-        return "/";
-
-#if !defined(_WIN32)
-    return basename(path);
-#else
-    return PathFindFileNameA(path);
-#endif
-}
-
-char* systest_getdirname(char* path) {
-    if (!path || !*path) {
-        handle_error(EINVAL, "path is an invalid string")
-        return ".";
-    }
-
-    if (path[0] == '/' && path[1] == '\0')
-        return "/";
-
-#if !defined(_WIN32)
-    return dirname(path);
-#else
-    BOOL ret = PathRemoveFileSpecA((LPSTR)path);
-    if (TRUE != ret)
-        handle_error(GetLastError(), "PathRemoveFileSpecA() failed!");
-    return path;
-#endif
-} */
 
 
 //
