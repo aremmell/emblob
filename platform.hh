@@ -190,6 +190,8 @@ namespace mkverobj
         }
 
         static bool is_system_command_available() {
+            std::cout.flush();
+            
             int ret = std::system(nullptr);
             if (ret == 0) {
                 g_logger->error("system() is NOT available for command processing!");
@@ -210,8 +212,6 @@ namespace mkverobj
                 int status = WEXITSTATUS(sysret);
 
                 retval = status == 0;
-
-                std::cout.flush();
 
                 if (!retval) {
                     g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
