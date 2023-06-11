@@ -334,7 +334,7 @@ char* systest_getappfilename(void) {
                 * of letting you know how much larger your buffer needs
                 * to be; it just truncates the string and returns how
                 * many chars it wrote there. */
-                size += SIR_PATH_BUFFER_GROW_BY;
+                size += SYSTEST_PATH_BUFFER_GROW_BY;
                 grow = true;
                 continue;
             }
@@ -385,7 +385,7 @@ char* systest_getappfilename(void) {
                 /* Windows has no concept of letting you know how much larger
                 * your buffer needed to be; it just truncates the string and
                 * returns size. So, we'll guess. */
-                size += SIR_PATH_BUFFER_GROW_BY;
+                size += SYSTEST_PATH_BUFFER_GROW_BY;
                 grow = true;
                 continue;
             }
