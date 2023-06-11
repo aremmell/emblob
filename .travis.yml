@@ -6,7 +6,8 @@ branches:
   only:
     - master
 dist:
-  - bionic
+  - jammy
+env: MAKE=make  
 jobs:
   include:
     - os: linux
@@ -21,10 +22,19 @@ jobs:
     - os: linux
       arch: arm64
       compiler: clang
+    - os: freebsd
+      arch: amd64
+      compiler: gcc
+      env: MAKE=gmake
+    - os: freebsd
+      arch: amd64
+      compiler: clang
+      env: MAKE=gmake      
     - os: osx
       osx_image: xcode14.2
       compiler: clang
 script:
-  - make all
+  - $MAKE all
   - build/bin/cxxexample
   - build/bin/cexample
+install: skip

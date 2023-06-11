@@ -82,7 +82,10 @@
 			"algorithm": "cpp",
 			"regex": "cpp",
 			"__tree": "cpp",
-			"map": "cpp"
+			"map": "cpp",
+			"inttypes.h": "c",
+			"stdint.h": "c",
+			"stddef.h": "c"
 		}
 	}
 }
