@@ -51,7 +51,7 @@
 MKVEROBJ_EXTERNAL uintptr_t MKVEROBJ_VAR;
 
 /** The size, in mkvo_chars of the ::versionresource.notes buffer. */
-static const size_t mkverobj_max_notes = ((size_t)256);
+#define size_t mkverobj_max_notes 256
 
 /**
  * @struct version_resource
