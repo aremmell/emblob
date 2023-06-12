@@ -42,7 +42,7 @@
 # define MKVEROBJ_EXTERNAL extern
 #endif
 
-#if defined(__APPLE__) && defined(__clang__) // lld adds underscores
+#if defined(__APPLE__)
 # define MKVEROBJ_VAR version_data
 #else
 # define MKVEROBJ_VAR _version_data
