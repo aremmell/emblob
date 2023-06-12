@@ -23,10 +23,16 @@ jobs:
       arch: arm64
       compiler: clang
     - os: freebsd
+      addons:
+        pkg:
+          - bash    
       arch: amd64
       compiler: gcc
       env: MAKE=gmake
     - os: freebsd
+      addons:
+        pkg:
+          - bash
       arch: amd64
       compiler: clang
       env: MAKE=gmake      
@@ -37,4 +43,4 @@ script:
   - $MAKE all
   - build/bin/cxxexample
   - build/bin/cexample
-install: skip
+install: chsh -s /usr/local/bin/bash
