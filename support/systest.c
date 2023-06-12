@@ -191,7 +191,19 @@ void check_platform()
 {
 #if !defined(_WIN32)
 #else
+
 #endif
+}
+
+void check_safefree() {
+    int *ptr = malloc(sizeof(int));
+    *ptr = 1234;
+    systest_safefree(ptr);
+
+    if (ptr)
+        printf("safe_free() does reset the pointer\n");
+    else
+        printf(RED("safe_free() does NOT reset the pointer!\n"));
 }
 
 int main(int argc, char *argv[]) {
@@ -204,6 +216,12 @@ int main(int argc, char *argv[]) {
 
     check_build_env();
     check_platform();
+
+    //
+    // begin curiosity tests
+    //
+
+    check_safefree();
 
     //
     // begin feature tests
