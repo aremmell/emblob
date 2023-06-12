@@ -43,4 +43,3 @@ script:
   - $MAKE all
   - build/bin/cxxexample
   - build/bin/cexample
-install: chsh -s /usr/local/bin/bash
