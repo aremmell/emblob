@@ -122,7 +122,7 @@ cxxexample: $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE)
 	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE) $(CXXFLAGS) $(LDFLAGS)
 
 systest: verfile
-	/bin/bash -c './support/make_systest.sh "$0" "$1"' --no-prompt --no-cd
+	/bin/bash -c './support/make_systest.sh --no-prompt --no-cd'
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))

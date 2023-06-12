@@ -21,10 +21,10 @@
 #include <fcntl.h>
 
 # if defined(__GLIBC__)
-#  if (__GLIBC__ >= 2 && __GLIBC_MINOR__ > 19)  || \
-      (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19) && defined(_BSD_SOURCE)
-#   define __HAVE_UNISTD_READLINK__
-#  endif
+# if (__GLIBC__ >= 2 && __GLIBC_MINOR__ > 19)  || \
+     (__GLIBC__ == 2 && __GLIBC_MINOR__ <= 19) && defined(_BSD_SOURCE)
+#  define __HAVE_UNISTD_READLINK__
+# endif
 # endif
 
 # if defined(PATH_MAX)
@@ -47,13 +47,17 @@
 # define SYSTEST_PATH_SEP '\\'
 #endif
 
-#define STRFMT(clr, s) clr s "\033[0m"
-#define RED(s) STRFMT("\033[1;91m", s)
-#define GREEN(s) STRFMT("\033[1;92m", s)
-#define WHITE(s) STRFMT("\033[1;97m", s)
-#define BLUE(s) STRFMT("\033[1;34m", s)
-#define CYAN(s) STRFMT("\033[1;36m", s)
-#define YELLOW(s) STRFMT("\033[1;33m", s)
+#define STRFMT(clr, s) "\x1b[" clr "m" s "\x1b[0m"
+#define RED(s) STRFMT("1;91", s)
+#define GREEN(s) STRFMT("1;92", s)
+#define WHITE(s) STRFMT("1;97", s)
+#define BLUE(s) STRFMT("1;34", s)
+#define CYAN(s) STRFMT("1;36", s)
+#define YELLOW(s) STRFMT("1;33", s)
+#define GRAY(s) STRFMT("1;90", s)
+#define ULINE(s) STRFMT("4", s)
+#define EMPH(s) STRFMT("3", s)
+#define BOLD(s) STRFMT("1", s)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,9 +70,10 @@
 #include <assert.h>
 
 #if defined(__APPLE__)
-#   include <mach-o/dyld.h>
+# define __MACOS__
+# include <mach-o/dyld.h>
 #elif defined(__FreeBSD__)
-#   include <sys/sysctl.h>
+# include <sys/sysctl.h>
 #endif
 
 #if defined(__clang__) && defined(__FILE_NAME__)
@@ -83,6 +88,7 @@
 extern "C" {
 #endif
 
+
 //
 // portability test implementations
 //
@@ -92,49 +98,33 @@ extern "C" {
  * by a system call (with no information regarding the necessary size). */
 #define SYSTEST_PATH_BUFFER_GROW_BY 32
 
-/**
- * Determines if a file or directory exists in the filesystem.
- * Returns false if an error occurs or an argument is invalid. Places the result
- * in \p exists.
-*/
-bool systest_pathexists(const char* restrict path, bool* restrict exists);
+/** Buffer size, in characters, for struct stat -> string. */
+#define SYSTEST_STAT_BUFFER_SIZE 128
 
-/**
- * Returns the current working directory for the calling process. If an error
- * occurs, returns NULL. Pointers returned must be deallocated with free().
- */
+/** Special flag to indicate to the caller that the file in question
+ * does not exist (systest_pathgetstat). */
+#define SYSTEST_STAT_NONEXISTENT ((off_t)0xffffff02)
+
+/** Flags used to specify which directory to use as the base reference for
+ * testing relative paths. */
+typedef enum {
+    SYSTEST_PATH_REL_TO_CWD = 0x0001,
+    SYSTEST_PATH_REL_TO_APP = 0x0002
+} systest_rel_to;
+
+bool systest_pathgetstat(const char* restrict path, struct stat* restrict st, systest_rel_to rel_to);
+bool systest_pathexists(const char* restrict path, bool* restrict exists, systest_rel_to rel_to);
+
 char* systest_getcwd(void);
 
-/**
- * Returns the absolute path of the binary executable file for the calling
- * process. If an error occurs, returns NULL. Pointers returned must be
- * deallocated with free().
- */
 char* systest_getappfilename(void);
-
-/**
- * Returns the absolute path of the directory containing the binary file
- * of the calling process (not necessarily the current working directory).
- */
+char* systest_getappbasename(void);
 char* systest_getappdir(void);
 
-/**
- * Returns only last component of a path.
- * May return ".", "/", or \p path if no determination can be made.
- */
 char* systest_getbasename(char* restrict path);
 
-/**
- * Returns all but the last component of a path.
- * May return "." "/", or \p path if no determination can be made.
-*/
 char* systest_getdirname(char* restrict path);
 
-/**
- * Determines if a given path is relative (or absolute).
- * Returns false if an error occurs or an argument is invalid. Places the result
- * in \p relative.
- */
 bool systest_ispathrelative(const char* restrict path, bool* restrict relative);
 
 //
@@ -169,6 +159,17 @@ void _systest_safefree(void** p) {
 static inline
 void systest_safefree(void* p) {
     _systest_safefree(&p);
+}
+
+static inline
+void systest_safeclose(int* restrict fd) {
+    if (!fd || (fd && 0 > *fd))
+        return;
+
+    if (-1 == close(*fd))
+        handle_error(errno, "close() failed!");
+
+    *fd = -1;    
 }
 
 #ifdef __cplusplus

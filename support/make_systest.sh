@@ -10,8 +10,8 @@ if [[ ${BASH_UTIL_INCLUDED} -ne 1 ]]; then
 fi
 
 name=systest
-out_bin_dir="${current_dir}/../build/bin"
-out_obj_dir="${current_dir}/../build/obj"
+out_bin_dir="$(realpath ${current_dir}/../build/bin)"
+out_obj_dir="$(realpath ${current_dir}/../build/obj)"
 out_bin_dir_relative="../build/bin"
 outfile="${out_bin_dir}/${name}"
 _c_flags="-O2 -Wall -std=c11 -DNDEBUG"
@@ -65,11 +65,11 @@ compile_systest() {
 	if [[ ${_exec} = true ]]; then
 		if [[ ${3} = true ]]; then
 			echo_info "Executing ${out_bin_dir_relative}/${name}..."
-			${outfile}
+			${outfile}&
 		else
 			echo_info "Changing directory to ${out_bin_dir_relative} and executing ${name}..."
 			cd "${out_bin_dir}" || error_exit "Failed to change directories; bailing."
-			./${name}		
+			./${name}&	
 		fi
 	fi
 }
@@ -87,6 +87,7 @@ _no_execute=false
 _no_cd=false
 
 for i in "${_args[@]}"; do
+	#echo "proccessing arg: '${i}'"
 	case ${i} in
 		"--no-prompt")
 			_no_prompt=true

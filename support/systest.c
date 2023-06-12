@@ -140,7 +140,8 @@ bool check_filesystem_api(void) {
 
     for (size_t n = 0; n < (sizeof(real_or_not) / sizeof(real_or_not[0])); n++) {
         bool exists = false;
-        bool ret    = systest_pathexists(real_or_not[n].path, &exists);
+        bool ret    = systest_pathexists(real_or_not[n].path, &exists,
+            SYSTEST_PATH_REL_TO_APP);
         all_passed &= ret;
         if (!ret)
             continue;            
@@ -244,28 +245,90 @@ int main(int argc, char *argv[]) {
 // portability test implementations
 //
 
-bool systest_pathexists(const char* restrict path, bool* restrict exists) {
+bool systest_pathgetstat(const char* restrict path, struct stat* restrict st, systest_rel_to rel_to) {
+    if (!_validstr(path) || !_validptr(st))
+        return false;
+
+    memset(st, 0, sizeof(struct stat));
+
+    int stat_ret  = -1;
+    bool relative = false;
+    if (!systest_ispathrelative(path, &relative))
+        return false;
+    
+    if (relative) {
+        char* base_path = NULL;
+        switch(rel_to) {
+            case SYSTEST_PATH_REL_TO_APP: base_path = systest_getappdir(); break;
+            case SYSTEST_PATH_REL_TO_CWD: base_path = systest_getcwd(); break;
+            default: self_log("invalid enum!"); return false;
+        }
+
+        if (!base_path) {
+            handle_error(errno, "couldn't get base path!");
+            return false;
+        }
+
+#if !defined(__WIN__)
+# if defined(__MACOS__)
+        int open_flags = O_SEARCH;
+# elif defined(__linux__)
+        int open_flags = O_PATH | O_DIRECTORY;
+# elif defined(__BSD__)
+        int open_flags = O_EXEC | O_DIRECTORY;
+# endif
+
+        int fd = open(base_path, open_flags);
+        if (-1 == fd) {
+            handle_error(errno, "open() failed!");
+            return false;
+        }
+
+        stat_ret = fstatat(fd, path, st, AT_SYMLINK_NOFOLLOW);
+        systest_safeclose(&fd);
+        systest_safefree(base_path);
+    } else {
+        stat_ret = stat(path, st);
+    }
+#else // __WIN__
+        char abs_path[SIR_MAXPATH] = {0};
+        if (NULL == PathCombineA(abs_path, base_path, path)) {
+            handle_error(GetLastError(), "PathCombineA() failed!");
+        } else {
+            abs_path[SIR_MAXPATH - 1] = '\0';
+            stat_ret = stat(abs_path, st);
+        }
+        systest_safefree(base_path);
+    } else {
+        stat_ret = stat(path, st);
+    }
+#endif
+    if (-1 == stat_ret) {
+        if (ENOENT == errno) {
+            st->st_size = SYSTEST_STAT_NONEXISTENT;
+            return true;
+        } else {
+            handle_error(errno, "stat() failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool systest_pathexists(const char* restrict path, bool* restrict exists, systest_rel_to rel_to) {
     if (!_validstr(path) || !_validptr(exists))
         return false;
 
-#if !defined(_WIN32)
+    *exists = false;
+
     struct stat st = {0};
-    if (0 != stat(path, &st)) {
-        if (ENOENT == errno) {
-            *exists = false;
-            return true;
-        }
-        self_log("stat('%s') = %s", path, strerror(errno));
+    bool stat_ret  = systest_pathgetstat(path, &st, rel_to);
+    if (!stat_ret)
         return false;
-    } else {
-        *exists = true;
-        self_log("'%s' exists, and is %ld bytes in size.", path,
-            (long)st.st_size);
-        return true;
-    }
-#else    
-   *exists = (TRUE == PathFileExistsA(path));
-#endif
+
+    *exists = (st.st_size != SYSTEST_STAT_NONEXISTENT);
+    return true;
 }
 
 char* systest_getcwd(void) {
@@ -397,12 +460,23 @@ char* systest_getappfilename(void) {
     if (!resolved) {
         systest_safefree(buffer);
         self_log("failed to resolve filename!");
-    }
-    else {
+    } else {
         self_log("successfully resolved: '%s'", buffer);
     }
 
     return buffer;
+}
+
+char* systest_getappbasename(void) {
+    char* filename = systest_getappfilename();
+    if (!_validstr(filename))
+        return NULL;
+
+    char* retval = systest_getbasename(filename);
+    char* bname  = strdup(retval);
+
+    systest_safefree(filename);
+    return bname;
 }
 
 char* systest_getappdir(void) {
@@ -410,14 +484,11 @@ char* systest_getappdir(void) {
     if (!_validstr(filename))
         return NULL;
 
-    char* dirname = strdup(filename);
-    if (!_validstr(dirname)) {
-        systest_safefree(filename);
-        return NULL;
-    }
+    char* retval = systest_getdirname(filename);
+    char* dirname = strdup(retval);
 
     systest_safefree(filename);
-    return systest_getdirname(dirname);
+    return dirname;
 }
 
 char* systest_getbasename(char* restrict path) {
@@ -427,11 +498,6 @@ char* systest_getbasename(char* restrict path) {
 #if !defined(_WIN32)
     return basename(path);
 #else
-    // this isn't going to work; basename() and dirname() will strip
-    // path components off the end, too. need to verify whether this
-    // function only returns a file name part if it contains a full stop,
-    // or perhaps it queries the path to see if it's a file or directory.
-    // https://www.man7.org/linux/man-pages/man3/basename.3.html
     return PathFindFileNameA(path);
 #endif
 }
@@ -440,17 +506,9 @@ char* systest_getdirname(char* restrict path) {
     if (!_validstr(path))
         return ".";
 
-#pragma message("TODO: come back and revisit dirname_r")
 #if !defined(_WIN32)
-/*# if defined(__APPLE__)
-    //char dir[SYSTEST_MAXPATH] = {0};
-    char* retval = dirname_r(path, NULL);
-    return retval;
-# else*/
     return dirname(path);
-//# endif
 #else
-    // TODO: same problem as above.
     if (!PathRemoveFileSpecA((LPSTR)path))
         handle_error(GetLastError(), "PathRemoveFileSpecA() failed!");
     return path;

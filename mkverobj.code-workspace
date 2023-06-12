@@ -85,7 +85,8 @@
 			"map": "cpp",
 			"inttypes.h": "c",
 			"stdint.h": "c",
-			"stddef.h": "c"
+			"stddef.h": "c",
+			"string.h": "c"
 		}
 	}
 }
