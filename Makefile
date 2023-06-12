@@ -38,6 +38,7 @@ endif
 BUILDDIR  := build
 INTDIR    := $(BUILDDIR)/obj
 BINDIR    := $(BUILDDIR)/bin
+THISDIR   := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 MKVEROBJ   := mkverobj
 VERFILE    := version
@@ -122,7 +123,7 @@ cxxexample: $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE)
 	$(CXX) -o $(BIN_CXXEXAMPLE) $(OBJ_CXXEXAMPLE) $(OBJ_VERFILE) $(CXXFLAGS) $(LDFLAGS)
 
 systest: verfile
-	support/make_systest.sh --no-prompt --no-cd
+	$(THISDIR)/support/make_systest.sh --no-prompt --no-cd
 
 prep:
 	$(shell mkdir -p $(BINDIR) && mkdir -p $(INTDIR))
