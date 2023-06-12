@@ -26,13 +26,13 @@ jobs:
       addons:
         pkg:
           - bash
-          - llvm90    
+          - llvm16    
       arch: amd64
       compiler: clang
       env:
         - MAKE=gmake
-        - CC=/usr/local/bin/clang90
-        - CXX=/usr/local/bin/clang++90
+        - CC=/usr/local/bin/clang16
+        - CXX=/usr/local/bin/clang++16
     - os: freebsd
       addons:
         pkg:
@@ -51,6 +51,7 @@ jobs:
       osx_image: xcode14.2
       compiler: gcc
       env:
+        - MAKE=make
         - MATRIX_EVAL="brew install gcc@11 && CC=gcc-11 && CXX=g++-11"
 before_script:
   if [ $TRAVIS_OS_NAME = freebsd ]; then sudo ln -s /usr/local/bin/bash /bin/bash; fi
