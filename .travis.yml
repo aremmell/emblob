@@ -37,13 +37,13 @@ jobs:
       addons:
         pkg:
           - bash
-          - gcc12
+          - gcc11
       arch: amd64
       compiler: gcc
       env:
         - MAKE=gmake
-        - CC=/usr/local/bin/gcc12
-        - CXX=/usr/local/bin/g++12
+        - CC=/usr/local/bin/gcc11
+        - CXX=/usr/local/bin/g++11
     - os: osx
       osx_image: xcode14.2
       compiler: clang
