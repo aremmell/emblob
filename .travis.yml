@@ -49,6 +49,3 @@ script:
   - $MAKE all
   - build/bin/cxxexample
   - build/bin/cexample
-before_install:
-  - eval "${MATRIX_EVAL}"
-
