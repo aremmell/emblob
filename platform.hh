@@ -102,6 +102,7 @@ namespace mkverobj
 #endif
         }
 
+
         static bool file_exists(const std::string& fname) {
 #if defined(_WIN32)
             if (TRUE != PathFileExists(fname.c_str()))
@@ -128,8 +129,9 @@ namespace mkverobj
                 return -1;
 
 #if defined(_WIN32)
-
+#error "NOT IMPLEMENTED"            
 #else
+
 #endif
             return off_t();
         }

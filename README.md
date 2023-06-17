@@ -1,5 +1,11 @@
 # mkverobj
 
+> NOTE: The main branch has undergone signficicant changes and improvements since this README was written. I will be updating it when I am satisfied with the added/improved functionality.
+>
+> The `mkverobj` binary that is generated now has a different/more configurable CLI interface; use `mkverobj --help` for more information.
+>
+> It *should* work just fine on any Linux, macOS and FreeBSD with gcc or Clang. No Windows support yet (maybe never).
+
 cli utility and header for link-time embedding of a version resource for use with gcc/g++
 
 ## About
