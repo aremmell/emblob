@@ -22,12 +22,12 @@ LIBSIRDIR := lib/libsir
 # compiler/linker commands. you're going to want to make sure $INCLUDE
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I$(LIBSIRDIR) -L$(LIBSIRDIR)/build/lib -lsir_s
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I$(LIBSIRDIR)
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-LDFLAGS         =
+LDFLAGS         = -L$(LIBSIRDIR)/build/lib -lsir_s
 
 ifeq ($(MKVEROBJ_DEBUG),1)
 	CFLAGS   += $(CFLAGS_DEBUG)
