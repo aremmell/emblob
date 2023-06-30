@@ -7,7 +7,7 @@
 # TODO: until I figure out how to use autoconf/automake,
 # and you want to build a debug version:
 #
-#   1.) you will need to define MKVEROBJ_DEBUG on the
+#   1.) you will need to define MKVEROBJ_DEBUG=1 on the
 #	    command line, or in the global environment before
 #		running make.
 #	2.) You may open this file in a text editor and modify
@@ -16,22 +16,25 @@
 # at this time, unless that variable is set, an optimized
 # release configuration will be used.
 
-# compiler/linker commands. you're going to want to make sure $INCLUDE 
+# libsir
+LIBSIRDIR := lib/libsir
+
+# compiler/linker commands. you're going to want to make sure $INCLUDE
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I.
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I$(LIBSIRDIR) -L$(LIBSIRDIR)/build/lib -lsir_s
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-LDFLAGS         = 
+LDFLAGS         =
 
 ifeq ($(MKVEROBJ_DEBUG),1)
 	CFLAGS   += $(CFLAGS_DEBUG)
 	CXXFLAGS += $(CXXFLAGS_DEBUG)
 else
 	CFLAGS   += $(CFLAGS_NDEBUG)
-	CXXFLAGS += $(CXXFLAGS_NDEBUG)	
+	CXXFLAGS += $(CXXFLAGS_NDEBUG)
 endif
 
 # set up build paths and filenames
@@ -57,7 +60,7 @@ OBJ_VERFILE := $(INTDIR)/$(VERFILE).o
 # imported into OBJ_VERFILE.
 BIN_VERFILE := $(INTDIR)/$(VERFILE).bin
 
-# this is an ASM file containing instructions on how to import 
+# this is an ASM file containing instructions on how to import
 # BIN_VERFILE into OBJ_VERFILE.
 ASM_VERFILE := $(INTDIR)/$(VERFILE).S
 
@@ -86,7 +89,7 @@ $(BUILDDIR) : prep
 $(INTDIR)   : $(BUILDDIR)
 $(BINDIR)   : $(BUILDDIR)
 
-$(OBJ_MKVEROBJ) : $(INTDIR)
+$(OBJ_MKVEROBJ) : $(INTDIR) $(LIBSIRDIR)
 $(OBJ_CEXAMPLE) : $(INTDIR)
 $(OBJ_CXXEXAMPLE) : $(INTDIR)
 $(OBJ_VERFILE) : $(INTDIR)
@@ -99,7 +102,10 @@ $(OBJ_VERFILE) : $(ASM_VERFILE)
 $(BIN_CEXAMPLE) : $(OBJ_VERFILE)
 $(BIN_CXXEXAMPLE) : $(OBJ_VERFILE)
 
-compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE) 
+$(LIBSIRDIR): depends
+	SIR_NO_SYSTEM_LOGGERS=1 $(MAKE) -C $@ static
+
+compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE)
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 

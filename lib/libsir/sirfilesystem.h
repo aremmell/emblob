@@ -43,8 +43,8 @@ typedef enum {
     SIR_PATH_REL_TO_APP = 0x0002
 } sir_rel_to;
 
-bool _sir_pathgetstat(const char* restrict path, struct stat* restrict st, sir_rel_to rel_to);
-bool _sir_pathexists(const char* restrict path, bool* restrict exists, sir_rel_to rel_to);
+bool _sir_pathgetstat(const char* path, struct stat* st, sir_rel_to rel_to);
+bool _sir_pathexists(const char* path, bool* exists, sir_rel_to rel_to);
 
 char* _sir_getcwd(void);
 
@@ -52,9 +52,9 @@ char* _sir_getappfilename(void);
 char* _sir_getappbasename(void);
 char* _sir_getappdir(void);
 
-char* _sir_getbasename(char* restrict path);
-char* _sir_getdirname(char* restrict path);
+char* _sir_getbasename(char* path);
+char* _sir_getdirname(char* path);
 
-bool _sir_ispathrelative(const char* restrict path, bool* restrict relative);
+bool _sir_ispathrelative(const char* path, bool* relative);
 
 #endif // !_SIR_FILESYSTEM_H_INCLUDED

@@ -9,7 +9,9 @@
 
 namespace mkverobj
 {
-#define CONST_STATIC_STRING static constexpr const char*
+#define CONST_STATIC_X(type) static constexpr type
+#define CONST_STATIC_STRING CONST_STATIC_X(const char*)
+
 
     CONST_STATIC_STRING APP_NAME = "mkverobj";
 
@@ -52,9 +54,9 @@ namespace mkverobj
         return nullptr != str && 0 != *str;
     }
 
-    static inline uint16_t string_to_uint16(const char* str) {
-        return static_cast<uint16_t>(std::strtoul(str, nullptr, 10));
-    }    
+    static inline uint16_t string_to_uint16(const std::string& str) {
+        return static_cast<uint16_t>(std::strtoul(str.c_str(), nullptr, 10));
+    }
 
 } // !namespace mkverobj
 

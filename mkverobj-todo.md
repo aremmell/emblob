@@ -4,5 +4,3 @@
 - [ ] better instructions when printing usage
 - [ ] rename it. mvs?
 - [ ] compiler command line option (default  = cc)
-- [x] is it really `_WINDOWS_` this whole time?
-- [x] remove ifdef SYSTEST_USE_X guard

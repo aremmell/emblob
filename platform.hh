@@ -1,9 +1,6 @@
 #ifndef _MKVEROBJ_PLATFORM_HH_INCLUDED
 #define _MKVEROBJ_PLATFORM_HH_INCLUDED
 
-#define _STR_MACRO(m) #m
-#define STR_MACRO(m) _STR_MACRO(m)
-
 #if defined(__APPLE__)
 #   define __MACOS__
 #   define MKVEROBJ_PLATFORM macOS
@@ -43,9 +40,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <iostream>
 #include <string>
 #include <cstdint>
-#include "logger.hh"
+#include <sir.h>
+#include <sirfilesystem.h>
+#include <siransimacros.h>
+#include "util.hh"
 
 #if !defined(_WIN32) && defined(__STDC_LIB_EXT1__)
 #   define __HAVE_STDC_SECURE_OR_EXT1__
@@ -73,7 +74,7 @@ namespace mkverobj
         ~platform() = delete;
 
         static std::string get_error_message(int err) {
-            char buf[MAX_ERRORMSG] = { 0 };
+            char buf[MAX_ERRORMSG] = {0};
 
 #if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
@@ -102,25 +103,14 @@ namespace mkverobj
 #endif
         }
 
-
         static bool file_exists(const std::string& fname) {
-#if defined(_WIN32)
-            if (TRUE != PathFileExists(fname.c_str()))
-                return false;
-#else
-            struct stat st = {0};
-            if (0 != stat(fname.c_str(), &st)) {
-                if (errno != ENOENT) {
-                    /* questionable; we'd better log this as a warning.
-                     * it may be the case that we need to use access() as a backup here. */
-                    g_logger->warning("stat(%s) failed, but errno is not ENOENT, it's: '%s' (%d)",
-                        fname.c_str(), get_error_message(errno).c_str(), errno);
-                }
-
+            bool exists = false;
+            if (!_sir_pathexists(fname.c_str(), &exists, SIR_PATH_REL_TO_CWD)) {
+                sir_crit("failed to determine existence of '%s'!", fname.c_str());
                 return false;
             }
-#endif
-            return true;
+
+            return exists;
         }
 
         /* file size in bytes, or -1 upon failure */
@@ -128,12 +118,13 @@ namespace mkverobj
             if (fname.empty())
                 return -1;
 
-#if defined(_WIN32)
-#error "NOT IMPLEMENTED"            
-#else
+            struct stat st;
+            if (!_sir_pathgetstat(fname.c_str(), &st, SIR_PATH_REL_TO_CWD)) {
+                sir_crit("failed to stat '%s'!", fname.c_str());
+                return -1;
+            }
 
-#endif
-            return off_t();
+            return st.st_size;
         }
 
         static bool delete_file(const std::string& fname) {
@@ -143,11 +134,11 @@ namespace mkverobj
         static bool is_valid_output_filename(const std::string& fname, /* [[out]] */ std::string& err_msg) {
             bool created = false;
             err_msg.clear();
-
+#pragma message("TODO: use dirname, test for existence and writability. should be good enough.")
             /* std::filesystem, where are you? */
             FILE *f = nullptr;
             int err = 0;
-            
+
 #if defined(__HAVE_STDC_SECURE_LIB__)
             err = fopen_s(&f, fname.c_str(), "wx");
             if (0 == err)
@@ -175,32 +166,32 @@ namespace mkverobj
         static std::string detect_c_compiler() {
             char* from_env = getenv("CC");
             if (valid_str(from_env)) {
-                g_logger->info("detected C compiler '%s' from environment variable 'CC'", from_env);
+                sir_info("detected C compiler '%s' from environment variable 'CC'", from_env);
                 return from_env;
             }
 
             /* I think the best bet here is to assume that if we run 'cc' it will work
-             * 90% of the time (have to check windows).
-             * 
+             * 90% of the time (not Windows, though).
+             *
              * if i'm able to run system commands, i can run 'which cc' and then 'cc --version'
-             * to get some information about the compiler. 
-             * 
+             * to get some information about the compiler.
+             *
              * if i'm not able to run system commands, i am out of ideas for the moment. */
 
-            g_logger->warning("unable to detect C compiler; defaulting to 'cc'");
-            return "cc";            
+            sir_warn("unable to detect C compiler; defaulting to 'cc'");
+            return "cc";
         }
 
         static bool is_system_command_available() {
             std::cout.flush();
-            
+
             int ret = std::system(nullptr);
             if (ret == 0) {
-                g_logger->error("system() is NOT available for command processing!");
+                sir_error("system() is NOT available for command processing!");
                 return false;
             }
 
-            g_logger->debug("system() is available for command processing");
+            sir_debug("system() is available for command processing");
             return true;
         }
 
@@ -216,10 +207,10 @@ namespace mkverobj
                 retval = status == 0;
 
                 if (!retval) {
-                    g_logger->error("command '%s' failed (status: %d)", cmd.c_str(), status);
+                    sir_error("command '%s' failed (status: %d)", cmd.c_str(), status);
                 } else {
-                    g_logger->info("command '%s' succeeded", cmd.c_str());
-                }            
+                    sir_info("command '%s' succeeded", cmd.c_str());
+                }
             }
 
             return retval;

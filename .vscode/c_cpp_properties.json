@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/",
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/libsir",
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
                 "/usr/local/include"
             ],
@@ -21,14 +22,15 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/libsir",
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
-        }        
+        }
     ],
     "version": 4
 }
