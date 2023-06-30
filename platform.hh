@@ -134,7 +134,7 @@ namespace mkverobj
         static bool is_valid_output_filename(const std::string& fname, /* [[out]] */ std::string& err_msg) {
             bool created = false;
             err_msg.clear();
-#pragma message("TODO: use dirname, test for existence and writability. should be good enough.")
+
             /* std::filesystem, where are you? */
             FILE *f = nullptr;
             int err = 0;
@@ -202,6 +202,9 @@ namespace mkverobj
                 std::cout.flush();
 
                 int sysret = std::system(cmd.c_str());
+
+                std::cout.flush();
+
                 int status = WEXITSTATUS(sysret);
 
                 retval = status == 0;
