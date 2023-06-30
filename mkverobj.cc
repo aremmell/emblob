@@ -97,6 +97,14 @@ int main(int argc, char** argv) {
                 si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
                 si.d_stdout.levels = SIRL_DEBUG | SIRL_INFO;
             break;
+            case SIRL_NONE:
+            case SIRL_ALL:
+            case SIRL_DEFAULT:
+            default: {
+                si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
+                si.d_stdout.levels = SIRL_INFO;
+                sir_warn("invalid logging level; using defaults");
+            }
         }
 
         strncpy(si.name, APP_NAME, SIR_MAXNAME);
