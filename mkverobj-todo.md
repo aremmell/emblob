@@ -4,4 +4,4 @@
 - [ ] better instructions when printing usage
 - [ ] rename it. mvs?
 - [ ] compiler command line option (default  = cc)
-- [ ] git subtree pull —prefix subtreeDirectory https://github.com/microsoft/hermes-windows master —squash
+- [ ] git subtree pull --prefix lib/libsir git@github.com:aremmell/libsir.git master --squash

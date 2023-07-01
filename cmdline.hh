@@ -3,10 +3,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <functional>
-#include <vector>
-#include <regex>
-#include <limits>
 #include "util.hh"
 #include "platform.hh"
 

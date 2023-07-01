@@ -47,6 +47,11 @@
 # define _WIN32_WINNT 0x0A00
 # include <windows.h>
 #endif
+
+#include <functional>
+#include <vector>
+#include <regex>
+#include <limits>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdarg.h>
