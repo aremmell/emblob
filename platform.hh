@@ -3,6 +3,7 @@
 
 #if defined(__APPLE__)
 # define __MACOS__
+# define _DARWIN_C_SOURCE
 # define MKVEROBJ_PLATFORM macOS
 #elif defined(__linux__)
 # define __LINUS__
