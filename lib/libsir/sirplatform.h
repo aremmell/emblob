@@ -134,7 +134,11 @@
 # include <limits.h>
 # include <fcntl.h>
 # include <libgen.h>
-# include <stdatomic.h>
+# if !defined(__cplusplus)
+#  include <stdatomic.h>
+# else
+#  define _Atomic(T) std::atomic<T>
+#endif
 # if defined(SIR_SYSLOG_ENABLED)
 #  include <syslog.h>
 # endif
