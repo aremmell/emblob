@@ -7,7 +7,7 @@ branches:
     - master
 dist:
   - jammy
-env: MAKE=make  
+env: MAKE=make
 jobs:
   include:
     - os: linux
@@ -22,17 +22,10 @@ jobs:
     - os: linux
       arch: arm64
       compiler: clang
-    - os: freebsd
-      addons:
-        pkg:
-          - bash
-          - llvm16    
-      arch: amd64
+    - os: linux
+      dist: xenial
+      arch: arm64
       compiler: clang
-      env:
-        - MAKE=gmake
-        - CC=/usr/local/bin/clang16
-        - CXX=/usr/local/bin/clang++16
     - os: osx
       osx_image: xcode14.2
       compiler: clang
