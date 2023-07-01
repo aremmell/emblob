@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 #else /* __WIN__ */
-# if defined(_DEBUG)
+# if defined(_DEBUG) && defined(SIR_ASSERT_ENABLED)
     /* Prevents assert() from calling abort() before the user is able to:
      * a.) break into the code and debug (Retry button)
      * b.) ignore the assert() and continue. */
@@ -187,7 +187,7 @@ bool sirtest_failnooutputdest(void) {
         pass &= sir_info("this goes to stdout");
         pass &= sir_stdoutlevels(SIRL_NONE);
 
-        sirfileid_t fid = sir_addfile(logfilename, SIRL_INFO, SIRO_DEFAULT);
+        sirfileid fid = sir_addfile(logfilename, SIRL_INFO, SIRO_DEFAULT);
         pass &= NULL != fid;
         pass &= sir_info("this goes to %s", logfilename);
         pass &= sir_filelevels(fid, SIRL_NONE);
@@ -222,7 +222,7 @@ bool sirtest_filecachesanity(void) {
     bool pass = si_init;
 
     size_t numfiles               = SIR_MAXFILES + 1;
-    sirfileid_t ids[SIR_MAXFILES] = {0};
+    sirfileid ids[SIR_MAXFILES] = {0};
 
     sir_options even = SIRO_MSGONLY;
     sir_options odd  = SIRO_ALL;
@@ -327,7 +327,7 @@ bool sirtest_faildupefile(void) {
     bool pass = si_init;
 
     const char* filename = "faildupefile.log";
-    sirfileid_t fid      = sir_addfile(filename, SIRL_ALL, SIRO_DEFAULT);
+    sirfileid fid      = sir_addfile(filename, SIRL_ALL, SIRO_DEFAULT);
 
     pass &= NULL != fid;
     pass &= NULL == sir_addfile(filename, SIRL_ALL, SIRO_DEFAULT);
@@ -401,7 +401,7 @@ bool sirtest_rollandarchivefile(void) {
     INIT(si, 0, 0, 0, 0);
     bool pass = si_init;
 
-    sirfileid_t fileid = sir_addfile(logfilename, SIRL_DEBUG, SIRO_MSGONLY | SIRO_NOHDR);
+    sirfileid fileid = sir_addfile(logfilename, SIRL_DEBUG, SIRO_MSGONLY | SIRO_NOHDR);
     pass &= NULL != fileid;
 
     if (pass) {
@@ -558,16 +558,25 @@ bool sirtest_textstylesanity(void) {
     INIT(si, SIRL_ALL, 0, 0, 0);
     bool pass = si_init;
 
-    // This is from the now-deleted test sirtest_failsetinvalidstyle.
-    // it doesn't belong in a test separate from this one.
+    pass &= !sir_settextstyle(SIRL_INFO, 0xbbbb);
+    pass &= sir_info("I have set an invalid text style.");
+    pass &= !sir_settextstyle(SIRL_DEBUG, SIRS_FG_RED | SIRS_FG_DEFAULT);
+    pass &= sir_info("oops, did it again...");
 
-    // pass &= !sir_settextstyle(SIRL_INFO, 0xbbbb/* 0xfefe */);
-    // pass &= sir_info("hello there, I set an invalid style.");
-    // pass &= !sir_settextstyle(SIRL_ALL, SIRS_FG_RED | SIRS_FG_DEFAULT);
-    // pass &= sir_info("oops, did it again...");
-#pragma message("TODO: uncomment the above when the TODO at sirtextstyle.c:50 is resolved")
     pass &= !sir_settextstyle(SIRL_ALERT, SIRS_FG_BLACK | SIRS_BG_BLACK);
     pass &= sir_info("and again.");
+
+    pass &= sir_settextstyle(SIRL_INFO, SIRS_FG_DEFAULT | SIRS_BG_DEFAULT);
+    pass &= sir_info("system default fg and bg");
+
+    pass &= sir_settextstyle(SIRL_INFO, SIRS_BG_DEFAULT);
+    pass &= sir_info("system default bg & no fg specified");
+
+    pass &= sir_settextstyle(SIRL_INFO, SIRS_FG_DEFAULT);
+    pass &= sir_info("system default fg & no bg specified");
+
+    printf("\treset styles...\n");
+    pass &= sir_resettextstyles();
 
     if (pass) {
         pass &= sir_debug("default style");
@@ -603,11 +612,8 @@ bool sirtest_textstylesanity(void) {
         pass &= sir_emerg("override style");
     }
 
-    printf("\tcleanup to reset styles...\n");
-    sir_cleanup();
-
-    INIT(si2, SIRL_ALL, 0, 0, 0);
-    pass &= si2_init;
+    printf("\treset styles...\n");
+    pass &= sir_resettextstyles();
 
     pass &= sir_debug("default style");
     pass &= sir_info("default style");
@@ -617,6 +623,68 @@ bool sirtest_textstylesanity(void) {
     pass &= sir_crit("default style");
     pass &= sir_alert("default style");
     pass &= sir_emerg("default style");
+
+    /* ensure that foreground color constants match background color when
+     * shifted and masked. allows prevention of unreadable text. */
+    printf("\tensuring fg and bg colors align when masked and shifted...\n");
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_BLACK,    SIRS_BG_BLACK);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_RED,      SIRS_BG_RED);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_GREEN,    SIRS_BG_GREEN);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_YELLOW,   SIRS_BG_YELLOW);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_BLUE,     SIRS_BG_BLUE);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_MAGENTA,  SIRS_BG_MAGENTA);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_CYAN,     SIRS_BG_CYAN);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LGRAY,    SIRS_BG_LGRAY);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_DGRAY,    SIRS_BG_DGRAY);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LRED,     SIRS_BG_LRED);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LGREEN,   SIRS_BG_LGREEN);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LYELLOW,  SIRS_BG_LYELLOW);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LBLUE,    SIRS_BG_LBLUE);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LMAGENTA, SIRS_BG_LMAGENTA);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_LCYAN,    SIRS_BG_LCYAN);
+    pass &= _SIRS_SAME_COLOR(SIRS_FG_WHITE,    SIRS_BG_WHITE);
+
+    if (pass)
+        printf("\t" GREEN("all fg and bg colors align") "\n");
+
+    /* for every foreground color, OR it with each of the others.
+     * same thing for background colors. none of these should be valid. */
+    printf("\ttesting all combinations of (2) fg colors to create collisions...\n");
+    for (size_t n = 3; n < 20; n++) {
+        uint32_t style = sir_style_16color_map[n].from;
+        for (size_t i = 3; i < 20; i++) {
+            if (n == i)
+                continue;
+
+            uint32_t attr, fg, bg;
+            if (_sir_validstyle(style | sir_style_16color_map[i].from, &attr, &fg, &bg)) {
+                pass = false;
+                printf("\t" RED("fg %08" PRIx32 " | %08" PRIx32 " (%08" PRIx32
+                       ") is valid!") "\n", style, sir_style_16color_map[i].from,
+                       style | sir_style_16color_map[i].from);
+            }
+        }
+    }
+
+    printf("\ttesting all combinations of (2) bg colors to create collisions...\n");
+    for (size_t n = 20; n < SIR_NUM16_COLOR_MAPPINGS; n++) {
+        uint32_t style = sir_style_16color_map[n].from;
+        for (size_t i = 20; i < SIR_NUM16_COLOR_MAPPINGS; i++) {
+            if (n == i)
+                continue;
+
+            uint32_t attr, fg, bg;
+            if (_sir_validstyle(style | sir_style_16color_map[i].from, &attr, &fg, &bg)) {
+                pass = false;
+                printf("\t" RED("bg %08" PRIx32 " | %08" PRIx32 " (%08" PRIx32
+                       ") is valid!") "\n", style, sir_style_16color_map[i].from,
+                       style | sir_style_16color_map[i].from);
+            }
+        }
+    }
+
+    if (pass)
+        printf("\t" GREEN("NO collisions in fg or bg colors") "\n");
 
     sir_cleanup();
 
@@ -800,7 +868,7 @@ bool sirtest_levelssanity(void) {
 
         pass &= _sir_validlevels(levels);
         printf(INDENT_ITEM WHITE("(%zu/%zu): random valid (count: %" PRIu32 ", levels:"
-                                 " %04" PRIx16) "\n", n + 1, iterations, rand_count, levels);
+                                 " %04" PRIx16) ")\n", n + 1, iterations, rand_count, levels);
     }
     PRINT_PASS(pass, "\t--- random bitmask of valid levels: %s ---\n\n", PRN_PASS(pass));
 
@@ -865,7 +933,7 @@ bool sirtest_perf(void) {
         char logfilename[SIR_MAXPATH] = {0};
         snprintf(logfilename, SIR_MAXPATH, "%s%s", logbasename, logext);
 
-        sirfileid_t logid = sir_addfile(logfilename, SIRL_ALL, SIRO_NOMSEC | SIRO_NONAME);
+        sirfileid logid = sir_addfile(logfilename, SIRL_ALL, SIRO_NOMSEC | SIRO_NONAME);
         pass &= NULL != logid;
 
         if (pass) {
@@ -929,7 +997,7 @@ bool sirtest_updatesanity(void) {
     };
 
     rmfile(logfile);
-    sirfileid_t id1 = sir_addfile(logfile, SIRL_DEFAULT, SIRO_DEFAULT);
+    sirfileid id1 = sir_addfile(logfile, SIRL_DEFAULT, SIRO_DEFAULT);
     pass &= NULL != id1;
 
     for (int i = 0; i < 10; i++) {
@@ -1054,6 +1122,21 @@ static bool generic_syslog_test(const char* sl_name, const char* identity, const
         pass &= sir_alert("%d/%d: this alert message sent to stdout and %s.", i + 1, runs, sl_name);
         pass &= sir_emerg("%d/%d: this emergency message sent to stdout and %s.", i + 1, runs, sl_name);
 
+#if defined(SIR_OS_LOG_ENABLED)
+        if (i == runs -1 && 0 == strncmp(sl_name, "os_log", 6)) {
+            printf("\ttesting os_log activity feature...\n");
+
+            /* also test activity grouping in Console. there's only one way to validate
+             * this and that's by manually viewing the log. */
+             os_activity_t parent = os_activity_create("flying to the moon",
+                OS_ACTIVITY_NONE, OS_ACTIVITY_FLAG_DETACHED);
+
+            /* execution now passes to os_log_parent_activity(), where some logging
+            * will occur, then a sub-activity will be created, and more logging. */
+            os_activity_apply_f(parent, (void*)parent, os_log_parent_activity);
+        }
+#endif
+
         sir_cleanup();
 
         if (!pass)
@@ -1077,9 +1160,8 @@ bool sirtest_os_log(void) {
     printf("\t" DGRAY("SIR_OS_LOG_ENABLED is not defined; skipping.") "\n");
     return true;
 #else
-    return generic_syslog_test("os_log", "com.aremmell.libsir.tests", "tests");
-# pragma message("TODO: os_activity_initiate_f")
-    /* static void os_log_activity1(void* ctx) {} */
+    bool pass = generic_syslog_test("os_log", "com.aremmell.libsir.tests", "tests");
+    return print_result_and_return(pass);
 #endif
 }
 
@@ -1391,7 +1473,7 @@ unsigned sirtest_thread(void* arg) {
     thread_args* my_args = (thread_args*)arg;
 
     rmfile(my_args->log_file);
-    sirfileid_t id = sir_addfile(my_args->log_file, SIRL_ALL, SIRO_MSGONLY);
+    sirfileid id = sir_addfile(my_args->log_file, SIRL_ALL, SIRO_MSGONLY);
 
     if (NULL == id) {
         bool unused = print_test_error(false, false);
@@ -1699,3 +1781,35 @@ void print_test_list(void) {
 
     printf("\n");
 }
+
+#if defined(SIR_OS_LOG_ENABLED)
+void os_log_parent_activity(void* ctx) {
+    sir_debug("confirming with ground control that we are a go...");
+    sir_info("all systems go; initiating launch sequence");
+    sir_warn("getting some excessive vibration here");
+    sir_info("safely reached escape velocity. catch you on the flip side");
+    sir_info("(3 days later) we have landed on the lunar surface");
+    sir_notice("beginning rock counting...");
+
+    os_activity_t parent = (os_activity_t)ctx;
+    os_activity_t child = os_activity_create("counting moon rocks", parent,
+        OS_ACTIVITY_FLAG_DEFAULT);
+
+    float rock_count = 0.0f;
+    os_activity_apply_f(child, (void*)&rock_count, os_log_child_activity);
+    sir_info("astronauts safely back on board. official count: ~%.02f moon rocks",
+        rock_count);
+}
+
+void os_log_child_activity(void* ctx) {
+    sir_info("there are a lot of rocks here; we're going to be here a while");
+
+    for (size_t n = 0; n < 10; n++) {
+        sir_info("counting rocks in sector %zu...", n);
+    }
+
+    float* rock_count = (float*)ctx;
+    *rock_count = 1e12;
+    sir_info("all sectors counted; heading back to the lunar lander");
+}
+#endif
