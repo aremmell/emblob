@@ -2,34 +2,50 @@
 #define _MKVEROBJ_PLATFORM_HH_INCLUDED
 
 #if defined(__APPLE__)
-#   define __MACOS__
-#   define MKVEROBJ_PLATFORM macOS
+# define __MACOS__
+# define MKVEROBJ_PLATFORM macOS
 #elif defined(__linux__)
-#   define __LINUS__
-#   define MKVEROBJ_PLATFORM Linux
+# define __LINUS__
+# define MKVEROBJ_PLATFORM Linux
 #elif defined(_WIN32)
-#   define MKVEROBJ_PLATFORM Windows
+# define MKVEROBJ_PLATFORM Windows
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-#   define __BSD__
-#   define MKVEROBJ_PLATFORM BSD
+# define __BSD__
+# define MKVEROBJ_PLATFORM BSD
 #else
-#   error "Unable to determine platform; please contact the author."
+# error "Unable to determine platform; please contact the author."
 #endif
 
 #if !defined(_WIN32)
-#   define __STDC_WANT_LIB_EXT1__ 1
+#if defined(__STDC_WANT_LIB_EXT1__)
+# undef __STDC_WANT_LIB_EXT1__
+# endif
+# define __STDC_WANT_LIB_EXT1__ 1
 #else
-#   define __WANT_STDC_SECURE_LIB__ 1
+# if defined(__WANT_STDC_SECURE_LIB__)
+# undef __WANT_STDC_SECURE_LIB__
+# endif
+# define __WANT_STDC_SECURE_LIB__ 1
+#endif
+
+#if !defined(restrict)
+# if defined(__clang__) || (defined(_MSC_VER) && _MSC_VER >= 1400)
+# define restrict __restrict
+# elif defined(__GNUC__)
+# define restrict __restrict__
+#else
+# define restrict
+# endif
 #endif
 
 #if !defined (_WIN32)
-#   include <sys/wait.h>
-#   include <unistd.h>
+# include <sys/wait.h>
+# include <unistd.h>
 #else
-#   define WIN32_LEAN_AND_MEAN
-#   define WINVER 0x0A00
-#   define _WIN32_WINNT 0x0A00
-#   include <windows.h>
+# define WIN32_LEAN_AND_MEAN
+# define WINVER 0x0A00
+# define _WIN32_WINNT 0x0A00
+# include <windows.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,18 +65,18 @@
 #include "util.hh"
 
 #if !defined(_WIN32) && defined(__STDC_LIB_EXT1__)
-#   define __HAVE_STDC_SECURE_OR_EXT1__
+# define __HAVE_STDC_SECURE_OR_EXT1__
 #elif defined(__STDC_SECURE_LIB__)
-#   define __HAVE_STDC_SECURE_OR_EXT1__
+# define __HAVE_STDC_SECURE_OR_EXT1__
 #endif
 
 #if defined(__MACOS__) || defined(__BSD__) || (_POSIX_C_SOURCE >= 200112L && ! _GNU_SOURCE)
-#   define __HAVE_XSI_STRERROR_R__
+# define __HAVE_XSI_STRERROR_R__
 #elif defined(_GNU_SOURCE)
-#   define __HAVE_GNU_STRERROR_R__
+# define __HAVE_GNU_STRERROR_R__
 #elif defined(__HAVE_STDC_SECURE_OR_EXT1__)
-#   define __HAVE_STRERROR_S__
-#   define __HAVE_FOPEN_S__
+# define __HAVE_STRERROR_S__
+# define __HAVE_FOPEN_S__
 #endif
 
 #define MAX_ERRORMSG 256
@@ -80,25 +96,25 @@ namespace mkverobj
             bool success = true;
             int finderr = strerror_r(err, buf, MAX_ERRORMSG);
 
-#if defined(__GLIBC__) && (__GLIBC__ >= 2 && __GLIBC_MINOR__ < 13)
+# if defined(__GLIBC__) && (__GLIBC__ >= 2 && __GLIBC_MINOR__ < 13)
             if (finderr == -1) {
                 success = false;
                 finderr = errno;
             }
-#else
+# else
             success = finderr == 0;
-#endif
+# endif
             if (!success)
                 snprintf(buf, MAX_ERRORMSG, "got error %d while trying to look up error %d", finderr, err);
 
             return buf;
-#elif defined(__HAVE_GNU_STRERROR_R__)
+# elif defined(__HAVE_GNU_STRERROR_R__)
             char* tmp = strerror_r(err, buf, MAX_ERRORMSG);
             return (tmp != buf) ? tmp : buf;
-#elif defined(__HAVE_STRERROR_S__)
+# elif defined(__HAVE_STRERROR_S__)
             [[maybe_unused]] errno_t finderr = strerror_s(buf, MAX_ERRORMSG, err);
             return buf;
-#else
+# else
             return strerror(err);
 #endif
         }
