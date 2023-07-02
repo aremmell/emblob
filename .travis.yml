@@ -22,6 +22,10 @@ jobs:
     - os: linux
       arch: arm64
       compiler: clang
+    - os: linux
+      dist: xenial
+      arch: arm64
+      compiler: gcc
     - os: osx
       osx_image: xcode14.2
       compiler: clang

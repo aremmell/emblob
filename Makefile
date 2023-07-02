@@ -27,7 +27,7 @@ CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-LDFLAGS         = -L$(LIBSIRDIR)/build/lib -lsir_s
+LDFLAGS         = -L$(LIBSIRDIR)/build/lib -lsir_s -pthread
 
 ifeq ($(MKVEROBJ_DEBUG),1)
 	CFLAGS   += $(CFLAGS_DEBUG)
