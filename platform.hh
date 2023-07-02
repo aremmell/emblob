@@ -4,15 +4,26 @@
 #if defined(__APPLE__)
 # define __MACOS__
 # define _DARWIN_C_SOURCE
+# if defined(_POSIX_C_SOURCE)
+#  undef _POSIX_C_SOURCE
+# endif
 # define MKVEROBJ_PLATFORM macOS
 #elif defined(__linux__)
 # define __LINUS__
 # define MKVEROBJ_PLATFORM Linux
+# if !defined(_GNU_SOURCE)
+#  define _GNU_SOURCE
+# endif
 #elif defined(_WIN32)
+# define __WIN__
 # define MKVEROBJ_PLATFORM Windows
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 # define __BSD__
 # define MKVEROBJ_PLATFORM BSD
+# define _BSD_SOURCE
+# if !defined(_DEFAULT_SOURCE)
+#  define _DEFAULT_SOURCE
+# endif
 #else
 # error "Unable to determine platform; please contact the author."
 #endif
@@ -22,11 +33,6 @@
 # undef __STDC_WANT_LIB_EXT1__
 # endif
 # define __STDC_WANT_LIB_EXT1__ 1
-#else
-# if defined(__WANT_STDC_SECURE_LIB__)
-# undef __WANT_STDC_SECURE_LIB__
-# endif
-# define __WANT_STDC_SECURE_LIB__ 1
 # if !defined(_POSIX_C_SOURCE)
 #  define _POSIX_C_SOURCE 200809L
 # endif
@@ -36,7 +42,11 @@
 # if !defined(_XOPEN_SOURCE)
 #  define _XOPEN_SOURCE 700
 # endif
-
+#else /* __WIN__ */
+# if defined(__WANT_STDC_SECURE_LIB__)
+# undef __WANT_STDC_SECURE_LIB__
+# endif
+# define __WANT_STDC_SECURE_LIB__ 1
 #endif
 
 #if !defined(restrict)
@@ -63,9 +73,6 @@
 #include <vector>
 #include <regex>
 #include <limits>
-#include <sir.h>
-#include <sirfilesystem.h>
-#include <siransimacros.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -79,6 +86,9 @@
 #include <string>
 #include <cstdint>
 #include "util.hh"
+#include <sir.h>
+#include <sirfilesystem.h>
+#include <siransimacros.h>
 
 #if !defined(_WIN32) && defined(__STDC_LIB_EXT1__)
 # define __HAVE_STDC_SECURE_OR_EXT1__
@@ -254,3 +264,4 @@ namespace mkverobj
 } // !namespace mkverobj
 
 #endif // ! _MKVEROBJ_PLATFORM_HH_INCLUDED
+
