@@ -63,6 +63,9 @@
 #include <vector>
 #include <regex>
 #include <limits>
+#include <sir.h>
+#include <sirfilesystem.h>
+#include <siransimacros.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -75,9 +78,6 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
-#include <sir.h>
-#include <sirfilesystem.h>
-#include <siransimacros.h>
 #include "util.hh"
 
 #if !defined(_WIN32) && defined(__STDC_LIB_EXT1__)
