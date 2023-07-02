@@ -56,6 +56,15 @@ bool _sir_pathgetstat(const char* restrict path, struct stat* restrict st, sir_r
 
 #if !defined(__WIN__)
 # if defined(__MACOS__)
+#  if defined(_DARWIN_C_SOURCE)
+#   pragma warning("_DARWIN_C_SOURCE defined")
+#  endif
+#  if defined(_POSIX_C_SOURCE)
+#   pragma warning("_POSIX_C_SOURCE defined to " #_POSIX_C_SOURCE)
+#  endif
+#  if defined(__DARWIN_C_LEVEL)
+#   pragma warning("__DARWIN_C_LEVEL defined to " #__DARWIN_C_LEVEL)
+#  endif
         int open_flags = O_SEARCH;
 # elif defined(__linux__)
         int open_flags = O_PATH | O_DIRECTORY;
