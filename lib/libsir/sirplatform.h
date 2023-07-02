@@ -136,7 +136,7 @@
 # include <libgen.h>
 # if !defined(__cplusplus)
 #  include <stdatomic.h>
-# else
+# elif !defined(_Atomic)
 #  define _Atomic(T) std::atomic<T>
 #endif
 # if defined(SIR_SYSLOG_ENABLED)

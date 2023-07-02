@@ -27,6 +27,16 @@
 # undef __WANT_STDC_SECURE_LIB__
 # endif
 # define __WANT_STDC_SECURE_LIB__ 1
+# if !defined(_POSIX_C_SOURCE)
+#  define _POSIX_C_SOURCE 200809L
+# endif
+# if !defined(_DEFAULT_SOURCE)
+#  define _DEFAULT_SOURCE
+# endif
+# if !defined(_XOPEN_SOURCE)
+#  define _XOPEN_SOURCE 700
+# endif
+
 #endif
 
 #if !defined(restrict)
@@ -55,7 +65,6 @@
 #include <limits>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
