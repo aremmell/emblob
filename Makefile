@@ -133,6 +133,5 @@ prep:
 clean:
 	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi)
 	$(MAKE) -C $(LIBSIRDIR) clean
-	@echo "Cleaned binary and intermediate files."
 
 .PHONY: clean prep

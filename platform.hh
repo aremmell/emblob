@@ -17,7 +17,7 @@
 #elif defined(_WIN32)
 # define __WIN__
 # define MKVEROBJ_PLATFORM Windows
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__)
 # define __BSD__
 # define MKVEROBJ_PLATFORM BSD
 # define _BSD_SOURCE
@@ -29,19 +29,10 @@
 #endif
 
 #if !defined(_WIN32)
-#if defined(__STDC_WANT_LIB_EXT1__)
+# if defined(__STDC_WANT_LIB_EXT1__)
 # undef __STDC_WANT_LIB_EXT1__
 # endif
 # define __STDC_WANT_LIB_EXT1__ 1
-# if !defined(_POSIX_C_SOURCE)
-#  define _POSIX_C_SOURCE 200809L
-# endif
-# if !defined(_DEFAULT_SOURCE)
-#  define _DEFAULT_SOURCE
-# endif
-# if !defined(_XOPEN_SOURCE)
-#  define _XOPEN_SOURCE 700
-# endif
 #else /* __WIN__ */
 # if defined(__WANT_STDC_SECURE_LIB__)
 # undef __WANT_STDC_SECURE_LIB__
