@@ -29,13 +29,13 @@ jobs:
     - os: freebsd
       addons:
         pkg:
+          - gmake
           - gcc12
       arch: amd64
-      compiler: gcc
       env:
         - MAKE=gmake
-        - CC=/usr/local/bin/gcc
-        - CXX=/usr/local/bin/g++
+        - CC=gcc-12
+        - CXX=g++-12
     - os: osx
       osx_image: xcode14.2
       compiler: clang
@@ -43,6 +43,7 @@ jobs:
       osx_image: xcode14.2
       compiler: gcc
       env:
+        - MAKE=make
         - CC=gcc-12
         - CXX=g++-12
 before_script:
