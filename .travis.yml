@@ -31,12 +31,10 @@ jobs:
         pkg:
           - gmake
           - gcc
-          - llvm
       arch: amd64
+      compiler: gcc
       env:
         - MAKE=gmake
-        - CC=/usr/local/bin/gcc
-        - CXX=/usr/local/bin/g++
     - os: freebsd
       addons:
         pkg:
