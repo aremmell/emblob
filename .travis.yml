@@ -34,18 +34,11 @@ jobs:
       arch: amd64
       env:
         - MAKE=gmake
-        - CC=gcc-12
-        - CXX=g++-12
+        - CC=gcc
+        - CXX=g++
     - os: osx
       osx_image: xcode14.2
       compiler: clang
-    - os: osx
-      osx_image: xcode14.2
-      compiler: gcc
-      env:
-        - MAKE=make
-        - CC=gcc-12
-        - CXX=g++-12
 before_script:
   if [ $TRAVIS_OS_NAME = freebsd ]; then sudo ln -s /usr/local/bin/bash /bin/bash; fi
 script:
