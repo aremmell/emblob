@@ -14,7 +14,7 @@ cli utility and header for link-time embedding of a version resource for use wit
 
 ## Compiling
 
-There's just a simple `Makefile` as of now, which may or may not work for you. Clone and `make`. Creates `build/mkverobj`.
+There's just a simple `Makefile` as of now, which may or may not work for you. Clone and `make`. Creates `build/bin/mkverobj`.
 
 ## Usage
 
