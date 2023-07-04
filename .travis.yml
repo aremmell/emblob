@@ -30,7 +30,8 @@ jobs:
       addons:
         pkg:
           - gmake
-          - gcc12
+          - gcc
+          - clang
       arch: amd64
       env:
         - MAKE=gmake
@@ -47,6 +48,8 @@ jobs:
     - os: osx
       osx_image: xcode14.2
       compiler: clang
+    - os: linux-ppc64le
+      compiler: gcc
 before_script:
   if [ $TRAVIS_OS_NAME = freebsd ]; then sudo ln -s /usr/local/bin/bash /bin/bash; fi
 script:
