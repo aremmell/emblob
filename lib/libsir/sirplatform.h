@@ -32,17 +32,11 @@
 # else
 #  define __HAVE_ATOMIC_H__
 # endif
+# if defined(__STDC_WANT_LIB_EXT1__)
+#  undef __STDC_WANT_LIB_EXT1__
+# endif
 # define __STDC_WANT_LIB_EXT1__ 1
 # if defined(__APPLE__) && defined(__MACH__)
-#  if defined(_DARWIN_C_SOURCE)
-#   pragma warning("_DARWIN_C_SOURCE defined")
-#  endif
-#  if defined(_POSIX_C_SOURCE)
-#   pragma warning("_POSIX_C_SOURCE defined to " #_POSIX_C_SOURCE)
-#  endif
-#  if defined(__DARWIN_C_LEVEL)
-#   pragma warning("__DARWIN_C_LEVEL defined to " #__DARWIN_C_LEVEL)
-#  endif
 #  define __MACOS__
 #  define _DARWIN_C_SOURCE
 # elif defined(__FreeBSD__)
