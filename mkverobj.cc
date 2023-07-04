@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 
         std::string notes = cmd_line.get_notes();
         if (!notes.empty())
-            strncpy(res.notes, notes.c_str(), mkverobj_max_notes - 1);
+            strncpy(res.notes, notes.c_str(), MKVEROBJ_MAX_NOTES - 1);
 
         std::string bin_file = cmd_line.get_bin_output_filename();
         sir_info("writing version data {%hu, %hu, %hu, '%s'} to %s...", res.major,
