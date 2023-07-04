@@ -34,8 +34,8 @@ jobs:
       arch: amd64
       env:
         - MAKE=gmake
-        - CC=gcc
-        - CXX=g++
+        - CC=/usr/local/bin/gcc-12
+        - CXX=/usr/local/bin/g++-12
     - os: osx
       osx_image: xcode14.2
       compiler: clang
