@@ -21,7 +21,7 @@ LIBSIRDIR := lib/libsir
 
 # compiler/linker commands. you're going to want to make sure $INCLUDE
 # and $LDFLAGS are defined.
-CFLAGS          = -Wpedantic -std=c17 -fPIC -I.
+CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
 CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I$(LIBSIRDIR)
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
