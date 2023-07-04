@@ -31,7 +31,7 @@ jobs:
         pkg:
           - gmake
           - gcc
-          - clang
+          - llvm
       arch: amd64
       env:
         - MAKE=gmake
