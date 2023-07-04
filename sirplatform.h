@@ -32,6 +32,9 @@
 # else
 #  define __HAVE_ATOMIC_H__
 # endif
+# if defined(__STDC_WANT_LIB_EXT1__)
+#  undef __STDC_WANT_LIB_EXT1__
+# endif
 # define __STDC_WANT_LIB_EXT1__ 1
 # if defined(__APPLE__) && defined(__MACH__)
 #  define __MACOS__
@@ -84,10 +87,14 @@
 # include <assert.h>
 #define SIR_ASSERT(...) assert(__VA_ARGS__)
 #else
+# if defined(SIR_SELFLOG)
 # define SIR_ASSERT(...) \
      if (!(__VA_ARGS__)) { \
          _sir_selflog(LRED("!!! would be asserting: " #__VA_ARGS__ "")); \
      }
+#else
+# define SIR_ASSERT(...)
+#endif
 #endif
 
 #include <errno.h>
@@ -134,7 +141,9 @@
 # include <limits.h>
 # include <fcntl.h>
 # include <libgen.h>
+# if defined(__HAVE_ATOMIC_H__) && !defined(__cplusplus)
 # include <stdatomic.h>
+# endif
 # if defined(SIR_SYSLOG_ENABLED)
 #  include <syslog.h>
 # endif
