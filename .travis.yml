@@ -30,15 +30,6 @@ jobs:
       addons:
         pkg:
           - gmake
-          - gcc
-      arch: amd64
-      compiler: gcc
-      env:
-        - MAKE=gmake
-    - os: freebsd
-      addons:
-        pkg:
-          - gmake
       arch: arm64
       compiler: clang
       env:
