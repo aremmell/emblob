@@ -12,7 +12,6 @@ namespace mkverobj
 #define CONST_STATIC_X(type) static constexpr type
 #define CONST_STATIC_STRING CONST_STATIC_X(const char*)
 
-
     CONST_STATIC_STRING APP_NAME = "mkverobj";
 
     static std::string fmt_str(const char* fmt, ...) {
