@@ -32,7 +32,6 @@ using namespace std;
 using namespace mkverobj;
 
 int main(int argc, char** argv) {
-
     app_state state;
     command_line cmd_line;
 
@@ -54,8 +53,9 @@ int main(int argc, char** argv) {
     };
 
     try {
-        if (!cmd_line.parse_and_validate(argc, argv))
-            return _exit_main(cmd_line.print_usage());
+        int exit_code = EXIT_FAILURE;
+        if (!cmd_line.parse_and_validate(argc, argv, exit_code))
+            return _exit_main(exit_code);
 
         std::string compiler = system::detect_c_compiler();
         if (compiler.empty())
@@ -64,18 +64,18 @@ int main(int argc, char** argv) {
         version_resource res;
         res.major = cmd_line.get_major_version();
         res.minor = cmd_line.get_minor_version();
-        res.build = cmd_line.get_build_version();
+        res.patch = cmd_line.get_patch_version();
 
-        std::string notes = cmd_line.get_notes();
-        if (!notes.empty())
-            strncpy(res.notes, notes.c_str(), MKVEROBJ_MAX_NOTES - 1);
+        std::string suffix = cmd_line.get_suffix();
+        if (!suffix.empty())
+            strncpy(res.suffix, suffix.c_str(), MKVEROBJ_MAX_SUFFIX - 1);
 
         std::string bin_file = cmd_line.get_bin_output_filename();
-        g_logger->info("writing version data {%hu, %hu, %hu, '%s'} to %s...", res.major,
-            res.minor, res.build, res.notes, bin_file.c_str());
+        g_logger->info("writing version data {%" PRIu16 ", %" PRIu16 ", %" PRIu16 ", '%s'} to %s...",
+            res.major, res.minor, res.patch, res.suffix, bin_file.c_str());
 
         auto openmode = ios::out | ios::binary | ios::trunc;
-        auto wrote = write_file_contents(bin_file, openmode, [&](ostream& strm) -> void {
+        auto wrote = system::write_file_contents(bin_file, openmode, [&](ostream& strm) -> void {
             strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
         });
 
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 #if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
         auto asm_file = cmd_line.get_asm_output_filename();
         openmode = ios::out | ios::trunc;
-        wrote = write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
+        wrote = system::write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
             strm << ".global _version_data" << endl;
             strm << "_version_data:" << endl;
             strm << ".incbin \"" << bin_file << "\"" << endl;
@@ -114,8 +114,11 @@ int main(int argc, char** argv) {
         auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());
         bool asm_to_obj = system::execute_system_command(cmd);
 
-        if (asm_to_obj)
+        if (asm_to_obj) {
             state.created_obj_file = true;
+            g_logger->info("successfully created %s (%lld bytes)", obj_file.c_str(),
+            system::file_size(obj_file));
+        }
 
         return _exit_main(asm_to_obj ? EXIT_SUCCESS : EXIT_FAILURE);
 #else
@@ -129,34 +132,12 @@ int main(int argc, char** argv) {
     return _exit_main(EXIT_SUCCESS);
 }
 
-namespace mkverobj
-{
-    std::ofstream::pos_type write_file_contents(const std::string& fname,
-        std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb) {
-        if (!cb)
-            return std::ofstream::pos_type(-1);
 
-        try {
-            std::ofstream strm(fname, mode);
-            strm.exceptions(strm.badbit | strm.failbit);
+void mkverobj::delete_file_on_unclean_exit(const std::string& fname) {
+    if (0 != remove(fname.c_str()))
+        g_logger->error("failed to delete '%s': %s", fname.c_str(),
+            system::get_error_message(errno).c_str());
+    else
+        g_logger->info("deleted '%s'", fname.c_str());
+}
 
-            cb(strm);
-            strm.flush();
-
-            if (strm.good())
-                return strm.tellp();
-        } catch (const std::exception& ex) {
-            g_logger->error("caught exception while writing to '%s': %s", fname.c_str(), ex.what());
-        }
-
-        return std::ofstream::pos_type(-1);
-    }
-
-    void delete_file_on_unclean_exit(const std::string& fname) {
-        if (0 != remove(fname.c_str()))
-            g_logger->error("failed to delete '%s': %s", fname.c_str(),
-                system::get_error_message(errno).c_str());
-        else
-            g_logger->info("deleted '%s'", fname.c_str());
-    }
-} // !namespace mkverobj

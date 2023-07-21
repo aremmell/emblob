@@ -109,4 +109,4 @@
 # define WHITE(s)     COLOR(0, 97, 49, s) /**< White foreground text. */
 # define WHITEB(s)    COLOR(1, 97, 49, s) /**< Bold white foreground text. */
 
-#endif /* !_MKVEROBJ_ANSIMACROS_H_INCLUDED */
+#endif // !_MKVEROBJ_ANSIMACROS_H_INCLUDED

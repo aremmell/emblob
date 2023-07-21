@@ -26,10 +26,10 @@
 #include <stdlib.h>
 #include "version.h"
 
-int main (int argc, char** argv)
+int main(void)
 {
     const version_resource* res = get_version_resource();
-    printf("major: %u, minor: %u, build: %u, notes: '%s'\n",
-        res->major, res->minor, res->build, res->notes);
+    printf("major: %u, minor: %u, patch: %u, suffix: '%s'\n",
+        res->major, res->minor, res->patch, res->suffix);
     return EXIT_SUCCESS;
 }

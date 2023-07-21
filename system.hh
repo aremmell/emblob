@@ -42,7 +42,6 @@ namespace mkverobj
 #if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
             int finderr = strerror_r(err, buf, MAX_ERRORMSG);
-
 # if defined(__GLIBC__) && (__GLIBC__ >= 2 && __GLIBC_MINOR__ < 13)
             if (finderr == -1) {
                 success = false;
@@ -93,6 +92,28 @@ namespace mkverobj
             return st.st_size;
         }
 
+        static std::ofstream::pos_type write_file_contents(const std::string& fname,
+            std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb) {
+            if (!cb)
+                return std::ofstream::pos_type(-1);
+
+            try {
+                std::ofstream strm(fname, mode);
+                strm.exceptions(strm.badbit | strm.failbit);
+
+                cb(strm);
+                strm.flush();
+
+                if (strm.good())
+                    return strm.tellp();
+            } catch (const std::exception& ex) {
+                g_logger->error("caught exception while writing to '%s': %s", fname.c_str(),
+                    ex.what());
+            }
+
+            return std::ofstream::pos_type(-1);
+        }
+
         static bool delete_file(const std::string& fname) {
             return 0 == std::remove(fname.c_str());
         }
@@ -101,7 +122,6 @@ namespace mkverobj
             bool created = false;
             err_msg.clear();
 
-            /* std::filesystem, where are you? */
             FILE *f = nullptr;
             int err = 0;
 
@@ -186,4 +206,4 @@ namespace mkverobj
     };
 } // !namespace mkverobj
 
-#endif /* !_MKVEROBJ_SYSTEM_HH_INCLUDED */
+#endif // !_MKVEROBJ_SYSTEM_HH_INCLUDED

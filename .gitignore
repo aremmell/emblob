@@ -1,5 +1,8 @@
 # output files
 build/*
+*.S
+*.o
+*.bin
 
 # annoying macOS files
 .DS_Store

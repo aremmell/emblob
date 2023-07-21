@@ -1,5 +1,5 @@
 /*
- * mkverobj.hh
+ * version.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
  * Copyright: Copyright (c) 2018-2023
@@ -22,19 +22,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_HH_INCLUDED
-#define _MKVEROBJ_HH_INCLUDED
+#ifndef _MKVEROBJ_VERSION_HH_INCLUDED
+#define _MKVEROBJ_VERSION_HH_INCLUDED
 
-#include "platform.hh"
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <functional>
+#include "util.hh"
 
 namespace mkverobj
 {
-    void delete_file_on_unclean_exit(const std::string& fname);
+    CONST_STATIC_X(uint16_t) VERSION_MAJOR = 2;
+    CONST_STATIC_X(uint16_t) VERSION_MINOR = 0;
+    CONST_STATIC_X(uint16_t) VERSION_PATCH = 0;
+    CONST_STATIC_STRING VERSION_SUFFIX     = "-rc";
+
 } // !namespace mkverobj
 
-#endif // !_MKVEROBJ_HH_INCLUDED
+#endif // !_MKVEROBJ_VERSION_HH_INCLUDED

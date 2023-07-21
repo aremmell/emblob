@@ -26,10 +26,10 @@
 #include <cstdlib>
 #include "version.h"
 
-int main (int argc, char** argv)
+int main()
 {
     auto res = get_version_resource();
-    std::cout << "major: " << res->major << ", minor: " << res->minor << ", build: " << res->build
-        << ", notes: '" << res->notes << "'" << std::endl;
+    std::cout << "major: " << res->major << ", minor: " << res->minor << ", patch: "
+        << res->patch << ", suffix: '" << res->suffix << "'" << std::endl;
     return EXIT_SUCCESS;
 }

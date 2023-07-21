@@ -103,15 +103,15 @@ namespace mkverobj
         static std::string level_to_string(level lvl, bool prefix = false) {
             switch (lvl) {
                 case level::debug:
-                    return prefix ? "[DEBUG]" : LEVEL_DEBUG;
+                    return prefix ? "[debug]" : LEVEL_DEBUG;
                 case level::info:
-                    return prefix ? "[INFO]" : LEVEL_INFO;
+                    return prefix ? "[info]" : LEVEL_INFO;
                 case level::warning:
-                    return prefix ? "[WARNING]" : LEVEL_WARNING;
+                    return prefix ? "[warning]" : LEVEL_WARNING;
                 case level::error:
-                    return prefix ? "[ERROR]" : LEVEL_ERROR;
+                    return prefix ? "[error]" : LEVEL_ERROR;
                 case level::fatal:
-                    return prefix ? "[FATAL]" : LEVEL_FATAL;
+                    return prefix ? "[fatal]" : LEVEL_FATAL;
                 case level::invalid:
                 default:
                     return LEVEL_INVALID;
@@ -143,10 +143,36 @@ namespace mkverobj
                 return;
 
             char buf[MAX_LOG_MESSAGE] = {0};
-            int len = std::vsnprintf(buf, MAX_LOG_MESSAGE, fmt, args);
+            [[maybe_unused]] int len = std::vsnprintf(buf, MAX_LOG_MESSAGE, fmt, args);
+
+
+            const char* attr     = "0";
+            const char* fg_color = "39";
+            switch (lvl) {
+                case level::debug:
+                    fg_color = "90";
+                    break;
+                case level::info:
+                    fg_color = "97";
+                    break;
+                case level::warning:
+                    fg_color = "33";
+                    break;
+                case level::error:
+                    fg_color = "91";
+                    break;
+                case level::fatal:
+                    attr     = "1";
+                    fg_color = "91";
+                    break;
+                case level::invalid:
+                default:
+                    return;
+            }
 
             std::ostream& strm = (lvl == level::error || lvl == level::fatal) ? std::cerr : std::cout;
-            strm << APP_NAME << " " << level_to_string(lvl, true) << ": " << buf << std::endl;
+            strm << "\x1b[" << attr << ";" << fg_color << ";49m" << APP_NAME << " "
+                << level_to_string(lvl, true) << ": " << buf << "\x1b[0m" << std::endl;
         }
 
     private:

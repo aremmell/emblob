@@ -16,13 +16,9 @@
 # at this time, unless that variable is set, an optimized
 # release configuration will be used.
 
-# libsir
-LIBSIRDIR := lib/libsir
-
-# compiler/linker commands. you're going to want to make sure $INCLUDE
-# and $LDFLAGS are defined.
-CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I.
+# compiler/linker commands
+CFLAGS          = -Wall -Wextra -Wpedantic -std=c11 -fPIC -I.
+CXXFLAGS        = -Wall -Wextra -Wpedantic -std=c++17 -fPIC -I.
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
@@ -50,8 +46,8 @@ CXXEXAMPLE := cxxexample
 # these variables will be stamped into the example applications.
 VER_MAJOR   := 1
 VER_MINOR   := 2
-VER_BUILD   := 3
-VER_NOTES   := This is just an example of what mkverobj can do.
+VER_PATCH   := 3
+VER_SUFFIX  := -dev
 
 # this is the object file that contains the version data and retrieval code.
 OBJ_VERFILE := $(INTDIR)/$(VERFILE).o
@@ -102,7 +98,7 @@ $(OBJ_VERFILE) : $(ASM_VERFILE)
 $(BIN_CEXAMPLE) : $(OBJ_VERFILE)
 $(BIN_CXXEXAMPLE) : $(OBJ_VERFILE)
 
-compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE)
+compile: depends
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
 	$(CXX) -MMD -c -o $@ $< $(CXXFLAGS)
 
@@ -116,7 +112,7 @@ mkverobj: depends $(OBJ_MKVEROBJ)
 	$(CXX) -o $(BIN_MKVEROBJ) $(OBJ_MKVEROBJ) $(CXXFLAGS) $(LDFLAGS)
 
 verfile: mkverobj $(ASM_VERFILE)
-	$(BIN_MKVEROBJ) --major $(VER_MAJOR) --minor $(VER_MINOR) --build $(VER_BUILD) --notes "$(VER_NOTES)" --outfile "$(INTDIR)/$(VERFILE)" --log-level debug
+	$(BIN_MKVEROBJ) -maj $(VER_MAJOR) -min $(VER_MINOR) -p $(VER_PATCH) -s "$(VER_SUFFIX)" -o "$(INTDIR)/$(VERFILE)" -l debug
 
 cexample: $(OBJ_CEXAMPLE) $(OBJ_VERFILE)
 	$(CC) -o $(BIN_CEXAMPLE) $(OBJ_CEXAMPLE) $(OBJ_VERFILE) $(CFLAGS) $(LDFLAGS)
@@ -129,5 +125,6 @@ prep:
 
 clean:
 	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi)
+	@echo build directory cleaned successfully.
 
 .PHONY: clean prep

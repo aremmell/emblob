@@ -33,7 +33,7 @@
 # define MKVEROBJ_ALIGNAS alignas
 # define MKVEROBJ_EXTERNAL extern "C"
 #else
-# if __STDC_VERSION__ >= 201112
+# if __STDC_VERSION__ < 201710L
 #  define MKVEROBJ_ALIGNAS _Alignas
 # elif __STDC_VERSION__ > 201710L
 #  define MKVEROBJ_ALIGNAS alignas
@@ -49,8 +49,8 @@
 
 MKVEROBJ_EXTERNAL uintptr_t MKVEROBJ_VAR;
 
-/** The size, in chars of the ::versionresource.notes buffer. */
-#define MKVEROBJ_MAX_NOTES 512
+/** The size, in chars of the ::version_resource.suffix buffer. */
+#define MKVEROBJ_MAX_SUFFIX 256
 
 /**
  * @struct version_resource
@@ -63,24 +63,14 @@ typedef struct {
 
     uint16_t major; /**< Major version number. */
     uint16_t minor; /**< Minor version number. */
-    uint16_t build; /**< Build/patch/revision version number. */
+    uint16_t patch; /**< Patch/build/revision number. */
 
     /**
      * A buffer of ::MKVEROBJ_MAX_NOTES chars in size to be used however
-     * you see fit. Intended to store one or more null-terminated strings
-     * containing information such as:
-     *
-     * - build date/time
-     * - architecture
-     * - change log
-     * - commit hash
-     * - copyright
-     * - miscellenous notes
-     *
-     * However, it is not limited to these use cases. The implementor could just
-     * as easily store arbirtrary binary data here.
+     * you see fit, but primarily intended to be used as a version suffix
+     * string (e.g., "-dev", "-rc", etc.)
      */
-    char notes[MKVEROBJ_MAX_NOTES];
+    char suffix[MKVEROBJ_MAX_SUFFIX];
 } version_resource;
 
 #if defined(__cplusplus)
@@ -116,25 +106,25 @@ uint16_t get_version_minor(void)
 }
 
 /**
- * Returns the build/patch/revision version number in the version resource struct.
+ * Returns the patch/build/revision number in the version resource struct.
  */
 static inline
-uint16_t get_version_build(void)
+uint16_t get_version_patch(void)
 {
-    return get_version_resource()->build;
+    return get_version_resource()->patch;
 }
 
 /**
- * Returns a pointer to the notes buffer in the version resource struct.
+ * Returns a pointer to the suffix buffer in the version resource struct.
  */
 static inline
-const char* get_version_notes(void)
+const char* get_version_suffix(void)
 {
-    return get_version_resource()->notes;
+    return get_version_resource()->suffix;
 }
 
 #if defined(__cplusplus)
     }
 #endif
 
-#endif /* !_MKVEROBJ_VERSION_H_INCLUDED */
+#endif // !_MKVEROBJ_VERSION_H_INCLUDED

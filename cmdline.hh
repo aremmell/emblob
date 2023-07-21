@@ -30,6 +30,7 @@
 #include "util.hh"
 #include "logger.hh"
 #include "system.hh"
+#include "version.hh"
 #include "ansimacros.h"
 
 namespace mkverobj
@@ -48,17 +49,20 @@ namespace mkverobj
         CONST_STATIC_STRING FLAG_MINOR = "--minor";
         CONST_STATIC_STRING S_FLAG_MINOR = "-min";
 
-        CONST_STATIC_STRING FLAG_BUILD = "--build";
-        CONST_STATIC_STRING S_FLAG_BUILD = "-b";
+        CONST_STATIC_STRING FLAG_PATCH = "--patch";
+        CONST_STATIC_STRING S_FLAG_PATCH = "-p";
 
-        CONST_STATIC_STRING FLAG_NOTES = "--notes";
-        CONST_STATIC_STRING S_FLAG_NOTES = "-n";
+        CONST_STATIC_STRING FLAG_SUFFIX = "--suffix";
+        CONST_STATIC_STRING S_FLAG_SUFFIX = "-s";
 
         CONST_STATIC_STRING FLAG_OUTPUT_FILE = "--outfile";
         CONST_STATIC_STRING S_FLAG_OUTPUT_FILE = "-o";
 
         CONST_STATIC_STRING FLAG_LOG_LEVEL = "--log-level";
         CONST_STATIC_STRING S_FLAG_LOG_LEVEL = "-l";
+
+        CONST_STATIC_STRING FLAG_VERSION = "--version";
+        CONST_STATIC_STRING S_FLAG_VERSION = "-v";
 
         CONST_STATIC_STRING FLAG_HELP = "--help";
         CONST_STATIC_STRING S_FLAG_HELP = "-h";
@@ -68,42 +72,44 @@ namespace mkverobj
 
         command_line() = default;
 
-        bool parse_and_validate(int argc, char** argv) {
-            int required = 0;
-
-            _config.for_each([&](const config::arg& a) {
-                if (a.required)
-                    required++;
-                if (a.value_required && a.default_value.empty())
-                    required++;
-            });
-
+        int parse_and_validate(int argc, char** argv, int& exit_code) {
+            bool retval = true;
             for (int i = 1; i < argc; i++) {
                 std::string input = argv[i];
 
                 config::arg *a = nullptr;
                 if (!_config.get_arg(input, &a)) {
-                    std::cerr << "unknown option: " << input << std::endl;
-                    return false;
+                    g_logger->error("unknown option: '%s'", input.c_str());
+                    retval = false;
+                    break;
                 }
 
+                /* special handling for -h/--help and -v/--version. */
                 if (a->flag == FLAG_HELP) {
-                    [[maybe_unused]] int p = print_usage();
-                    return true;
+                    [[maybe_unused]] int prn = print_usage();
+                    exit_code = EXIT_SUCCESS;
+                    return false;
+                } else if (a->flag == FLAG_VERSION) {
+                    print_version();
+                    exit_code = EXIT_SUCCESS;
+                    return false;
                 }
 
                 a->seen = true;
 
                 if (a->value_required) {
                     if (i + 1 > argc - 1) {
-                        std::cerr << "missing value for " << input << std::endl;
-                        return false;
+                        g_logger->error("missing value for '%s'", input.c_str());
+                        retval = false;
+                        break;
                     }
 
                     std::string validate_msg;
                     if (a->validator != nullptr && !a->validator(argv[i + 1], validate_msg)) {
-                        std::cerr << argv[i + 1] << " is not a valid value for " << input << " (" << validate_msg << ")" << std::endl;
-                        return false;
+                        g_logger->error("'%s' is not a valid value for '%s' (%s)", argv[i + 1],  input.c_str(),
+                            validate_msg.c_str());
+                        retval = false;
+                        break;
                     }
 
                     a->value = argv[i++ + 1];
@@ -111,19 +117,39 @@ namespace mkverobj
                 }
             }
 
-            return true;
+            if (retval) {
+                /* look for required options that are missing. */
+                _config.for_each([&](const config::arg& a) {
+                    if (a.required && !a.seen && a.default_value.empty()) {
+                        g_logger->error("'%s/%s' is a required option", a.short_flag.c_str(), a.flag.c_str());
+                        retval = false;
+                    }
+
+                    return true;
+                });
+            }
+
+            exit_code = retval ? EXIT_SUCCESS : print_usage();
+            return retval;
         }
 
         int print_usage() const {
-            std::cerr << ESC_SEQ("1", "") << APP_NAME << " usage:" << ESC_RST
-                << std:: endl;
+            std::cerr << std::endl << ESC_SEQ("1", "") << APP_NAME << " usage:"
+                << ESC_RST << std:: endl;
 
-            std::cerr << APP_NAME << " usage:" << std:: endl;
             _config.for_each([](const config::arg& a) {
                 std::cerr << "\t" << a.to_string() << std::endl;
             });
 
+            std::cerr << std::endl;
+
             return EXIT_FAILURE;
+        }
+
+        void print_version() const {
+            std::cout << APP_NAME << " " << VERSION_MAJOR << "." << VERSION_MINOR
+                << "." << VERSION_PATCH << VERSION_SUFFIX << std::endl;
+
         }
 
         uint16_t get_major_version() const {
@@ -134,12 +160,12 @@ namespace mkverobj
             return string_to_uint16(_config.get_value(FLAG_MINOR));
         }
 
-        uint16_t get_build_version() const {
-            return string_to_uint16(_config.get_value(FLAG_BUILD));
+        uint16_t get_patch_version() const {
+            return string_to_uint16(_config.get_value(FLAG_PATCH));
         }
 
-        std::string get_notes() const {
-            return _config.get_value(FLAG_NOTES);
+        std::string get_suffix() const {
+            return _config.get_value(FLAG_SUFFIX);
         }
 
         std::string get_bin_output_filename() const {
@@ -169,18 +195,20 @@ namespace mkverobj
                     std::string description;
                     std::string value;
                     std::string default_value;
+                    std::string arg;
+                    std::string notes;
                     std::vector<std::string> options;
                     bool required = false;
                     bool value_required = false;
                     bool seen = false;
                     bool validated = false;
-                    std::function<bool(const std::string& value, /* [[out]] */ std::string& msg)> validator;
+                    std::function<bool(const std::string& value, /*out*/ std::string& msg)> validator;
 
                     std::string options_to_string() const {
                         if (options.empty())
                             return std::string();
 
-                        std::string retval = "{";
+                        std::string retval = required ? "{" : "[";
                         bool first = true;
 
                         for (const auto& o : options) {
@@ -193,7 +221,7 @@ namespace mkverobj
                             }
                         }
 
-                        return retval + "}";
+                        return retval + (required ? "}" : "]");
                     }
 
                     std::string to_string() const {
@@ -212,23 +240,32 @@ namespace mkverobj
                         for (size_t n = 0; n < std::max(padding, size_t(1)); n++)
                             retval += " ";
 
+                        if (!arg.empty()) {
+                            if (!required)
+                                retval += "[";
+
+                            retval += ESC_SEQ("4", "") + arg + ESC_SEQE("24");
+
+                            if (!default_value.empty()) {
+                                retval += "=" + default_value;
+                            }
+
+                            if (!required)
+                                retval += "]";
+                        }
+
+                        retval += " ";
                         retval += description;
+
+                        if (!notes.empty()) {
+                            retval += " (";
+                            retval += ESC_SEQ("3", "") + notes + ESC_SEQE("23");
+                            retval += ")";
+                        }
 
                         std::string options_str = options_to_string();
                         if (!options_str.empty())
-                            retval += " : " + options_str;
-
-                        if (!required && flag != FLAG_HELP) {
-                            retval += " (";
-                            retval += EMPH("optional");
-
-                            if (!default_value.empty()) {
-                                retval += "; default: '";
-                                retval += ESC_SEQ("4", "") + default_value + ESC_SEQE("24");
-                                retval += "'";
-                            }
-                            retval += ")";
-                        }
+                            retval += ": " + options_str;
 
                         return retval;
                     }
@@ -239,7 +276,7 @@ namespace mkverobj
                         func(a);
                 }
 
-                bool get_arg(const std::string& flag, /* [[out]] */ arg** out) {
+                bool get_arg(const std::string& flag, /*out*/ arg** out) {
                     if (!out)
                         return false;
 
@@ -267,19 +304,132 @@ namespace mkverobj
                 }
 
                 std::vector<arg> args = {
-                    { FLAG_MAJOR, S_FLAG_MAJOR, "Major version number", "", "", {}, true, true, false, false, &_version_number_validator },
-                    { FLAG_MINOR, S_FLAG_MINOR, "Minor version number", "", "", {}, true, true, false, false, &_version_number_validator },
-                    { FLAG_BUILD, S_FLAG_BUILD, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
-                    { FLAG_NOTES, S_FLAG_NOTES, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
-                    { FLAG_OUTPUT_FILE, S_FLAG_OUTPUT_FILE, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
-                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", logger::LEVEL_INFO, {
-                        logger::LEVEL_DEBUG,
+                    {
+                        FLAG_MAJOR,
+                        S_FLAG_MAJOR,
+                        "Major version number",
+                        "",
+                        "",
+                        "num",
+                        "",
+                        {},
+                        true,
+                        true,
+                        false,
+                        false,
+                        &_version_number_validator
+                    },
+                    {
+                        FLAG_MINOR,
+                        S_FLAG_MINOR,
+                        "Minor version number",
+                        "",
+                        "",
+                        "num",
+                        "",
+                        {},
+                        true,
+                        true,
+                        false,
+                        false,
+                        &_version_number_validator
+                    },
+                    {
+                        FLAG_PATCH,
+                        S_FLAG_PATCH,
+                        "Patch/build/revision number",
+                        "",
+                        "",
+                        "num",
+                        "",
+                        {},
+                        true,
+                        true,
+                        false,
+                        false,
+                        &_version_number_validator
+                    },
+                    {
+                        FLAG_SUFFIX,
+                        S_FLAG_SUFFIX,
+                        "Version suffix",
+                        "",
+                        "",
+                        "suffix",
+                        "max 256 characters",
+                        {},
+                        false,
+                        true,
+                        false,
+                        false,
+                        nullptr
+                    },
+                    {
+                        FLAG_OUTPUT_FILE,
+                        S_FLAG_OUTPUT_FILE,
+                        "Output file base name",
+                        "",
+                        DEF_OUTPUT_FILE,
+                        "basename",
+                        fmt_str("creates %s, %s, and %s", EXT_ASM, EXT_OBJ, EXT_BIN),
+                        {},
+                        false,
+                        true,
+                        false,
+                        false,
+                        &_output_filename_validator
+                    },
+                    {
+                        FLAG_LOG_LEVEL,
+                        S_FLAG_LOG_LEVEL,
+                        "Console logging verbosity",
+                        "",
                         logger::LEVEL_INFO,
-                        logger::LEVEL_WARNING,
-                        logger::LEVEL_ERROR,
-                        logger::LEVEL_FATAL,
-                    }, false, true, false, false, &_log_level_validator },
-                    { FLAG_HELP, S_FLAG_HELP, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
+                        "level",
+                        "",
+                        {
+                            logger::LEVEL_DEBUG,
+                            logger::LEVEL_INFO,
+                            logger::LEVEL_WARNING,
+                            logger::LEVEL_ERROR,
+                            logger::LEVEL_FATAL,
+                        },
+                        false,
+                        true,
+                        false,
+                        false,
+                        &_log_level_validator
+                    },
+                    {
+                        FLAG_VERSION,
+                        S_FLAG_VERSION,
+                        "Prints mkverobj version information",
+                        "",
+                        "",
+                        "",
+                        "",
+                        {},
+                        false,
+                        false,
+                        false,
+                        false,
+                        nullptr
+                    },
+                    {
+                        FLAG_HELP,
+                        S_FLAG_HELP,
+                        "Prints this message",
+                        "",
+                        "",
+                        "",
+                        "",
+                        {},
+                        false,
+                        false,
+                        false,
+                        false,
+                        nullptr
+                    }
                 };
             };
 
@@ -291,7 +441,7 @@ namespace mkverobj
                     return std::string();
             }
 
-            static bool _log_level_validator(const std::string& val, /* [[out]] */ std::string& msg) {
+            static bool _log_level_validator(const std::string& val, /*out*/ std::string& msg) {
 
                 msg.clear();
 
@@ -308,7 +458,7 @@ namespace mkverobj
                 return true;
             }
 
-            static bool _output_filename_validator(const std::string& val, /* [[out]] */ std::string& msg) {
+            static bool _output_filename_validator(const std::string& val, /*out*/ std::string& msg) {
 
                 msg.clear();
 
@@ -320,7 +470,8 @@ namespace mkverobj
                 for (const auto& ext : { EXT_BIN, EXT_ASM, EXT_OBJ }) {
                     std::string file_err_msg;
                     if(!system::is_valid_output_filename(val + ext, file_err_msg)) {
-                        msg = fmt_str("Unable to use %s as an output filename (%s)", val.c_str(), file_err_msg.c_str());
+                        msg = fmt_str("Unable to use %s as an output file base name (%s)", val.c_str(),
+                            file_err_msg.c_str());
                         return false;
                     }
                 }
@@ -328,7 +479,7 @@ namespace mkverobj
                 return true;
             }
 
-            static bool _version_number_validator(const std::string& val, /* [[out]] */ std::string& msg) {
+            static bool _version_number_validator(const std::string& val, /*out*/ std::string& msg) {
 
                 msg.clear();
 
