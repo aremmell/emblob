@@ -42,7 +42,7 @@ namespace mkverobj
 #if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
             int finderr = strerror_r(err, buf, MAX_ERRORMSG);
-# if defined(__GLIBC__) && (__GLIBC__ >= 2 && __GLIBC_MINOR__ < 13)
+# if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
             if (finderr == -1) {
                 success = false;
                 finderr = errno;
