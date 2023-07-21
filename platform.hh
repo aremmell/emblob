@@ -4,13 +4,15 @@
 #if defined(__APPLE__)
 # define __MACOS__
 # define _DARWIN_C_SOURCE
-# if defined(_POSIX_C_SOURCE)
-#  undef _POSIX_C_SOURCE
-# endif
 # define MKVEROBJ_PLATFORM macOS
 #elif defined(__linux__)
 # define __LINUS__
 # define MKVEROBJ_PLATFORM Linux
+#elif defined(_WIN32)
+# define MKVEROBJ_PLATFORM Windows
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+# define __BSD__
+# define MKVEROBJ_PLATFORM BSD
 # if !defined(_GNU_SOURCE)
 #  define _GNU_SOURCE
 # endif
@@ -29,11 +31,11 @@
 #endif
 
 #if !defined(_WIN32)
-# if defined(__STDC_WANT_LIB_EXT1__)
+#if defined(__STDC_WANT_LIB_EXT1__)
 # undef __STDC_WANT_LIB_EXT1__
 # endif
 # define __STDC_WANT_LIB_EXT1__ 1
-#else /* __WIN__ */
+#else
 # if defined(__WANT_STDC_SECURE_LIB__)
 # undef __WANT_STDC_SECURE_LIB__
 # endif
