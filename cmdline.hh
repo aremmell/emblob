@@ -1,10 +1,35 @@
+/*
+ * cmdline.hh
+ *
+ * Author:    Ryan M. Lederman <lederman@gmail.com>
+ * Copyright: Copyright (c) 2018-2023
+ * License:   The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #ifndef _MKVEROBJ_CMDLINE_HH_INCLUDED
 #define _MKVEROBJ_CMDLINE_HH_INCLUDED
 
 #include <cstring>
 #include <iostream>
 #include "util.hh"
-#include "platform.hh"
+#include "logger.hh"
+#include "system.hh"
 
 namespace mkverobj
 {
@@ -92,6 +117,7 @@ namespace mkverobj
             std::cerr << SIR_ESC_SEQ("1", "") << APP_NAME << " usage:"
                       << SIR_ESC_RST << std:: endl;
 
+            std::cerr << APP_NAME << " usage:" << std:: endl;
             _config.for_each([](const config::arg& a) {
                 std::cerr << "\t" << a.to_string() << std::endl;
             });
@@ -127,38 +153,8 @@ namespace mkverobj
             return _get_output_filename(EXT_OBJ);
         }
 
-        sir_level get_log_level() const {
-            return log_level_from_string(_config.get_value(FLAG_LOG_LEVEL));
-        }
-
-        static sir_level log_level_from_string(const std::string& str) {
-            if (str == "debug") {
-                return SIRL_DEBUG;
-            } else if (str == "info") {
-                return SIRL_INFO;
-            } else if (str == "warning") {
-                return SIRL_WARN;
-            } else if (str == "error") {
-                return SIRL_ERROR;
-            } else if (str == "critical") {
-                return SIRL_CRIT;
-            } else {
-                return SIRL_NONE;
-            }
-        }
-
-        static std::string log_level_to_string(sir_level level) {
-            switch (level) {
-                case SIRL_DEBUG:  return "debug";
-                case SIRL_INFO:   return "info";
-                case SIRL_NOTICE: return "notice";
-                case SIRL_WARN:   return "warning";
-                case SIRL_ERROR:  return "error";
-                case SIRL_CRIT:   return "critical";
-                case SIRL_ALERT:  return "alert";
-                case SIRL_EMERG:  return "emergency";
-                default: return SIR_UNKNOWN;
-            }
+        logger::level get_log_level() const {
+            return logger::level_from_string(_config.get_value(FLAG_LOG_LEVEL));
         }
 
         private:
@@ -322,8 +318,8 @@ namespace mkverobj
 
                 for (const auto& ext : { EXT_BIN, EXT_ASM, EXT_OBJ }) {
                     std::string file_err_msg;
-                    if(!platform::is_valid_output_filename(val + ext, file_err_msg)) {
-                        msg = fmt_str("unable to use %s as an output filename (%s)", val.c_str(), file_err_msg.c_str());
+                    if(!system::is_valid_output_filename(val + ext, file_err_msg)) {
+                        msg = fmt_str("Unable to use %s as an output filename (%s)", val.c_str(), file_err_msg.c_str());
                         return false;
                     }
                 }

@@ -1,16 +1,9 @@
 /*
- * @file cexample.c
- * @brief mkverobj API
+ * cexample.c
  *
- * This file and accompanying source code originated from <https://github.com/aremmell/mkverobj/>.
- * If you obtained it elsewhere, all bets are off.
- *
- * @author Ryan M. Lederman <lederman@gmail.com>
- * @copyright
- *
- * The MIT License (MIT)
- *
- * Copyright (c) 2018 Ryan M. Lederman
+ * Author:    Ryan M. Lederman <lederman@gmail.com>
+ * Copyright: Copyright (c) 2018-2023
+ * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +22,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "version.h"

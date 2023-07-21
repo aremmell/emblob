@@ -1,16 +1,9 @@
 /*
- * @file mkverobj.cc
- * @brief mkverobj API
+ * mkverobj.cc
  *
- * This file and accompanying source code originated from <https://github.com/aremmell/mkverobj/>.
- * If you obtained it elsewhere, all bets are off.
- *
- * @author Ryan M. Lederman <lederman@gmail.com>
- * @copyright
- *
- * The MIT License (MIT)
- *
- * Copyright (c) 2018 Ryan M. Lederman
+ * Author:    Ryan M. Lederman <lederman@gmail.com>
+ * Copyright: Copyright (c) 2018-2023
+ * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +22,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 #include "mkverobj.hh"
 #include "cmdline.hh"
 #include "appstate.hh"
@@ -56,9 +48,8 @@ int main(int argc, char** argv) {
                 delete_file_on_unclean_exit(cmd_line.get_obj_output_filename());
         }
 
-        sir_debug("exiting with status: %d (%s)", code,
+        g_logger->debug("exiting with status: %d (%s)", code,
             code == EXIT_SUCCESS ? "success" : "failure");
-        sir_cleanup();
         return code;
     };
 
@@ -66,55 +57,7 @@ int main(int argc, char** argv) {
         if (!cmd_line.parse_and_validate(argc, argv))
             return _exit_main(cmd_line.print_usage());
 
-        /* Initialize libsir. */
-        sirinit si = {0};
-        si.d_stdout.opts   = SIRO_NOHOST | SIRO_NOTID;
-        si.d_stderr.opts   = si.d_stdout.opts;
-        si.d_stdout.levels = SIRL_NONE;
-        si.d_stderr.levels = SIRL_NONE;
-        si.d_syslog.opts   = SIRO_MSGONLY;
-        si.d_syslog.levels = SIRL_NONE;
-
-        sir_level log_level = cmd_line.get_log_level();
-        switch (log_level) {
-            case SIRL_EMERG:
-            case SIRL_ALERT:
-            case SIRL_CRIT:
-                si.d_stderr.levels = SIRL_CRIT;
-            break;
-            case SIRL_ERROR:
-                si.d_stderr.levels = SIRL_ERROR | SIRL_CRIT;
-            break;
-            case SIRL_WARN:
-                si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
-            break;
-            case SIRL_NOTICE:
-            case SIRL_INFO:
-                si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
-                si.d_stdout.levels = SIRL_INFO;
-            break;
-            case SIRL_DEBUG:
-                si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
-                si.d_stdout.levels = SIRL_DEBUG | SIRL_INFO;
-            break;
-            case SIRL_NONE:
-            case SIRL_ALL:
-            case SIRL_DEFAULT:
-            default: {
-                si.d_stderr.levels = SIRL_WARN | SIRL_ERROR | SIRL_CRIT;
-                si.d_stdout.levels = SIRL_INFO;
-                sir_warn("invalid logging level; using defaults");
-            }
-        }
-
-        strncpy(si.name, APP_NAME, SIR_MAXNAME);
-
-        if (!sir_init(&si)) {
-            fprintf(stderr, RED("failed to initialize libsir; exiting!") "\n");
-            return _exit_main(EXIT_FAILURE);
-        }
-
-        std::string compiler = platform::detect_c_compiler();
+        std::string compiler = system::detect_c_compiler();
         if (compiler.empty())
             return _exit_main(EXIT_FAILURE);
 
@@ -128,7 +71,7 @@ int main(int argc, char** argv) {
             strncpy(res.notes, notes.c_str(), MKVEROBJ_MAX_NOTES - 1);
 
         std::string bin_file = cmd_line.get_bin_output_filename();
-        sir_info("writing version data {%hu, %hu, %hu, '%s'} to %s...", res.major,
+        g_logger->info("writing version data {%hu, %hu, %hu, '%s'} to %s...", res.major,
             res.minor, res.build, res.notes, bin_file.c_str());
 
         auto openmode = ios::out | ios::binary | ios::trunc;
@@ -137,12 +80,12 @@ int main(int argc, char** argv) {
         });
 
         if (wrote == -1) {
-            sir_crit("failed to write %s: %s", bin_file.c_str(),
-                platform::get_error_message(errno).c_str());
+            g_logger->fatal("failed to write %s: %s", bin_file.c_str(),
+                system::get_error_message(errno).c_str());
             return _exit_main(EXIT_FAILURE);
         }
 
-        sir_info("successfully created %s (%lld bytes)", bin_file.c_str(),
+        g_logger->info("successfully created %s (%lld bytes)", bin_file.c_str(),
             platform::file_size(bin_file));
         state.created_bin_file = true;
 
@@ -158,28 +101,28 @@ int main(int argc, char** argv) {
         });
 
         if (wrote == -1) {
-            sir_crit("failed to write %s: %s", asm_file.c_str(),
-                platform::get_error_message(errno).c_str());
+            g_logger->fatal("failed to write %s: %s", asm_file.c_str(),
+                system::get_error_message(errno).c_str());
             return _exit_main(EXIT_FAILURE);
         }
 
-        sir_info("successfully created %s (%lld bytes)", asm_file.c_str(),
+        g_logger->info("successfully created %s (%lld bytes)", asm_file.c_str(),
             platform::file_size(asm_file));
         state.created_asm_file = true;
 
         std::string obj_file = cmd_line.get_obj_output_filename();
         auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());
-        bool asm_to_obj = platform::execute_system_command(cmd);
+        bool asm_to_obj = system::execute_system_command(cmd);
 
         if (asm_to_obj)
             state.created_obj_file = true;
 
         return _exit_main(asm_to_obj ? EXIT_SUCCESS : EXIT_FAILURE);
 #else
-# error "support for this platform/OS has not been implemented; please contact the author."
+# error "support for this platform is not implemented. please contact the author."
 #endif
     } catch (const exception& ex) {
-        sir_crit("caught top-level exception: %s; exiting!", ex.what());
+        g_logger->fatal("caught top-level exception: %s", ex.what());
         return _exit_main(EXIT_FAILURE);
     }
 
@@ -203,7 +146,7 @@ namespace mkverobj
             if (strm.good())
                 return strm.tellp();
         } catch (const std::exception& ex) {
-            sir_error("caught exception while writing to '%s': %s", fname.c_str(), ex.what());
+            g_logger->error("caught exception while writing to '%s': %s", fname.c_str(), ex.what());
         }
 
         return std::ofstream::pos_type(-1);
@@ -211,9 +154,9 @@ namespace mkverobj
 
     void delete_file_on_unclean_exit(const std::string& fname) {
         if (0 != remove(fname.c_str()))
-            sir_error("failed to delete '%s': %s", fname.c_str(),
-                platform::get_error_message(errno).c_str());
+            g_logger->error("failed to delete '%s': %s", fname.c_str(),
+                system::get_error_message(errno).c_str());
         else
-            sir_info("deleted '%s'", fname.c_str());
+            g_logger->info("deleted '%s'", fname.c_str());
     }
 } // !namespace mkverobj
