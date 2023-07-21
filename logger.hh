@@ -25,9 +25,6 @@
 #ifndef _MKVEROBJ_LOGGER_HH_INCLUDED
 #define _MKVEROBJ_LOGGER_HH_INCLUDED
 
-#include <iostream>
-#include <exception>
-#include <memory>
 #include "util.hh"
 
 namespace mkverobj

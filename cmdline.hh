@@ -25,8 +25,6 @@
 #ifndef _MKVEROBJ_CMDLINE_HH_INCLUDED
 #define _MKVEROBJ_CMDLINE_HH_INCLUDED
 
-#include <cstring>
-#include <iostream>
 #include "util.hh"
 #include "logger.hh"
 #include "system.hh"

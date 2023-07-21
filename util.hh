@@ -25,11 +25,7 @@
 #ifndef _MKVEROBJ_UTIL_HH_INCLUDED
 #define _MKVEROBJ_UTIL_HH_INCLUDED
 
-#include <string>
-#include <fstream>
-#include <cstdio>
-#include <cstdarg>
-#include <algorithm>
+#include "platform.hh"
 
 namespace mkverobj
 {
