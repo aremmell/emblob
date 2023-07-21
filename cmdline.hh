@@ -299,7 +299,7 @@ namespace mkverobj
                     return false;
                 }
 
-                if (SIRL_NONE == log_level_from_string(val)) {
+                if (logger::level::invalid == logger::level_from_string(val)) {
                     msg = fmt_str("%s is not a valid log level", val.c_str());
                     return false;
                 }
@@ -345,7 +345,7 @@ namespace mkverobj
                         return false;
                     }
                 } catch (std::regex_error& e) {
-                    sir_crit("regex exception: %s", e.what());
+                    g_logger->fatal("regex exception: %s", e.what());
                     return false;
                 }
 

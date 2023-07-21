@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         }
 
         g_logger->info("successfully created %s (%lld bytes)", bin_file.c_str(),
-            platform::file_size(bin_file));
+            system::file_size(bin_file));
         state.created_bin_file = true;
 
 #if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
