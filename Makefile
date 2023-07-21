@@ -22,12 +22,12 @@ LIBSIRDIR := lib/libsir
 # compiler/linker commands. you're going to want to make sure $INCLUDE
 # and $LDFLAGS are defined.
 CFLAGS          = -Wpedantic -std=c11 -fPIC -I.
-CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I. -I$(LIBSIRDIR)
+CXXFLAGS        = -Wpedantic -std=c++17 -fPIC -I.
 CFLAGS_NDEBUG   = -O3 -DNDEBUG
 CFLAGS_DEBUG    = -g -O0 -DDEBUG
 CXXFLAGS_NDEBUG = -O3 -DNDEBUG
 CXXFLAGS_DEBUG  = -g -O0 -DDEBUG
-LDFLAGS         = -L$(LIBSIRDIR)/build/lib -lsir_s -pthread
+LDFLAGS         = -pthread
 
 ifeq ($(MKVEROBJ_DEBUG),1)
 	CFLAGS   += $(CFLAGS_DEBUG)
@@ -89,7 +89,7 @@ $(BUILDDIR) : prep
 $(INTDIR)   : $(BUILDDIR)
 $(BINDIR)   : $(BUILDDIR)
 
-$(OBJ_MKVEROBJ) : $(INTDIR) $(LIBSIRDIR)
+$(OBJ_MKVEROBJ) : $(INTDIR)
 $(OBJ_CEXAMPLE) : $(INTDIR)
 $(OBJ_CXXEXAMPLE) : $(INTDIR)
 $(OBJ_VERFILE) : $(INTDIR)
@@ -101,9 +101,6 @@ $(ASM_VERFILE) : $(BIN_MKVEROBJ)
 $(OBJ_VERFILE) : $(ASM_VERFILE)
 $(BIN_CEXAMPLE) : $(OBJ_VERFILE)
 $(BIN_CXXEXAMPLE) : $(OBJ_VERFILE)
-
-$(LIBSIRDIR): depends
-	SIR_NO_SYSTEM_LOGGERS=1 $(MAKE) -C $@ static
 
 compile: depends $(OBJ_MKVEROBJ) $(OBJ_CEXAMPLE) $(OBJ_CXXEXAMPLE)
 $(OBJ_MKVEROBJ) : $(TUS_MKVEROBJ) $(DEPS)
@@ -132,6 +129,5 @@ prep:
 
 clean:
 	$(shell if [ -d "$(BUILDDIR)" ]; then rm -rf "$(BUILDDIR)"; fi)
-	$(MAKE) -C $(LIBSIRDIR) clean
 
 .PHONY: clean prep

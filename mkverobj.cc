@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
         }
 
         g_logger->info("successfully created %s (%lld bytes)", asm_file.c_str(),
-            platform::file_size(asm_file));
+            system::file_size(asm_file));
         state.created_asm_file = true;
 
         std::string obj_file = cmd_line.get_obj_output_filename();

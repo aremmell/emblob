@@ -30,6 +30,7 @@
 #include "util.hh"
 #include "logger.hh"
 #include "system.hh"
+#include "ansimacros.h"
 
 namespace mkverobj
 {
@@ -114,8 +115,8 @@ namespace mkverobj
         }
 
         int print_usage() const {
-            std::cerr << SIR_ESC_SEQ("1", "") << APP_NAME << " usage:"
-                      << SIR_ESC_RST << std:: endl;
+            std::cerr << ESC_SEQ("1", "") << APP_NAME << " usage:" << ESC_RST
+                << std:: endl;
 
             std::cerr << APP_NAME << " usage:" << std:: endl;
             _config.for_each([](const config::arg& a) {
@@ -184,11 +185,11 @@ namespace mkverobj
 
                         for (const auto& o : options) {
                             if (first) {
-                                retval += SIR_ESC_SEQ("4", "") + o + SIR_ESC_SEQE("24");
+                                retval += ESC_SEQ("4", "") + o + ESC_SEQE("24");
                                 first = false;
                             } else {
                                 retval += " | ";
-                                retval += SIR_ESC_SEQ("4", "") + o + SIR_ESC_SEQE("24");
+                                retval += ESC_SEQ("4", "") + o + ESC_SEQE("24");
                             }
                         }
 
@@ -223,7 +224,7 @@ namespace mkverobj
 
                             if (!default_value.empty()) {
                                 retval += "; default: '";
-                                retval += SIR_ESC_SEQ("4", "") + default_value + SIR_ESC_SEQE("24");
+                                retval += ESC_SEQ("4", "") + default_value + ESC_SEQE("24");
                                 retval += "'";
                             }
                             retval += ")";
@@ -271,12 +272,12 @@ namespace mkverobj
                     { FLAG_BUILD, S_FLAG_BUILD, "Build number", "", "", {}, false, true, false, false, &_version_number_validator },
                     { FLAG_NOTES, S_FLAG_NOTES, "Notes (max 256 characters)", "", "", {}, false, true, false, false, nullptr },
                     { FLAG_OUTPUT_FILE, S_FLAG_OUTPUT_FILE, "Output file name", "", DEF_OUTPUT_FILE, {}, false, true, false, false, &_output_filename_validator },
-                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", log_level_to_string(SIRL_INFO), {
-                        log_level_to_string(SIRL_DEBUG),
-                        log_level_to_string(SIRL_INFO),
-                        log_level_to_string(SIRL_WARN),
-                        log_level_to_string(SIRL_ERROR),
-                        log_level_to_string(SIRL_CRIT),
+                    { FLAG_LOG_LEVEL, S_FLAG_LOG_LEVEL, "Console logging verbosity", "", logger::LEVEL_INFO, {
+                        logger::LEVEL_DEBUG,
+                        logger::LEVEL_INFO,
+                        logger::LEVEL_WARNING,
+                        logger::LEVEL_ERROR,
+                        logger::LEVEL_FATAL,
                     }, false, true, false, false, &_log_level_validator },
                     { FLAG_HELP, S_FLAG_HELP, "Print this usage information", "", "", {}, false, false, false, false, nullptr }
                 };
