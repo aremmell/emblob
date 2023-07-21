@@ -66,16 +66,6 @@
 # define __WANT_STDC_SECURE_LIB__ 1
 #endif
 
-#if !defined(restrict)
-# if defined(__clang__) || (defined(_MSC_VER) && _MSC_VER >= 1400)
-# define restrict __restrict
-# elif defined(__GNUC__)
-# define restrict __restrict__
-#else
-# define restrict
-# endif
-#endif
-
 #if !defined (_WIN32)
 # include <sys/wait.h>
 # include <unistd.h>
