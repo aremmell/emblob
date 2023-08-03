@@ -1,5 +1,7 @@
 # mkverobj
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/04d7ae1da0de4710b7680167965b83e0)](https://app.codacy.com/gh/aremmell/mkverobj/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 > NOTE: The main branch has undergone signficicant changes and improvements since this README was written. I will be updating it when I am satisfied with the added/improved functionality.
 >
 > The `mkverobj` binary that is generated now has a different/more configurable CLI interface; use `mkverobj --help` for more information.
