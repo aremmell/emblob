@@ -5,7 +5,6 @@
             "includePath": [
                 "${workspaceFolder}/",
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/lib/libsir",
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
                 "/usr/local/include"
             ],
@@ -22,8 +21,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/",
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/lib/libsir",
+                "${workspaceFolder}/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
