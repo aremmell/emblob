@@ -25,7 +25,7 @@
 #ifndef _MKVEROBJ_PLATFORM_HH_INCLUDED
 #define _MKVEROBJ_PLATFORM_HH_INCLUDED
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(__MACH__)
 # define __MACOS__
 # define _DARWIN_C_SOURCE
 # define MKVEROBJ_PLATFORM macOS
