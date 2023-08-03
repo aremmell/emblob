@@ -67,8 +67,10 @@ int main(int argc, char** argv) {
         res.patch = cmd_line.get_patch_version();
 
         std::string suffix = cmd_line.get_suffix();
-        if (!suffix.empty())
+        if (!suffix.empty()) {
             strncpy(res.suffix, suffix.c_str(), MKVEROBJ_MAX_SUFFIX - 1);
+            res.suffix[MKVEROBJ_MAX_SUFFIX - 1] = '\0';
+        }
 
         std::string bin_file = cmd_line.get_bin_output_filename();
         g_logger->info("writing version data {%" PRIu16 ", %" PRIu16 ", %" PRIu16 ", '%s'} to %s...",
