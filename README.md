@@ -61,7 +61,7 @@ typedef struct
 
 #### Example C program
 
-- Build with: `gcc -Wall -o build/cexample cexample.c VERSION.o -I. -std=c11`
+Build with: `gcc -Wall -o build/cexample cexample.c VERSION.o -I. -std=c11`
 
 ```c
 #include <stdio.h>
@@ -79,7 +79,7 @@ int main (int argc, char** argv)
 
 #### Example C++ program
 
-- Build with: `g++ -Wall -o build/cxxexample cxxexample.cc VERSION.o -I. -std=c++17`
+Build with: `g++ -Wall -o build/cxxexample cxxexample.cc VERSION.o -I. -std=c++17`
 
 ```cpp
 #include <iostream>
