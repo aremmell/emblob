@@ -66,9 +66,8 @@ typedef struct {
     uint16_t patch; /**< Patch/build/revision number. */
 
     /**
-     * A buffer of ::MKVEROBJ_MAX_NOTES chars in size to be used however
-     * you see fit, but primarily intended to be used as a version suffix
-     * string (e.g., "-dev", "-rc", etc.)
+     * A buffer of ::MKVEROBJ_MAX_SUFFIX chars in size to be used however
+     * you see fit.
      */
     char suffix[MKVEROBJ_MAX_SUFFIX];
 } version_resource;
