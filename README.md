@@ -1,24 +1,22 @@
 # mkverobj
 
-> NOTE: The main branch has undergone signficicant changes and improvements since this README was written. I will be updating it when I am satisfied with the added/improved functionality.
+> NOTE: The main branch has undergone signficicant changes and improvements since this README was written. I will be updating it when I am satisfied with the added/improved functionality (and get around to it).
 >
-> The `mkverobj` binary that is generated now has a different/more configurable CLI interface; use `mkverobj --help` for more information.
+> The `build/bin/mkverobj` binary that is generated now has a different/more configurable CLI interface; use `build/bin/mkverobj --help` for more information.
 >
-> It *should* work just fine on any Linux, macOS and FreeBSD with gcc or Clang. No Windows support yet (maybe never).
-
-cli utility and header for link-time embedding of a version resource for use with gcc/g++
+> It *should* work just fine on any Linux, macOS and BSD with gcc/g++ or Clang[++]. No Windows support yet (and perhaps never).
 
 ## About
 
-**TL;DR:** `mkverobj` is a simple cli utility that generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and a function to retrieve the compiled version information at runtime.
+**TL;DR:** `mkverobj` is a simple cli utility that generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and functions to retrieve the compiled version information at runtime.
 
 ## Compiling
 
-There's just a simple `Makefile` as of now, which may or may not work for you. Clone and `make`. Creates `build/bin/mkverobj`.
+There's just a simple `Makefile` as of now, which may or may not work for you. **In the near future I will be migrating to CMake**. Clone and `make all`. Creates `build/bin/mkverobj`, executes it with sample parameters and links the resulting version object into `build/bin/cxxexample` and `build/bin/cexample`.
 
 ## Usage
 
-The intention is to use `mkverobj` as part of your build process&mdash;before the linking stage, then include the header to access the version information in your code.
+The intention is to use `mkverobj` as part of your build process&mdash;before the linking stage, then include the `version.h` header to access the version information from your code.
 
 ### Compile-time
 
