@@ -8,7 +8,7 @@
 
 ## About
 
-**TL;DR:** `mkverobj` is a simple cli utility that generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and functions to retrieve the compiled version information at runtime.
+**TL;DR:** `mkverobj` is a simple cli utility which generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and functions to retrieve the compiled version information at runtime.
 
 ## Compiling
 
