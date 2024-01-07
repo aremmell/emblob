@@ -4,7 +4,7 @@
 >
 > The `build/bin/mkverobj` binary that is generated now has a different/more configurable CLI interface; use `build/bin/mkverobj --help` for more information.
 >
-> It *should* work just fine on any Linux, macOS and BSD with gcc/g++ or Clang[++]. No Windows support yet (and perhaps never).
+> It *should* work just fine on any Linux, macOS and BSD with GCC or Clang. No Windows support yet (and perhaps never).
 
 ## About
 
