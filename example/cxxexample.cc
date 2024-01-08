@@ -1,8 +1,9 @@
 /*
- * appstate.hh
+ * cxxexample.cc
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,18 +23,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_APPSTATE_HH_INCLUDED
-#define _MKVEROBJ_APPSTATE_HH_INCLUDED
+#include <iostream>
+#include <cstdlib>
+#include "../emblob_test.h"
 
-namespace mkverobj
+int main()
 {
-    class app_state
-    {
-    public:
-        bool created_bin_file = false;
-        bool created_asm_file = false;
-        bool created_obj_file = false;
-    };
-} // !namespace mkverobj
-
-#endif // !_MKVEROBJ_APPSTATE_HH_INCLUDED
+    auto bytes = emblob_get_test_8();
+    for (size_t n = 0; n < 15; n++) {
+        std::cout << std::hex << "0x" << static_cast<int>(bytes[n]) << ", ";
+    }
+    std::cout << std::endl;
+    return EXIT_SUCCESS;
+}

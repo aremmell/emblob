@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2018-2024 Ryan M. Lederman <lederman@gmail.com> -->
 # mkverobj
 
 > NOTE: The main branch has undergone signficicant changes and improvements since this README was written. I will be updating it when I am satisfied with the added/improved functionality (and get around to it).

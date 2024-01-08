@@ -1,0 +1,34 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: emblob
+Upstream-Contact: Ryan M. Lederman <lederman@gmail.com>
+Source: https://github.com/aremmell/emblob
+
+# GitHub files
+Files: .github/workflows/*.yml
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
+
+# Visual Studio Code files
+Files: .vscode/*
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
+
+# Workspace files
+Files: bal.code-workspace
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
+
+# CMake files
+Files: CMakePresets.json
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
+
+# Examples
+Files: example/*.c example/*.cc
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
+
+# C++ source
+Files: src/*.cc include/*.hh include/emblob/*.hh include/emblob/version.hh.in
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT

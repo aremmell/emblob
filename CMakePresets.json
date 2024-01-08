@@ -1,0 +1,72 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 18,
+        "patch": 4
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Configure: default",
+            "description": "Generator: Ninja",
+            "generator": "Ninja",
+            "cacheVariables": {
+            },
+            "binaryDir": "build",
+            "installDir": "build/install",
+            "toolset": {
+                "strategy": "external"
+            },
+            "environment": {
+                "PATH": "$penv{PATH}"
+            },
+            "warnings": {
+                "unusedCli": true,
+                "systemVars": true
+            },
+            "debug": {
+                "output": true
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Configure: debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Configure: release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "displayName": "Build: default",
+            "configurePreset": "default",
+            "cleanFirst": true,
+            "verbose": true
+        },
+        {
+            "name": "debug",
+            "displayName": "Build: debug",
+            "description": "Builds emblob with debugging symbols.",
+            "configurePreset": "debug",
+            "inherits": "default"
+        },
+        {
+            "name": "release",
+            "displayName": "Build: release",
+            "description": "Builds emblob for public use.",
+            "configurePreset": "release",
+            "inherits": "default"
+        }
+    ]
+}

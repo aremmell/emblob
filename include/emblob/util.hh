@@ -2,7 +2,8 @@
  * util.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,17 +23,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_UTIL_HH_INCLUDED
-#define _MKVEROBJ_UTIL_HH_INCLUDED
+#ifndef _EMBLOB_UTIL_HH_INCLUDED
+# define _EMBLOB_UTIL_HH_INCLUDED
 
-#include "platform.hh"
+# include "platform.hh"
 
-namespace mkverobj
+namespace emblob
 {
-#define CONST_STATIC_X(type) static constexpr type
-#define CONST_STATIC_STRING CONST_STATIC_X(const char*)
+# define CONST_STATIC_X(type) static constexpr type
+# define CONST_STATIC_STRING CONST_STATIC_X(const char*)
 
-    CONST_STATIC_STRING APP_NAME = "mkverobj";
+    CONST_STATIC_STRING APP_NAME = "emblob";
 
     static std::string fmt_str(const char* fmt, ...) {
         va_list args1;
@@ -60,10 +61,24 @@ namespace mkverobj
     }
 
     std::string string_to_lower(const std::string& str) {
-        std::string retval = str;
+        auto retval = str;
 
         std::for_each(retval.begin(), retval.end(), [](char& c) {
-            c = std::tolower(c);
+            int i = c;
+            i = std::tolower(i);
+            c = static_cast<char>(i);
+        });
+
+        return retval;
+    }
+
+    std::string string_to_upper(const std::string& str) {
+        auto retval = str;
+
+        std::for_each(retval.begin(), retval.end(), [](char& c) {
+            int i = c;
+            i = std::toupper(i);
+            c = static_cast<char>(i);
         });
 
         return retval;
@@ -73,10 +88,6 @@ namespace mkverobj
         return nullptr != str && 0 != *str;
     }
 
-    static inline uint16_t string_to_uint16(const std::string& str) {
-        return static_cast<uint16_t>(std::strtoul(str.c_str(), nullptr, 10));
-    }
+} // !namespace emblob
 
-} // !namespace mkverobj
-
-#endif // !_MKVEROBJ_UTIL_HH_INCLUDED
+#endif // !_EMBLOB_UTIL_HH_INCLUDED

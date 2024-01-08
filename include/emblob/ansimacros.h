@@ -2,7 +2,8 @@
  * ansimacros.h
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,8 +23,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_ANSIMACROS_H_INCLUDED
-# define _MKVEROBJ_ANSIMACROS_H_INCLUDED
+#ifndef _EMBLOB_ANSIMACROS_H_INCLUDED
+# define _EMBLOB_ANSIMACROS_H_INCLUDED
 
 # define _ESC "\x1b[" /**< Begins an ANSI escape sequence. */
 # define _ESC_M "m"    /**< Marks the end of a sequence. */
@@ -109,4 +110,4 @@
 # define WHITE(s)     COLOR(0, 97, 49, s) /**< White foreground text. */
 # define WHITEB(s)    COLOR(1, 97, 49, s) /**< Bold white foreground text. */
 
-#endif // !_MKVEROBJ_ANSIMACROS_H_INCLUDED
+#endif // !_EMBLOB_ANSIMACROS_H_INCLUDED

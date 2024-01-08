@@ -1,8 +1,9 @@
 /*
- * mkverobj.hh
+ * cexample.c
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,14 +23,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_HH_INCLUDED
-#define _MKVEROBJ_HH_INCLUDED
+#include <stdio.h>
+#include <stdlib.h>
+#include "../emblob_test.h"
 
-#include <string>
-
-namespace mkverobj
+int main(void)
 {
-    void delete_file_on_unclean_exit(const std::string& fname);
-} // !namespace mkverobj
-
-#endif // !_MKVEROBJ_HH_INCLUDED
+    const uint8_t* bytes = emblob_get_test_8();
+    for (size_t n = 0; n < 256; n++) {
+        printf("%hhx ", bytes[n]);
+    }
+    printf("\n");
+    return EXIT_SUCCESS;
+}

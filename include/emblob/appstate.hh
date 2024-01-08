@@ -1,8 +1,9 @@
 /*
- * cxxexample.cc
+ * appstate.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,14 +23,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <iostream>
-#include <cstdlib>
-#include "version.h"
+#ifndef _EMBLOB_APPSTATE_HH_INCLUDED
+# define _EMBLOB_APPSTATE_HH_INCLUDED
 
-int main()
+namespace emblob
 {
-    auto res = get_version_resource();
-    std::cout << "major: " << res->major << ", minor: " << res->minor << ", patch: "
-        << res->patch << ", suffix: '" << res->suffix << "'" << std::endl;
-    return EXIT_SUCCESS;
-}
+    class app_state
+    {
+    public:
+        bool created_hdr_file = false;
+        bool created_asm_file = false;
+        bool created_obj_file = false;
+    };
+} // !namespace emblob
+
+#endif // !_EMBLOB_APPSTATE_HH_INCLUDED

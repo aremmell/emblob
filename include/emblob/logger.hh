@@ -2,7 +2,8 @@
  * logger.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,12 +23,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_LOGGER_HH_INCLUDED
-#define _MKVEROBJ_LOGGER_HH_INCLUDED
+#ifndef _EMBLOB_LOGGER_HH_INCLUDED
+# define _EMBLOB_LOGGER_HH_INCLUDED
 
-#include "util.hh"
+# include "emblob/util.hh"
 
-namespace mkverobj
+namespace emblob
 {
     class logger : public std::enable_shared_from_this<logger>
     {
@@ -173,16 +174,16 @@ namespace mkverobj
         }
 
     private:
-#if defined(DEBUG)
+# if defined(DEBUG)
         level _level = level::debug;
-#else
+# else
         level _level = level::info;
-#endif
+# endif
     };
 
     typedef std::unique_ptr<logger> logger_ptr;
     logger_ptr g_logger = std::make_unique<logger>();
 
-} // !namespace mkverobj
+} // !namespace emblob
 
-#endif // !_MKVEROBJ_LOGGER_HH_INCLUDED
+#endif // !_EMBLOB_LOGGER_HH_INCLUDED

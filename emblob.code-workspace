@@ -6,6 +6,7 @@
 	],
 	"settings": {
 		"files.associations": {
+			"*.i": "swig",
 			"*.php": "php",
 			"ostream": "cpp",
 			"format": "cpp",

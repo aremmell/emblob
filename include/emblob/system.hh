@@ -2,7 +2,8 @@
  * system.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   2.0.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,13 +23,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_SYSTEM_HH_INCLUDED
-# define _MKVEROBJ_SYSTEM_HH_INCLUDED
+#ifndef _EMBLOB_SYSTEM_HH_INCLUDED
+# define _EMBLOB_SYSTEM_HH_INCLUDED
 
-#include "platform.hh"
-#include "util.hh"
+# include "emblob/platform.hh"
+# include "emblob/util.hh"
 
-namespace mkverobj
+namespace emblob
 {
     class system
     {
@@ -39,17 +40,17 @@ namespace mkverobj
         static std::string get_error_message(int err) {
             char buf[MAX_ERRORMSG] = {0};
 
-#if defined(__HAVE_XSI_STRERROR_R__)
+# if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
             int finderr = strerror_r(err, buf, MAX_ERRORMSG);
-# if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
+#  if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
             if (finderr == -1) {
                 success = false;
                 finderr = errno;
             }
-# else
+#  else
             success = finderr == 0;
-# endif
+#  endif
             if (!success)
                 snprintf(buf, MAX_ERRORMSG, "got error %d while trying to look up error %d",
                     finderr, err);
@@ -63,7 +64,7 @@ namespace mkverobj
             return buf;
 # else
             return strerror(err);
-#endif
+# endif
         }
 
         static bool file_exists(const std::string& fname) {
@@ -81,7 +82,7 @@ namespace mkverobj
         }
 
         /* file size in bytes, or -1 upon failure */
-        static off_t file_size(const std::string fname) {
+        static off_t file_size(const std::string& fname) {
             struct stat st;
             if (0 != stat(fname.c_str(), &st)) {
                 g_logger->error("couldn't stat %s; error: %s", fname.c_str(),
@@ -90,6 +91,18 @@ namespace mkverobj
             }
 
             return st.st_size;
+        }
+
+        static std::string file_base_name(const std::string& fname) {
+            auto last_full_stop = fname.find_last_of('.');
+            if (std::string::npos == last_full_stop) {
+                return fname;
+            }
+
+            auto base_name = fname.substr(0, last_full_stop);
+            std::replace(base_name.begin(), base_name.end(), '.', '_');
+// TODO_strip_illegal_variable_name_chars:
+            return base_name;
         }
 
         static std::ofstream::pos_type write_file_contents(const std::string& fname,
@@ -118,6 +131,23 @@ namespace mkverobj
             return 0 == std::remove(fname.c_str());
         }
 
+        static bool is_valid_input_filename(const std::string& fname, std::string& err_msg) {
+            bool opened = false;
+            err_msg.clear();
+
+            auto size = file_size(fname);
+            if (-1 == size) {
+                err_msg = get_error_message(errno);
+            } else if (0 == size) {
+                err_msg = fmt_str("input file %s is empty", fname.c_str());
+            } else {
+                opened = true;
+                g_logger->info("input file %s (%lld bytes)", fname.c_str(), size);
+            }
+
+            return opened;
+        }
+
         static bool is_valid_output_filename(const std::string& fname, std::string& err_msg) {
             bool created = false;
             err_msg.clear();
@@ -125,17 +155,19 @@ namespace mkverobj
             FILE *f = nullptr;
             int err = 0;
 
-#if defined(__HAVE_STDC_SECURE_LIB__)
+# if defined(__HAVE_STDC_SECURE_LIB__)
             err = fopen_s(&f, fname.c_str(), "wx");
-            if (0 == err)
+            if (0 == err) {
                 created = true;
-#else
+            }
+# else
             f = fopen(fname.c_str(), "wx");
-            if (f)
+            if (f) {
                 created = true;
-            else
+            } else {
                 err = errno;
-#endif
+            }
+# endif
             if (created) {
                 fclose(f);
                 f = nullptr;
@@ -152,8 +184,7 @@ namespace mkverobj
         static std::string detect_c_compiler() {
             char* from_env = getenv("CC");
             if (valid_str(from_env)) {
-                g_logger->info("detected C compiler '%s' from environment variable 'CC'",
-                    from_env);
+                g_logger->info("detected C compiler '%s' from environment variable 'CC'", from_env);
                 return from_env;
             }
 
@@ -204,6 +235,6 @@ namespace mkverobj
             return retval;
         }
     };
-} // !namespace mkverobj
+} // !namespace emblob
 
-#endif // !_MKVEROBJ_SYSTEM_HH_INCLUDED
+#endif // !_EMBLOB_SYSTEM_HH_INCLUDED
