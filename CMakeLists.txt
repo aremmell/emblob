@@ -124,15 +124,65 @@ add_executable(
     src/emblob.cc
 )
 
-#add_executable(
-#    ${C_EXAMPLE_EXECUTABLE_NAME}
-#    example/cexample.c
-#)
+add_custom_target(
+    RUN_EMBLOB_C
+    COMMAND rm cexample.*
+    COMMAND build/emblob -maj 1 -min 2 -p 3 -s foo -o cexample
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "build object file(s) for cexample"
+)
 
-#add_executable(
-#    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-#    example/cxxexample.cc
-#)
+add_dependencies(
+    RUN_EMBLOB_C
+    ${EMBLOB_EXECUTABLE_NAME}
+)
+
+add_custom_target(
+    RUN_EMBLOB_CXX
+    COMMAND rm cxxexample.*
+    COMMAND build/emblob -maj 1 -min 2 -p 3 -s foo -o cxxexample
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "build object file(s) for cxxexample"
+)
+
+add_dependencies(
+    RUN_EMBLOB_CXX
+    ${EMBLOB_EXECUTABLE_NAME}
+)
+
+set_source_files_properties(
+    cexample.o
+    PROPERTIES
+    EXTERNAL_OBJECT true
+    GENERATED true
+)
+
+set_source_files_properties(
+    cxxexample.o
+    PROPERTIES
+    EXTERNAL_OBJECT true
+    GENERATED true
+)
+
+add_executable(
+    ${C_EXAMPLE_EXECUTABLE_NAME}
+    example/cexample.c
+)
+
+add_dependencies(
+    ${C_EXAMPLE_EXECUTABLE_NAME}
+    RUN_EMBLOB_C
+)
+
+add_executable(
+    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    example/cxxexample.cc
+)
+
+add_dependencies(
+    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    RUN_EMBLOB_CXX
+)
 
 target_include_directories(
     ${EMBLOB_EXECUTABLE_NAME}
@@ -141,19 +191,29 @@ target_include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-#target_include_directories(
-#    ${C_EXAMPLE_EXECUTABLE_NAME}
-#    PUBLIC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/include
-#    ${CMAKE_CURRENT_BINARY_DIR}/include
-#)
+target_include_directories(
+    ${C_EXAMPLE_EXECUTABLE_NAME}
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+)
 
-#target_include_directories(
-#    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-#    PUBLIC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/include
-#    ${CMAKE_CURRENT_BINARY_DIR}/include
-#)
+target_link_libraries(
+    ${C_EXAMPLE_EXECUTABLE_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cexample.o
+)
+
+target_link_libraries(
+    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cxxexample.o
+)
+
+target_include_directories(
+    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+)
 
 target_compile_features(
     ${EMBLOB_EXECUTABLE_NAME}
@@ -161,14 +221,14 @@ target_compile_features(
     ${CXX_STANDARD}
 )
 
-#target_compile_features(
-#    ${C_EXAMPLE_EXECUTABLE_NAME}
-#    PUBLIC
-#    ${C_STANDARD}
-#)
+target_compile_features(
+    ${C_EXAMPLE_EXECUTABLE_NAME}
+    PUBLIC
+    ${C_STANDARD}
+)
 
-#target_compile_features(
-#    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-#    PUBLIC
-#    ${CXX_STANDARD}
-#)
+target_compile_features(
+    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    PUBLIC
+    ${CXX_STANDARD}
+)
