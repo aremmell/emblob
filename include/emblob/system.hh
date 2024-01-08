@@ -82,7 +82,7 @@ namespace emblob
         }
 
         /* file size in bytes, or -1 upon failure */
-        static off_t file_size(const std::string fname) {
+        static off_t file_size(const std::string& fname) {
             struct stat st;
             if (0 != stat(fname.c_str(), &st)) {
                 g_logger->error("couldn't stat %s; error: %s", fname.c_str(),
@@ -91,6 +91,18 @@ namespace emblob
             }
 
             return st.st_size;
+        }
+
+        static std::string file_base_name(const std::string& fname) {
+            auto last_full_stop = fname.find_last_of('.');
+            if (std::string::npos == last_full_stop) {
+                return fname;
+            }
+
+            auto base_name = fname.substr(0, last_full_stop);
+            std::replace(base_name.begin(), base_name.end(), '.', '_');
+// TODO_strip_illegal_variable_name_chars:
+            return base_name;
         }
 
         static std::ofstream::pos_type write_file_contents(const std::string& fname,
@@ -119,6 +131,23 @@ namespace emblob
             return 0 == std::remove(fname.c_str());
         }
 
+        static bool is_valid_input_filename(const std::string& fname, std::string& err_msg) {
+            bool opened = false;
+            err_msg.clear();
+
+            auto size = file_size(fname);
+            if (-1 == size) {
+                err_msg = get_error_message(errno);
+            } else if (0 == size) {
+                err_msg = fmt_str("input file %s is empty", fname.c_str());
+            } else {
+                opened = true;
+                g_logger->info("input file %s (%lld bytes)", fname.c_str(), size);
+            }
+
+            return opened;
+        }
+
         static bool is_valid_output_filename(const std::string& fname, std::string& err_msg) {
             bool created = false;
             err_msg.clear();
@@ -128,14 +157,16 @@ namespace emblob
 
 #if defined(__HAVE_STDC_SECURE_LIB__)
             err = fopen_s(&f, fname.c_str(), "wx");
-            if (0 == err)
+            if (0 == err) {
                 created = true;
+            }
 #else
             f = fopen(fname.c_str(), "wx");
-            if (f)
+            if (f) {
                 created = true;
-            else
+            } else {
                 err = errno;
+            }
 #endif
             if (created) {
                 fclose(f);
@@ -153,8 +184,7 @@ namespace emblob
         static std::string detect_c_compiler() {
             char* from_env = getenv("CC");
             if (valid_str(from_env)) {
-                g_logger->info("detected C compiler '%s' from environment variable 'CC'",
-                    from_env);
+                g_logger->info("detected C compiler '%s' from environment variable 'CC'", from_env);
                 return from_env;
             }
 

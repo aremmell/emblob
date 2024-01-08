@@ -61,7 +61,7 @@ namespace emblob
     }
 
     std::string string_to_lower(const std::string& str) {
-        std::string retval = str;
+        auto retval = str;
 
         std::for_each(retval.begin(), retval.end(), [](char& c) {
             int i = c;
@@ -72,12 +72,20 @@ namespace emblob
         return retval;
     }
 
-    static inline bool valid_str(const char* str) {
-        return nullptr != str && 0 != *str;
+    std::string string_to_upper(const std::string& str) {
+        auto retval = str;
+
+        std::for_each(retval.begin(), retval.end(), [](char& c) {
+            int i = c;
+            i = std::toupper(i);
+            c = static_cast<char>(i);
+        });
+
+        return retval;
     }
 
-    static inline uint16_t string_to_uint16(const std::string& str) {
-        return static_cast<uint16_t>(std::strtoul(str.c_str(), nullptr, 10));
+    static inline bool valid_str(const char* str) {
+        return nullptr != str && 0 != *str;
     }
 
 } // !namespace emblob

@@ -25,12 +25,14 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "emblob/version.h"
+#include "../emblob_test.h"
 
 int main(void)
 {
-    const version_resource* res = get_version_resource();
-    printf("major: %u, minor: %u, patch: %u, suffix: '%s'\n",
-        res->major, res->minor, res->patch, res->suffix);
+    const uint8_t* bytes = emblob_get_test_8();
+    for (size_t n = 0; n < 256; n++) {
+        printf("%hhx ", bytes[n]);
+    }
+    printf("\n");
     return EXIT_SUCCESS;
 }

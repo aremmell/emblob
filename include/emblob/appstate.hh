@@ -31,7 +31,7 @@ namespace emblob
     class app_state
     {
     public:
-        bool created_bin_file = false;
+        bool created_hdr_file = false;
         bool created_asm_file = false;
         bool created_obj_file = false;
     };

@@ -25,12 +25,14 @@
  */
 #include <iostream>
 #include <cstdlib>
-#include "emblob/version.h"
+#include "../emblob_test.h"
 
 int main()
 {
-    auto res = get_version_resource();
-    std::cout << "major: " << res->major << ", minor: " << res->minor << ", patch: "
-        << res->patch << ", suffix: '" << res->suffix << "'" << std::endl;
+    auto bytes = emblob_get_test_8();
+    for (size_t n = 0; n < 15; n++) {
+        std::cout << std::hex << "0x" << static_cast<int>(bytes[n]) << ", ";
+    }
+    std::cout << std::endl;
     return EXIT_SUCCESS;
 }

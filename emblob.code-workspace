@@ -87,8 +87,7 @@
 			"inttypes.h": "c",
 			"stdint.h": "c",
 			"stddef.h": "c",
-			"string.h": "c",
-			"version.h": "c"
+			"string.h": "c"
 		}
 	}
 }

@@ -37,22 +37,11 @@ namespace emblob
     class command_line
     {
     public:
-        CONST_STATIC_STRING EXT_BIN = ".bin";
         CONST_STATIC_STRING EXT_ASM = ".S";
         CONST_STATIC_STRING EXT_OBJ = ".o";
-        CONST_STATIC_STRING DEF_OUTPUT_FILE = "__version";
 
-        CONST_STATIC_STRING FLAG_MAJOR = "--major";
-        CONST_STATIC_STRING S_FLAG_MAJOR = "-maj";
-
-        CONST_STATIC_STRING FLAG_MINOR = "--minor";
-        CONST_STATIC_STRING S_FLAG_MINOR = "-min";
-
-        CONST_STATIC_STRING FLAG_PATCH = "--patch";
-        CONST_STATIC_STRING S_FLAG_PATCH = "-p";
-
-        CONST_STATIC_STRING FLAG_SUFFIX = "--suffix";
-        CONST_STATIC_STRING S_FLAG_SUFFIX = "-s";
+        CONST_STATIC_STRING FLAG_INPUT_FILE = "--infile";
+        CONST_STATIC_STRING S_FLAG_INPUT_FILE = "-i";
 
         CONST_STATIC_STRING FLAG_OUTPUT_FILE = "--outfile";
         CONST_STATIC_STRING S_FLAG_OUTPUT_FILE = "-o";
@@ -67,7 +56,7 @@ namespace emblob
         CONST_STATIC_STRING S_FLAG_HELP = "-h";
 
         CONST_STATIC_X(size_t) LONGEST_FLAG = 11;
-        CONST_STATIC_X(size_t) LONGEST_SHORT_FLAG = 4;
+        CONST_STATIC_X(size_t) LONGEST_SHORT_FLAG = 2;
 
         command_line() = default;
 
@@ -148,27 +137,16 @@ namespace emblob
         void print_version() const {
             std::cout << APP_NAME << " " << VERSION_MAJOR << "." << VERSION_MINOR
                 << "." << VERSION_PATCH << VERSION_SUFFIX << std::endl;
-
         }
 
-        uint16_t get_major_version() const {
-            return string_to_uint16(_config.get_value(FLAG_MAJOR));
+        std::string get_input_filename() const {
+            return _config.get_value(FLAG_INPUT_FILE);
         }
 
-        uint16_t get_minor_version() const {
-            return string_to_uint16(_config.get_value(FLAG_MINOR));
-        }
-
-        uint16_t get_patch_version() const {
-            return string_to_uint16(_config.get_value(FLAG_PATCH));
-        }
-
-        std::string get_suffix() const {
-            return _config.get_value(FLAG_SUFFIX);
-        }
-
-        std::string get_bin_output_filename() const {
-            return _get_output_filename(EXT_BIN);
+        std::string get_hdr_output_filename() const {
+            std::string file_name = APP_NAME;
+            file_name += "_" + system::file_base_name(get_input_filename()) + ".h";
+            return file_name;
         }
 
         std::string get_asm_output_filename() const {
@@ -292,10 +270,11 @@ namespace emblob
                 std::string get_value(const std::string& flag) const {
                     for (const auto& a : args) {
                         if (a.flag == flag || a.short_flag == flag) {
-                            if (a.value.empty() && !a.default_value.empty())
+                            if (a.value.empty() && !a.default_value.empty()) {
                                 return a.default_value;
-                            else
+                            } else {
                                 return a.value;
+                            }
                         }
                     }
 
@@ -304,73 +283,28 @@ namespace emblob
 
                 std::vector<arg> args = {
                     {
-                        FLAG_MAJOR,
-                        S_FLAG_MAJOR,
-                        "Major version number",
+                        FLAG_INPUT_FILE,
+                        S_FLAG_INPUT_FILE,
+                        "Input file name",
                         "",
                         "",
-                        "num",
-                        "",
-                        {},
-                        true,
-                        true,
-                        false,
-                        false,
-                        &_version_number_validator
-                    },
-                    {
-                        FLAG_MINOR,
-                        S_FLAG_MINOR,
-                        "Minor version number",
-                        "",
-                        "",
-                        "num",
-                        "",
-                        {},
-                        true,
-                        true,
-                        false,
-                        false,
-                        &_version_number_validator
-                    },
-                    {
-                        FLAG_PATCH,
-                        S_FLAG_PATCH,
-                        "Patch/build/revision number",
-                        "",
-                        "",
-                        "num",
-                        "",
-                        {},
-                        true,
-                        true,
-                        false,
-                        false,
-                        &_version_number_validator
-                    },
-                    {
-                        FLAG_SUFFIX,
-                        S_FLAG_SUFFIX,
-                        "Version suffix",
-                        "",
-                        "",
-                        "suffix",
-                        "max 256 characters",
+                        "filename",
+                        "the file to be embedded",
                         {},
                         false,
                         true,
                         false,
                         false,
-                        nullptr
+                        &_input_filename_validator
                     },
                     {
                         FLAG_OUTPUT_FILE,
                         S_FLAG_OUTPUT_FILE,
                         "Output file base name",
                         "",
-                        DEF_OUTPUT_FILE,
+                        "infile",
                         "basename",
-                        fmt_str("creates %s, %s, and %s", EXT_ASM, EXT_OBJ, EXT_BIN),
+                        fmt_str("creates %s and %s", EXT_ASM, EXT_OBJ),
                         {},
                         false,
                         true,
@@ -433,11 +367,11 @@ namespace emblob
             };
 
             std::string _get_output_filename(const char *ext) const {
-                std::string val = _config.get_value(FLAG_OUTPUT_FILE);
-                if (!val.empty())
-                    return val + ext;
-                else
-                    return std::string();
+                auto val = _config.get_value(FLAG_OUTPUT_FILE);
+                if (val == "infile") {
+                    val = system::file_base_name(_config.get_value(FLAG_INPUT_FILE));
+                }
+                return val.empty() ? val : val + ext;
             }
 
             static bool _log_level_validator(const std::string& val, /*out*/ std::string& msg) {
@@ -457,6 +391,25 @@ namespace emblob
                 return true;
             }
 
+            static bool _input_filename_validator(const std::string& val, /*out*/ std::string& msg) {
+
+                msg.clear();
+
+                if (val.empty()) {
+                    msg = "no filename specified";
+                    return false;
+                }
+
+                std::string file_err_msg;
+                if (!system::is_valid_input_filename(val, file_err_msg)) {
+                    msg = fmt_str("Unable to use %s as an input file (%s)", val.c_str(),
+                        file_err_msg.c_str());
+                    return false;
+                }
+
+                return true;
+            }
+
             static bool _output_filename_validator(const std::string& val, /*out*/ std::string& msg) {
 
                 msg.clear();
@@ -466,7 +419,7 @@ namespace emblob
                     return false;
                 }
 
-                for (const auto& ext : { EXT_BIN, EXT_ASM, EXT_OBJ }) {
+                for (const auto& ext : { EXT_ASM, EXT_OBJ }) {
                     std::string file_err_msg;
                     if(!system::is_valid_output_filename(val + ext, file_err_msg)) {
                         msg = fmt_str("Unable to use %s as an output file base name (%s)", val.c_str(),

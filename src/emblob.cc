@@ -27,7 +27,6 @@
 #include "emblob/cmdline.hh"
 #include "emblob/appstate.hh"
 #include "emblob/util.hh"
-#include "emblob/version.h"
 
 using namespace std;
 using namespace emblob;
@@ -40,8 +39,8 @@ int main(int argc, char** argv) {
         if (code != EXIT_SUCCESS) {
             /* If exiting with an error code, clean up any files created;
                don't want to leave things in a half-assed state. */
-            if (state.created_bin_file)
-                delete_file_on_unclean_exit(cmd_line.get_bin_output_filename());
+            if (state.created_hdr_file)
+                delete_file_on_unclean_exit(cmd_line.get_hdr_output_filename());
             if (state.created_asm_file)
                 delete_file_on_unclean_exit(cmd_line.get_asm_output_filename());
             if (state.created_obj_file)
@@ -58,47 +57,174 @@ int main(int argc, char** argv) {
         if (!cmd_line.parse_and_validate(argc, argv, exit_code))
             return _exit_main(exit_code);
 
-        std::string compiler = system::detect_c_compiler();
+        auto compiler = system::detect_c_compiler();
         if (compiler.empty())
             return _exit_main(EXIT_FAILURE);
 
-        version_resource res;
-        res.major = cmd_line.get_major_version();
-        res.minor = cmd_line.get_minor_version();
-        res.patch = cmd_line.get_patch_version();
+CONST_STATIC_STRING(header_template) = R"EOF(/*
+ * emblob_{lname}.h
+ *
+ * Author:    Ryan M. Lederman <lederman@gmail.com>
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
+ * License:   The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+#ifndef _EMBLOB_{NAME}_H_INCLUDED
+#define _EMBLOB_{NAME}_H_INCLUDED
 
-        std::string suffix = cmd_line.get_suffix();
-        if (!suffix.empty())
-            strncpy(res.suffix, suffix.c_str(), EMBLOB_MAX_SUFFIX - 1);
+#include <stdint.h>
+#include <stddef.h>
+#include <stdalign.h>
 
-        std::string bin_file = cmd_line.get_bin_output_filename();
-        g_logger->info("writing version data {%" PRIu16 ", %" PRIu16 ", %" PRIu16 ", '%s'} to %s...",
-            res.major, res.minor, res.patch, res.suffix, bin_file.c_str());
+#if defined(__cplusplus)
+# if !defined(EMBLOB_ALIGNAS)
+#  define EMBLOB_ALIGNAS alignas
+# endif
+# if !defined(EMBLOB_EXTERNAL)
+#  define EMBLOB_EXTERNAL extern "C"
+# endif
+#else
+# if !defined(EMBLOB_ALIGNAS)
+#  if __STDC_VERSION__ < 201710L
+#   define EMBLOB_ALIGNAS _Alignas
+#  elif __STDC_VERSION__ >= 201710L
+#   define EMBLOB_ALIGNAS alignas
+#  endif
+# endif
+# if !defined(EMBLOB_EXTERNAL)
+#  define EMBLOB_EXTERNAL extern
+# endif
+#endif
 
-        auto openmode = ios::out | ios::binary | ios::trunc;
-        auto wrote = system::write_file_contents(bin_file, openmode, [&](ostream& strm) -> void {
-            strm.write(reinterpret_cast<const char*>(&res), sizeof(res));
+#if defined(__APPLE__)
+# define EMBLOB_{NAME} {lname}_data
+#else
+# define EMBLOB_{NAME} _{lname}_data
+#endif
+
+/**
+ * The address of the embedded blob, stored as a pointer-sized unsigned integer.
+ */
+EMBLOB_EXTERNAL uintptr_t EMBLOB_{NAME};
+
+#if defined(__cplusplus)
+    extern "C" {
+#endif
+
+/**
+ * Returns a pointer to the embedded blob that may be used to access the blob's
+ * data one byte (8-bits) at a time.
+ */
+static inline
+const uint8_t* emblob_get_{lname}_8(void)
+{
+    return (const uint8_t*)&EMBLOB_{NAME};
+}
+
+/**
+ * Returns a pointer to the embedded blob that may be used to access the blob's
+ * data two bytes (16-bits) at a time.
+ */
+static inline
+const uint16_t* emblob_get_{lname}_16(void)
+{
+    return (const uint16_t*)&EMBLOB_{NAME};
+}
+
+/**
+ * Returns a pointer to the embedded blob that may be used to access the blob's
+ * data four bytes (32-bits) at a time.
+ */
+static inline
+const uint32_t* emblob_get_{lname}_32(void)
+{
+    return (const uint32_t*)&EMBLOB_{NAME};
+}
+
+/**
+ * Returns a pointer to the embedded blob that may be used to access the blob's
+ * data eight bytes (64-bits) at a time.
+ */
+static inline
+const uint64_t* emblob_get_{lname}_64(void)
+{
+    return (const uint64_t*)&EMBLOB_{NAME};
+}
+
+/**
+ * Returns a pointer to the embedded blob that may be used to access the blob's
+ * data arbitrarily.
+ */
+static inline
+const void* emblob_get_{lname}_raw(void)
+{
+    return (const void*)&EMBLOB_{NAME};
+}
+
+#if defined(__cplusplus)
+    }
+#endif
+
+#endif // !_EMBLOB_{NAME}_H_INCLUDED
+)EOF";
+
+        auto input_file = cmd_line.get_input_filename();
+        auto blob_name = system::file_base_name(input_file);
+        auto hdr_file = cmd_line.get_hdr_output_filename();
+
+        std::string header_contents {};
+        auto blob_lname = string_to_lower(blob_name);
+        auto blob_uname = string_to_upper(blob_name);
+
+        std::regex lexpr("\\{lname\\}");
+        header_contents = std::regex_replace(header_template, lexpr, blob_lname);
+
+        std::regex uexpr("\\{NAME\\}");
+        header_contents = std::regex_replace(header_contents, uexpr, blob_uname);
+
+        system::delete_file(hdr_file.c_str());
+
+        auto openmode = ios::out | ios::trunc;
+        auto wrote = system::write_file_contents(hdr_file, openmode, [&](ostream& strm) -> void {
+            strm.write(header_contents.c_str(), header_contents.size());
         });
 
         if (wrote == -1) {
-            g_logger->fatal("failed to write %s: %s", bin_file.c_str(),
+            g_logger->fatal("failed to write %s: %s", hdr_file.c_str(),
                 system::get_error_message(errno).c_str());
             return _exit_main(EXIT_FAILURE);
         }
 
-        g_logger->info("successfully created %s (%lld bytes)", bin_file.c_str(),
-            system::file_size(bin_file));
-        state.created_bin_file = true;
+        g_logger->info("successfully created %s (%lld bytes)", hdr_file.c_str(),
+            system::file_size(hdr_file));
+        state.created_hdr_file = true;
 
 #if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
         auto asm_file = cmd_line.get_asm_output_filename();
         openmode = ios::out | ios::trunc;
         wrote = system::write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
-            strm << ".global _version_data" << endl;
-            strm << "_version_data:" << endl;
-            strm << ".incbin \"" << bin_file << "\"" << endl;
-            strm << ".global _sizeof__version_data" << endl;
-            strm << ".set _sizeof__version_data, . - _version_data" << endl;
+            strm << ".global _" << blob_lname << "_data" << endl;
+            strm << "_" << blob_lname << "_data:" << endl;
+            strm << ".incbin \"" << input_file << "\"" << endl;
+            strm << ".global _sizeof__" << blob_lname << "_data" << endl;
+            strm << ".set _sizeof__" << blob_lname << "_data, . - _" << blob_lname << "_data" << endl;
         });
 
         if (wrote == -1) {
@@ -111,7 +237,7 @@ int main(int argc, char** argv) {
             system::file_size(asm_file));
         state.created_asm_file = true;
 
-        std::string obj_file = cmd_line.get_obj_output_filename();
+        auto obj_file = cmd_line.get_obj_output_filename();
         auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());
         bool asm_to_obj = system::execute_system_command(cmd);
 
@@ -133,7 +259,6 @@ int main(int argc, char** argv) {
     return _exit_main(EXIT_SUCCESS);
 }
 
-
 void emblob::delete_file_on_unclean_exit(const std::string& fname) {
     if (0 != remove(fname.c_str()))
         g_logger->error("failed to delete '%s': %s", fname.c_str(),
@@ -141,4 +266,3 @@ void emblob::delete_file_on_unclean_exit(const std::string& fname) {
     else
         g_logger->info("deleted '%s'", fname.c_str());
 }
-
