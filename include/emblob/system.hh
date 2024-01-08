@@ -2,7 +2,8 @@
  * system.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,13 +23,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_SYSTEM_HH_INCLUDED
-# define _MKVEROBJ_SYSTEM_HH_INCLUDED
+#ifndef _EMBLOB_SYSTEM_HH_INCLUDED
+# define _EMBLOB_SYSTEM_HH_INCLUDED
 
-#include "platform.hh"
-#include "util.hh"
+#include "emblob/platform.hh"
+#include "emblob/util.hh"
 
-namespace mkverobj
+namespace emblob
 {
     class system
     {
@@ -204,6 +205,6 @@ namespace mkverobj
             return retval;
         }
     };
-} // !namespace mkverobj
+} // !namespace emblob
 
-#endif // !_MKVEROBJ_SYSTEM_HH_INCLUDED
+#endif // !_EMBLOB_SYSTEM_HH_INCLUDED

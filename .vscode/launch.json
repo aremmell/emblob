@@ -4,7 +4,7 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/mkverobj",
+            "program": "${workspaceFolder}/build/bin/emblob",
             "args": [
             ],
             "stopAtEntry": false,

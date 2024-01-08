@@ -1,2 +1,2 @@
 *.cc linguist-language=C++
-docs/ linguist-vendored
+*.hh linguist-language=C++

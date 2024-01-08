@@ -2,7 +2,8 @@
  * platform.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,30 +23,30 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_PLATFORM_HH_INCLUDED
-#define _MKVEROBJ_PLATFORM_HH_INCLUDED
+#ifndef _EMBLOB_PLATFORM_HH_INCLUDED
+#define _EMBLOB_PLATFORM_HH_INCLUDED
 
 #if defined(__APPLE__) && defined(__MACH__)
 # define __MACOS__
 # define _DARWIN_C_SOURCE
-# define MKVEROBJ_PLATFORM macOS
+# define EMBLOB_PLATFORM macOS
 #elif defined(__linux__)
 # define __LINUS__
-# define MKVEROBJ_PLATFORM Linux
+# define EMBLOB_PLATFORM Linux
 #elif defined(_WIN32)
-# define MKVEROBJ_PLATFORM Windows
+# define EMBLOB_PLATFORM Windows
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 # define __BSD__
-# define MKVEROBJ_PLATFORM BSD
+# define EMBLOB_PLATFORM BSD
 # if !defined(_GNU_SOURCE)
 #  define _GNU_SOURCE
 # endif
 #elif defined(_WIN32)
 # define __WIN__
-# define MKVEROBJ_PLATFORM Windows
+# define EMBLOB_PLATFORM Windows
 #elif defined(__FreeBSD__)
 # define __BSD__
-# define MKVEROBJ_PLATFORM BSD
+# define EMBLOB_PLATFORM BSD
 # define _BSD_SOURCE
 # if !defined(_DEFAULT_SOURCE)
 #  define _DEFAULT_SOURCE
@@ -88,6 +89,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cstdint>
+#include <cctype>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -119,5 +121,5 @@
 
 #define MAX_ERRORMSG 256
 
-#endif // ! _MKVEROBJ_PLATFORM_HH_INCLUDED
+#endif // ! _EMBLOB_PLATFORM_HH_INCLUDED
 

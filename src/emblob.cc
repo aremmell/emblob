@@ -1,8 +1,9 @@
 /*
- * mkverobj.cc
+ * emblob.cc
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,14 +23,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "mkverobj.hh"
-#include "cmdline.hh"
-#include "appstate.hh"
-#include "util.hh"
-#include "version.h"
+#include "emblob.hh"
+#include "emblob/cmdline.hh"
+#include "emblob/appstate.hh"
+#include "emblob/util.hh"
+#include "emblob/version.h"
 
 using namespace std;
-using namespace mkverobj;
+using namespace emblob;
 
 int main(int argc, char** argv) {
     app_state state;
@@ -68,7 +69,7 @@ int main(int argc, char** argv) {
 
         std::string suffix = cmd_line.get_suffix();
         if (!suffix.empty())
-            strncpy(res.suffix, suffix.c_str(), MKVEROBJ_MAX_SUFFIX - 1);
+            strncpy(res.suffix, suffix.c_str(), EMBLOB_MAX_SUFFIX - 1);
 
         std::string bin_file = cmd_line.get_bin_output_filename();
         g_logger->info("writing version data {%" PRIu16 ", %" PRIu16 ", %" PRIu16 ", '%s'} to %s...",
@@ -133,7 +134,7 @@ int main(int argc, char** argv) {
 }
 
 
-void mkverobj::delete_file_on_unclean_exit(const std::string& fname) {
+void emblob::delete_file_on_unclean_exit(const std::string& fname) {
     if (0 != remove(fname.c_str()))
         g_logger->error("failed to delete '%s': %s", fname.c_str(),
             system::get_error_message(errno).c_str());

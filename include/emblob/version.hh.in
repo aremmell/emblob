@@ -1,8 +1,9 @@
 /*
- * mkverobj.hh
+ * version.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,14 +23,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_HH_INCLUDED
-#define _MKVEROBJ_HH_INCLUDED
+#ifndef _EMBLOB_VERSION_HH_INCLUDED
+# define _EMBLOB_VERSION_HH_INCLUDED
 
-#include <string>
+# include "emblob/util.hh"
 
-namespace mkverobj
+namespace emblob
 {
-    void delete_file_on_unclean_exit(const std::string& fname);
-} // !namespace mkverobj
+    CONST_STATIC_X(uint16_t) VERSION_MAJOR  = ${PROJECT_VERSION_MAJOR};
+    CONST_STATIC_X(uint16_t) VERSION_MINOR  = ${PROJECT_VERSION_MINOR};
+    CONST_STATIC_X(uint16_t) VERSION_PATCH  = ${PROJECT_VERSION_PATCH};
+    CONST_STATIC_X(bool) VERSION_IS_RELEASE = ${PROJECT_IS_REL_BUILD};
+    CONST_STATIC_STRING VERSION_SUFFIX      = "${PROJECT_VERSION_SUFFIX}";
+    CONST_STATIC_STRING VERSION_COMMITHASH  = "${GIT_COMMIT_HASH}";
+} // !namespace emblob
 
-#endif // !_MKVEROBJ_HH_INCLUDED
+#endif // !_EMBLOB_VERSION_HH_INCLUDED

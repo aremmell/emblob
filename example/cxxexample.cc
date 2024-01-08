@@ -2,7 +2,8 @@
  * cxxexample.cc
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -24,7 +25,7 @@
  */
 #include <iostream>
 #include <cstdlib>
-#include "version.h"
+#include "emblob/version.h"
 
 int main()
 {

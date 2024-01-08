@@ -1,8 +1,9 @@
 /*
- * version.hh
+ * emblob.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,18 +23,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_VERSION_HH_INCLUDED
-#define _MKVEROBJ_VERSION_HH_INCLUDED
+#ifndef _EMBLOB_HH_INCLUDED
+#define _EMBLOB_HH_INCLUDED
 
-#include "util.hh"
+#include <string>
 
-namespace mkverobj
+namespace emblob
 {
-    CONST_STATIC_X(uint16_t) VERSION_MAJOR = 2;
-    CONST_STATIC_X(uint16_t) VERSION_MINOR = 0;
-    CONST_STATIC_X(uint16_t) VERSION_PATCH = 0;
-    CONST_STATIC_STRING VERSION_SUFFIX     = "-rc";
+    void delete_file_on_unclean_exit(const std::string& fname);
+} // !namespace emblob
 
-} // !namespace mkverobj
-
-#endif // !_MKVEROBJ_VERSION_HH_INCLUDED
+#endif // !_EMBLOB_HH_INCLUDED

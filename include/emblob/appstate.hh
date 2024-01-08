@@ -1,8 +1,9 @@
 /*
- * cexample.c
+ * appstate.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,14 +23,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "version.h"
+#ifndef _EMBLOB_APPSTATE_HH_INCLUDED
+#define _EMBLOB_APPSTATE_HH_INCLUDED
 
-int main(void)
+namespace emblob
 {
-    const version_resource* res = get_version_resource();
-    printf("major: %u, minor: %u, patch: %u, suffix: '%s'\n",
-        res->major, res->minor, res->patch, res->suffix);
-    return EXIT_SUCCESS;
-}
+    class app_state
+    {
+    public:
+        bool created_bin_file = false;
+        bool created_asm_file = false;
+        bool created_obj_file = false;
+    };
+} // !namespace emblob
+
+#endif // !_EMBLOB_APPSTATE_HH_INCLUDED

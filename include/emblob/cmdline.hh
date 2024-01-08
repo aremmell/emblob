@@ -2,7 +2,8 @@
  * cmdline.hh
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
- * Copyright: Copyright (c) 2018-2023
+ * Copyright: Copyright (c) 2018-2024
+ * Version:   0.2.0
  * License:   The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,16 +23,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef _MKVEROBJ_CMDLINE_HH_INCLUDED
-#define _MKVEROBJ_CMDLINE_HH_INCLUDED
+#ifndef _EMBLOB_CMDLINE_HH_INCLUDED
+#define _EMBLOB_CMDLINE_HH_INCLUDED
 
-#include "util.hh"
-#include "logger.hh"
-#include "system.hh"
-#include "version.hh"
-#include "ansimacros.h"
+#include "emblob/util.hh"
+#include "emblob/logger.hh"
+#include "emblob/system.hh"
+#include "emblob/version.hh"
+#include "emblob/ansimacros.h"
 
-namespace mkverobj
+namespace emblob
 {
     class command_line
     {
@@ -401,7 +402,7 @@ namespace mkverobj
                     {
                         FLAG_VERSION,
                         S_FLAG_VERSION,
-                        "Prints mkverobj version information",
+                        "Prints emblob version information",
                         "",
                         "",
                         "",
@@ -505,6 +506,6 @@ namespace mkverobj
         config _config;
     };
 
-} // !namespace mkverobj
+} // !namespace emblob
 
-#endif // !_MKVEROBJ_CMDLINE_HH_INCLUDED
+#endif // !_EMBLOB_CMDLINE_HH_INCLUDED

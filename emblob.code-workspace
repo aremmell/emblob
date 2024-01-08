@@ -6,6 +6,7 @@
 	],
 	"settings": {
 		"files.associations": {
+			"*.i": "swig",
 			"*.php": "php",
 			"ostream": "cpp",
 			"format": "cpp",
@@ -86,7 +87,8 @@
 			"inttypes.h": "c",
 			"stdint.h": "c",
 			"stddef.h": "c",
-			"string.h": "c"
+			"string.h": "c",
+			"version.h": "c"
 		}
 	}
 }
