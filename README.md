@@ -6,11 +6,11 @@
 >
 > The `build/bin/mkverobj` binary that is generated now has a different/more configurable CLI interface; use `build/bin/mkverobj --help` for more information.
 >
-> It *should* work just fine on any Linux, macOS and BSD with gcc/g++ or Clang[++]. No Windows support yet (and perhaps never).
+> It *should* work just fine on any Linux, macOS and BSD with GCC or Clang. No Windows support yet (and perhaps never).
 
 ## About
 
-**TL;DR:** `mkverobj` is a simple cli utility that generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and functions to retrieve the compiled version information at runtime.
+**TL;DR:** `mkverobj` is a simple cli utility which generates an object file that can be linked in to an executable *(or library)*, along with a header that defines a version resource data structure and functions to retrieve the compiled version information at runtime.
 
 ## Compiling
 
