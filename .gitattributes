@@ -1,2 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Copyright (c) 2024 Ryan M. Lederman
+
 *.cc linguist-language=C++
 *.hh linguist-language=C++
