@@ -24,13 +24,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef _EMBLOB_CMDLINE_HH_INCLUDED
-#define _EMBLOB_CMDLINE_HH_INCLUDED
+# define _EMBLOB_CMDLINE_HH_INCLUDED
 
-#include "emblob/util.hh"
-#include "emblob/logger.hh"
-#include "emblob/system.hh"
-#include "emblob/version.hh"
-#include "emblob/ansimacros.h"
+# include "emblob/util.hh"
+# include "emblob/logger.hh"
+# include "emblob/system.hh"
+# include "emblob/version.hh"
+# include "emblob/ansimacros.h"
 
 namespace emblob
 {

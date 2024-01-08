@@ -24,14 +24,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef _EMBLOB_UTIL_HH_INCLUDED
-#define _EMBLOB_UTIL_HH_INCLUDED
+# define _EMBLOB_UTIL_HH_INCLUDED
 
-#include "platform.hh"
+# include "platform.hh"
 
 namespace emblob
 {
-#define CONST_STATIC_X(type) static constexpr type
-#define CONST_STATIC_STRING CONST_STATIC_X(const char*)
+# define CONST_STATIC_X(type) static constexpr type
+# define CONST_STATIC_STRING CONST_STATIC_X(const char*)
 
     CONST_STATIC_STRING APP_NAME = "emblob";
 

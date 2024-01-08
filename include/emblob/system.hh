@@ -26,8 +26,8 @@
 #ifndef _EMBLOB_SYSTEM_HH_INCLUDED
 # define _EMBLOB_SYSTEM_HH_INCLUDED
 
-#include "emblob/platform.hh"
-#include "emblob/util.hh"
+# include "emblob/platform.hh"
+# include "emblob/util.hh"
 
 namespace emblob
 {
@@ -40,17 +40,17 @@ namespace emblob
         static std::string get_error_message(int err) {
             char buf[MAX_ERRORMSG] = {0};
 
-#if defined(__HAVE_XSI_STRERROR_R__)
+# if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
             int finderr = strerror_r(err, buf, MAX_ERRORMSG);
-# if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
+#  if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
             if (finderr == -1) {
                 success = false;
                 finderr = errno;
             }
-# else
+#  else
             success = finderr == 0;
-# endif
+#  endif
             if (!success)
                 snprintf(buf, MAX_ERRORMSG, "got error %d while trying to look up error %d",
                     finderr, err);
@@ -64,7 +64,7 @@ namespace emblob
             return buf;
 # else
             return strerror(err);
-#endif
+# endif
         }
 
         static bool file_exists(const std::string& fname) {
@@ -155,19 +155,19 @@ namespace emblob
             FILE *f = nullptr;
             int err = 0;
 
-#if defined(__HAVE_STDC_SECURE_LIB__)
+# if defined(__HAVE_STDC_SECURE_LIB__)
             err = fopen_s(&f, fname.c_str(), "wx");
             if (0 == err) {
                 created = true;
             }
-#else
+# else
             f = fopen(fname.c_str(), "wx");
             if (f) {
                 created = true;
             } else {
                 err = errno;
             }
-#endif
+# endif
             if (created) {
                 fclose(f);
                 f = nullptr;

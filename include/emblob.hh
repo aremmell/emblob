@@ -24,9 +24,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef _EMBLOB_HH_INCLUDED
-#define _EMBLOB_HH_INCLUDED
+# define _EMBLOB_HH_INCLUDED
 
-#include <string>
+# include <string>
 
 namespace emblob
 {

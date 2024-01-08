@@ -24,9 +24,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef _EMBLOB_LOGGER_HH_INCLUDED
-#define _EMBLOB_LOGGER_HH_INCLUDED
+# define _EMBLOB_LOGGER_HH_INCLUDED
 
-#include "emblob/util.hh"
+# include "emblob/util.hh"
 
 namespace emblob
 {
@@ -174,11 +174,11 @@ namespace emblob
         }
 
     private:
-#if defined(DEBUG)
+# if defined(DEBUG)
         level _level = level::debug;
-#else
+# else
         level _level = level::info;
-#endif
+# endif
     };
 
     typedef std::unique_ptr<logger> logger_ptr;
