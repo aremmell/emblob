@@ -29,6 +29,7 @@
 
 int main()
 {
+    std::cout << "size = " << emblob_get_test_size() << " bytes" << std::endl;
     auto bytes = emblob_get_test_8();
     for (size_t n = 0; n < 15; n++) {
         std::cout << std::hex << "0x" << static_cast<int>(bytes[n]) << ", ";
