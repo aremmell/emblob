@@ -135,8 +135,15 @@ namespace emblob
         }
 
         void print_version() const {
-            std::cout << APP_NAME << " " << VERSION_MAJOR << "." << VERSION_MINOR
-                << "." << VERSION_PATCH << VERSION_SUFFIX << std::endl;
+            std::cout
+                << APP_NAME
+                << " " << VERSION_MAJOR
+                << "." << VERSION_MINOR
+                << "." << VERSION_PATCH
+                << VERSION_SUFFIX
+                << " (" << VERSION_COMMITHASH
+                << (VERSION_IS_RELEASE ? ")" : "/pre-release)")
+                << std::endl;
         }
 
         std::string get_input_filename() const {
