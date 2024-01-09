@@ -3,7 +3,6 @@
 
 # Sample input files
 empty.bin
-test.bin
 
 # Output files
 build/*
