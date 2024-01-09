@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: Copyright (c) 2024 Ryan M. Lederman
+# SPDX-FileCopyrightText: Copyright (c) 2018-2024 Ryan M. Lederman
 
-# output files
+# Sample input files
+empty.bin
+test.bin
+
+# Output files
 build/*
 *.S
 *.o
-*.bin
+emblob_test.h
 
-# annoying macOS files
+# Annoying macOS files
 .DS_Store
-
-# Visual Studio files
-.vs/
-*.user
