@@ -125,42 +125,27 @@ add_executable(
 )
 
 add_custom_target(
-    RUN_EMBLOB_C
-    COMMAND rm build/cexample.* || true
-    COMMAND build/emblob -i test.bin -o build/cexample
+    RUN_EMBLOB
+    COMMAND rm test.o || true
+    COMMAND rm test.S || true
+    COMMAND build/emblob -i test.bin -l debug
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/build/cexample.o
-    COMMENT "build object file(s) for cexample"
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/test.o
+    COMMENT "execute emblob with test.bin as input"
 )
 
 add_dependencies(
-    RUN_EMBLOB_C
+    RUN_EMBLOB
     ${EMBLOB_EXECUTABLE_NAME}
 )
 
-add_custom_target(
-    RUN_EMBLOB_CXX
-    COMMAND rm build/cxxexample.* || true
-    COMMAND build/emblob -i test.bin -o build/cxxexample
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/build/cxxexample.o
-    COMMENT "build object file(s) for cxxexample"
-)
-
 add_dependencies(
-    RUN_EMBLOB_CXX
+    RUN_EMBLOB
     ${EMBLOB_EXECUTABLE_NAME}
 )
 
 set_source_files_properties(
-    build/cexample.o
-    PROPERTIES
-    EXTERNAL_OBJECT true
-    GENERATED true
-)
-
-set_source_files_properties(
-    build/cxxexample.o
+    test.o
     PROPERTIES
     EXTERNAL_OBJECT true
     GENERATED true
@@ -173,7 +158,7 @@ add_executable(
 
 add_dependencies(
     ${C_EXAMPLE_EXECUTABLE_NAME}
-    RUN_EMBLOB_C
+    RUN_EMBLOB
 )
 
 add_executable(
@@ -183,7 +168,7 @@ add_executable(
 
 add_dependencies(
     ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    RUN_EMBLOB_CXX
+    RUN_EMBLOB
 )
 
 target_include_directories(
@@ -202,12 +187,12 @@ target_include_directories(
 
 target_link_libraries(
     ${C_EXAMPLE_EXECUTABLE_NAME}
-    ${CMAKE_CURRENT_BINARY_DIR}/cexample.o
+    ${CMAKE_CURRENT_SOURCE_DIR}/test.o
 )
 
 target_link_libraries(
     ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    ${CMAKE_CURRENT_BINARY_DIR}/cxxexample.o
+    ${CMAKE_CURRENT_SOURCE_DIR}/test.o
 )
 
 target_include_directories(

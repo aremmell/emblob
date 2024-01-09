@@ -212,8 +212,6 @@ const void* emblob_get_{lname}_raw(void)
         regex sexpr("\\{BLOB_SIZE\\}");
         header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));
 
-        system::delete_file(hdr_file.c_str());
-
         auto openmode = ios::out | ios::trunc;
         auto wrote = system::write_file_contents(hdr_file, openmode, [&](ostream& strm) -> void {
             strm.write(header_contents.c_str(), header_contents.size());
