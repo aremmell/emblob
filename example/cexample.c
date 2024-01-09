@@ -25,13 +25,15 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include "../emblob_test.h"
 
 int main(void)
 {
     const uint8_t* bytes = emblob_get_test_8();
-    for (size_t n = 0; n < 256; n++) {
-        printf("%hhx ", bytes[n]);
+    printf("size = %" PRIu32 " bytes\n", emblob_get_test_size());
+    for (size_t n = 0; n < 15; n++) {
+        printf("0x%hhx ", bytes[n]);
     }
     printf("\n");
     return EXIT_SUCCESS;

@@ -129,6 +129,15 @@ EMBLOB_EXTERNAL uintptr_t EMBLOB_{NAME};
 #endif
 
 /**
+ * Returns the size of the embedded blob, in bytes.
+ */
+static inline
+uint32_t emblob_get_{lname}_size(void)
+{
+    return UINT32_C({BLOB_SIZE});
+}
+
+/**
  * Returns a pointer to the embedded blob that may be used to access the blob's
  * data one byte (8-bits) at a time.
  */
@@ -186,18 +195,22 @@ const void* emblob_get_{lname}_raw(void)
 )EOF";
 
         auto input_file = cmd_line.get_input_filename();
+        auto input_file_size = system::file_size(input_file);
         auto blob_name = system::file_base_name(input_file);
         auto hdr_file = cmd_line.get_hdr_output_filename();
 
-        std::string header_contents {};
+        string header_contents {};
         auto blob_lname = string_to_lower(blob_name);
         auto blob_uname = string_to_upper(blob_name);
 
-        std::regex lexpr("\\{lname\\}");
-        header_contents = std::regex_replace(header_template, lexpr, blob_lname);
+        regex lexpr("\\{lname\\}");
+        header_contents = regex_replace(header_template, lexpr, blob_lname);
 
-        std::regex uexpr("\\{NAME\\}");
-        header_contents = std::regex_replace(header_contents, uexpr, blob_uname);
+        regex uexpr("\\{NAME\\}");
+        header_contents = regex_replace(header_contents, uexpr, blob_uname);
+
+        regex sexpr("\\{BLOB_SIZE\\}");
+        header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));
 
         system::delete_file(hdr_file.c_str());
 
@@ -259,7 +272,7 @@ const void* emblob_get_{lname}_raw(void)
     return _exit_main(EXIT_SUCCESS);
 }
 
-void emblob::delete_file_on_unclean_exit(const std::string& fname) {
+void emblob::delete_file_on_unclean_exit(const string& fname) {
     if (0 != remove(fname.c_str()))
         g_logger->error("failed to delete '%s': %s", fname.c_str(),
             system::get_error_message(errno).c_str());

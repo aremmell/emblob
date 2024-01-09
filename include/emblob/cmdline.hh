@@ -151,9 +151,8 @@ namespace emblob
         }
 
         std::string get_hdr_output_filename() const {
-            std::string file_name = APP_NAME;
-            file_name += "_" + system::file_base_name(get_input_filename()) + ".h";
-            return file_name;
+            auto fname = get_input_filename();
+            return fmt_str("%s_%s.h", APP_NAME, system::file_base_name(fname).c_str());
         }
 
         std::string get_asm_output_filename() const {
