@@ -32,3 +32,8 @@ License: MIT
 Files: src/*.cc include/*.hh include/emblob/*.hh include/emblob/*.h include/emblob/version.hh.in
 Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
+
+# Test input files
+Files: test.bin
+Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
+License: MIT
