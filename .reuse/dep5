@@ -4,7 +4,7 @@ Upstream-Contact: Ryan M. Lederman <lederman@gmail.com>
 Source: https://github.com/aremmell/emblob
 
 # GitHub files
-Files: .github/workflows/*.yml
+Files: .github/workflows/*.yml .github/ISSUE_TEMPLATE/*.md
 Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
@@ -14,7 +14,7 @@ Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
 # Workspace files
-Files: bal.code-workspace
+Files: emblob.code-workspace
 Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
@@ -29,6 +29,6 @@ Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
 # C++ source
-Files: src/*.cc include/*.hh include/emblob/*.hh include/emblob/version.hh.in
+Files: src/*.cc include/*.hh include/emblob/*.hh include/emblob/*.h include/emblob/version.hh.in
 Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
