@@ -213,7 +213,7 @@ const void* emblob_get_{lname}_raw(void)
         header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));
 
         auto openmode = ios::out | ios::trunc;
-        auto wrote = system::write_file_contents(hdr_file, openmode, [&](ostream& strm) -> void {
+        auto wrote = system::write_file_contents(hdr_file, openmode, [&header_contents](ostream& strm) {
             strm.write(header_contents.c_str(), header_contents.size());
         });
 
@@ -230,7 +230,7 @@ const void* emblob_get_{lname}_raw(void)
 #if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
         auto asm_file = cmd_line.get_asm_output_filename();
         openmode = ios::out | ios::trunc;
-        wrote = system::write_file_contents(asm_file, openmode, [&](ostream& strm) -> void {
+        wrote = system::write_file_contents(asm_file, openmode, [&blob_lname, input_file](ostream& strm) {
             strm << ".global _" << blob_lname << "_data" << endl;
             strm << "_" << blob_lname << "_data:" << endl;
             strm << ".incbin \"" << input_file << "\"" << endl;

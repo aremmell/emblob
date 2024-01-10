@@ -83,9 +83,11 @@
 # include <iostream>
 # include <memory>
 # include <vector>
+# include <array>
 # include <regex>
 # include <limits>
 # include <string>
+# include <string_view>
 # include <cstdlib>
 # include <cstdarg>
 # include <cstdint>

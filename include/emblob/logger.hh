@@ -94,30 +94,31 @@ namespace emblob
         }
 
         void set_log_level(level lvl) {
-            if (lvl != level::invalid)
+            if (lvl != level::invalid) {
                 _level = lvl;
+            }
         }
 
         static std::string level_to_string(level lvl, bool prefix = false) {
+            using enum level;
             switch (lvl) {
-                case level::debug:
+                case debug:
                     return prefix ? "[debug]" : LEVEL_DEBUG;
-                case level::info:
+                case info:
                     return prefix ? "[info]" : LEVEL_INFO;
-                case level::warning:
+                case warning:
                     return prefix ? "[warning]" : LEVEL_WARNING;
-                case level::error:
+                case error:
                     return prefix ? "[error]" : LEVEL_ERROR;
-                case level::fatal:
+                case fatal:
                     return prefix ? "[fatal]" : LEVEL_FATAL;
-                case level::invalid:
                 default:
                     return LEVEL_INVALID;
             }
         }
 
         static level level_from_string(const std::string& str) {
-            std::string lstr = string_to_lower(str);
+            auto lstr = string_to_lower(str);
             if (lstr == LEVEL_DEBUG)
                 return level::debug;
             else if (lstr == LEVEL_INFO)
@@ -134,46 +135,48 @@ namespace emblob
 
     private:
         void _logv(level lvl, const char* fmt, va_list args) const {
-            if (!valid_str(fmt) || lvl == level::invalid)
+            if (!valid_str(fmt) || lvl == level::invalid) {
                 return;
+            }
 
-            if (lvl < _level)
+            if (lvl < _level) {
                 return;
+            }
 
-            char buf[MAX_LOG_MESSAGE] = {0};
-            [[maybe_unused]] int len = std::vsnprintf(buf, MAX_LOG_MESSAGE, fmt, args);
-
+            std::array<char, MAX_LOG_MESSAGE> buf {};
+            buf.fill('\0');
+            [[maybe_unused]] int len = std::vsnprintf(buf.data(), buf.size(), fmt, args);
 
             const char* attr     = "0";
             const char* fg_color = "39";
+
+            using enum level;
             switch (lvl) {
-                case level::debug:
+                case debug:
                     fg_color = "90";
                     break;
-                case level::info:
+                case info:
                     fg_color = "97";
                     break;
-                case level::warning:
+                case warning:
                     fg_color = "33";
                     break;
-                case level::error:
+                case error:
                     fg_color = "91";
                     break;
-                case level::fatal:
+                case fatal:
                     attr     = "1";
                     fg_color = "91";
                     break;
-                case level::invalid:
                 default:
                     return;
             }
 
             std::ostream& strm = (lvl == level::error || lvl == level::fatal) ? std::cerr : std::cout;
             strm << "\x1b[" << attr << ";" << fg_color << ";49m" << APP_NAME << " "
-                << level_to_string(lvl, true) << ": " << buf << "\x1b[0m" << std::endl;
+                << level_to_string(lvl, true) << ": " << buf.data() << "\x1b[0m" << std::endl;
         }
 
-    private:
 # if defined(DEBUG)
         level _level = level::debug;
 # else
@@ -181,7 +184,7 @@ namespace emblob
 # endif
     };
 
-    typedef std::unique_ptr<logger> logger_ptr;
+    using logger_ptr = std::unique_ptr<logger>;
     logger_ptr g_logger = std::make_unique<logger>();
 
 } // !namespace emblob

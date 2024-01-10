@@ -92,8 +92,7 @@ namespace emblob
                         break;
                     }
 
-                    std::string validate_msg;
-                    if (a->validator != nullptr && !a->validator(argv[i + 1], validate_msg)) {
+                    if (std::string validate_msg; a->validator != nullptr && !a->validator(argv[i + 1], validate_msg)) {
                         g_logger->error("'%s' is not a valid value for '%s' (%s)", argv[i + 1],  input.c_str(),
                             validate_msg.c_str());
                         retval = false;
@@ -107,7 +106,7 @@ namespace emblob
 
             if (retval) {
                 /* look for required options that are missing. */
-                _config.for_each([&](const config::arg& a) {
+                _config.for_each([&retval](const config::arg& a) {
                     if (a.required && !a.seen && a.default_value.empty()) {
                         g_logger->error("'%s/%s' is a required option", a.short_flag.c_str(), a.flag.c_str());
                         retval = false;
@@ -213,19 +212,22 @@ namespace emblob
 
                         retval += flag + ",";
 
-                        for (size_t n = 0; n < std::max(padding, size_t(1)); n++)
+                        for (size_t n = 0; n < std::max(padding, size_t(1)); n++) {
                             retval += " ";
+                        }
 
                         retval += short_flag;
 
                         padding = LONGEST_SHORT_FLAG - short_flag.size() + 1;
 
-                        for (size_t n = 0; n < std::max(padding, size_t(1)); n++)
+                        for (size_t n = 0; n < std::max(padding, size_t(1)); n++) {
                             retval += " ";
+                        }
 
                         if (!arg.empty()) {
-                            if (!required)
+                            if (!required) {
                                 retval += "[";
+                            }
 
                             retval += ESC_SEQ("4", "") + arg + ESC_SEQE("24");
 
@@ -233,8 +235,9 @@ namespace emblob
                                 retval += "=" + default_value;
                             }
 
-                            if (!required)
+                            if (!required) {
                                 retval += "]";
+                            }
                         }
 
                         retval += " ";
@@ -246,22 +249,25 @@ namespace emblob
                             retval += ")";
                         }
 
-                        std::string options_str = options_to_string();
-                        if (!options_str.empty())
+                        if (auto options_str = options_to_string(); !options_str.empty()) {
                             retval += ": " + options_str;
+                        }
 
                         return retval;
                     }
                 };
 
-                void for_each(const std::function<void(const arg& a)>& func) const {
-                    for (const auto& a : args)
+                template<typename TFunc>
+                void for_each(const TFunc& func) const {
+                    for (const auto& a : args) {
                         func(a);
+                    }
                 }
 
-                bool get_arg(const std::string& flag, /*out*/ arg** out) {
-                    if (!out)
+                bool get_arg(const std::string_view& flag, /*out*/ arg** out) {
+                    if (!out) {
                         return false;
+                    }
 
                     for (auto& a : args) {
                         if (a.flag == flag || a.short_flag == flag) {
@@ -273,7 +279,7 @@ namespace emblob
                     return false;
                 }
 
-                std::string get_value(const std::string& flag) const {
+                std::string get_value(const std::string_view& flag) const {
                     for (const auto& a : args) {
                         if (a.flag == flag || a.short_flag == flag) {
                             if (a.value.empty() && !a.default_value.empty()) {
@@ -406,8 +412,7 @@ namespace emblob
                     return false;
                 }
 
-                std::string file_err_msg;
-                if (!system::is_valid_input_filename(val, file_err_msg)) {
+                if (std::string file_err_msg; !system::is_valid_input_filename(val, file_err_msg)) {
                     msg = fmt_str("Unable to use %s as an input file (%s)", val.c_str(),
                         file_err_msg.c_str());
                     return false;
@@ -426,8 +431,7 @@ namespace emblob
                 }
 
                 for (const auto& ext : { EXT_ASM, EXT_OBJ }) {
-                    std::string file_err_msg;
-                    if(!system::is_valid_output_filename(val + ext, file_err_msg)) {
+                    if (std::string file_err_msg; !system::is_valid_output_filename(val + ext, file_err_msg)) {
                         msg = fmt_str("Unable to use %s as an output file base name (%s)", val.c_str(),
                             file_err_msg.c_str());
                         return false;

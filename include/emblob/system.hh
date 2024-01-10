@@ -38,11 +38,12 @@ namespace emblob
         ~system() = delete;
 
         static std::string get_error_message(int err) {
-            char buf[MAX_ERRORMSG] = {0};
+            std::array<char, MAX_ERRORMSG> buf {};
+            buf.fill('\0');
 
 # if defined(__HAVE_XSI_STRERROR_R__)
             bool success = true;
-            int finderr = strerror_r(err, buf, MAX_ERRORMSG);
+            int finderr = strerror_r(err, buf.data(), buf.size());
 #  if defined(__HAVE_XSI_STRERROR_R_ERRNO__)
             if (finderr == -1) {
                 success = false;
@@ -52,15 +53,15 @@ namespace emblob
             success = finderr == 0;
 #  endif
             if (!success)
-                snprintf(buf, MAX_ERRORMSG, "got error %d while trying to look up error %d",
+                snprintf(buf.data(), buf.size(), "got error %d while trying to look up error %d",
                     finderr, err);
 
-            return buf;
+            return buf.data();
 # elif defined(__HAVE_GNU_STRERROR_R__)
-            char* tmp = strerror_r(err, buf, MAX_ERRORMSG);
-            return (tmp != buf) ? tmp : buf;
+            char* tmp = strerror_r(err, buf.data(), buf.size());
+            return (tmp != buf.data()) ? tmp : buf.data();
 # elif defined(__HAVE_STRERROR_S__)
-            [[maybe_unused]] errno_t finderr = strerror_s(buf, MAX_ERRORMSG, err);
+            [[maybe_unused]] errno_t finderr = strerror_s(buf.data(), buf.size(), err);
             return buf;
 # else
             return strerror(err);
@@ -68,9 +69,8 @@ namespace emblob
         }
 
         static bool file_exists(const std::string& fname) {
-            struct stat st;
-            int ret = stat(fname.c_str(), &st);
-            if (0 != ret) {
+            struct stat st {};
+            if (int ret = stat(fname.c_str(), &st); 0 != ret) {
                 if (ENOENT != errno) {
                     g_logger->error("couldn't stat %s; error: %s", fname.c_str(),
                         get_error_message(errno).c_str());
@@ -83,7 +83,7 @@ namespace emblob
 
         /* file size in bytes, or -1 upon failure */
         static off_t file_size(const std::string& fname) {
-            struct stat st;
+            struct stat st {};
             if (0 != stat(fname.c_str(), &st)) {
                 g_logger->error("couldn't stat %s; error: %s", fname.c_str(),
                     get_error_message(errno).c_str());
@@ -107,8 +107,9 @@ namespace emblob
 
         static std::ofstream::pos_type write_file_contents(const std::string& fname,
             std::ios_base::openmode mode, const std::function<void(std::ostream&)>& cb) {
-            if (!cb)
+            if (!cb) {
                 return std::ofstream::pos_type(-1);
+            }
 
             try {
                 std::ofstream strm(fname, mode);
@@ -117,9 +118,10 @@ namespace emblob
                 cb(strm);
                 strm.flush();
 
-                if (strm.good())
+                if (strm.good()) {
                     return strm.tellp();
-            } catch (const std::exception& ex) {
+                }
+            } catch (const std::ios_base::failure& ex) {
                 g_logger->error("caught exception while writing to '%s': %s", fname.c_str(),
                     ex.what());
             }
@@ -135,8 +137,7 @@ namespace emblob
             bool opened = false;
             err_msg.clear();
 
-            auto size = file_size(fname);
-            if (-1 == size) {
+            if (auto size = file_size(fname); -1 == size) {
                 err_msg = get_error_message(errno);
             } else if (0 == size) {
                 err_msg = fmt_str("input file %s is empty", fname.c_str());
@@ -182,8 +183,7 @@ namespace emblob
         }
 
         static std::string detect_c_compiler() {
-            char* from_env = getenv("CC");
-            if (valid_str(from_env)) {
+            if (auto from_env = getenv("CC"); valid_str(from_env)) {
                 g_logger->info("detected C compiler '%s' from environment variable 'CC'", from_env);
                 return from_env;
             }
@@ -203,8 +203,7 @@ namespace emblob
         static bool is_system_command_available() {
             std::cout.flush();
 
-            int ret = std::system(nullptr);
-            if (ret == 0) {
+            if (int ret = std::system(nullptr); ret == 0) {
                 g_logger->error("system() is NOT available for command processing!");
                 return false;
             }
