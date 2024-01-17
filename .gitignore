@@ -8,7 +8,7 @@ empty.bin
 build/*
 *.S
 *.o
-emblob_test.h
+emblob_*.h
 
 # Annoying macOS files
 .DS_Store
