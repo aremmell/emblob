@@ -60,10 +60,8 @@ namespace emblob
     std::string string_to_lower(const std::string& str) {
         auto retval = str;
 
-        std::for_each(retval.begin(), retval.end(), [](char& c) {
-            int i = c;
-            i = std::tolower(i);
-            c = static_cast<char>(i);
+        std::ranges::for_each(retval.begin(), retval.end(), [](char& c) {
+            c = static_cast<char>(std::tolower(c));
         });
 
         return retval;
@@ -72,10 +70,8 @@ namespace emblob
     std::string string_to_upper(const std::string& str) {
         auto retval = str;
 
-        std::for_each(retval.begin(), retval.end(), [](char& c) {
-            int i = c;
-            i = std::toupper(i);
-            c = static_cast<char>(i);
+        std::ranges::for_each(retval.begin(), retval.end(), [](char& c) {
+            c = static_cast<char>(std::toupper(c));
         });
 
         return retval;

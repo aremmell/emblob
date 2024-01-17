@@ -100,7 +100,7 @@ namespace emblob
             }
 
             auto base_name = fname.substr(0, last_full_stop);
-            std::replace(base_name.begin(), base_name.end(), '.', '_');
+            std::ranges::replace(base_name.begin(), base_name.end(), '.', '_');
 // TODO_strip_illegal_variable_name_chars:
             return base_name;
         }
