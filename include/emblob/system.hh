@@ -112,6 +112,7 @@ namespace emblob
             }
 
             try {
+                g_logger->debug("opening %s for writing (mode: 0x%x)...", fname.c_str(), mode);
                 std::ofstream strm(fname, mode);
                 strm.exceptions(strm.badbit | strm.failbit);
 
@@ -122,7 +123,7 @@ namespace emblob
                     return strm.tellp();
                 }
             } catch (const std::ios_base::failure& ex) {
-                g_logger->error("caught exception while writing to '%s': %s", fname.c_str(),
+                g_logger->error("caught exception while writing to %s: %s", fname.c_str(),
                     ex.what());
             }
 
@@ -130,7 +131,24 @@ namespace emblob
         }
 
         static bool delete_file(const std::string& fname) {
-            return 0 == std::remove(fname.c_str());
+            int err_code = 0;
+#if !defined(__WIN__)
+            if (remove(fname.c_str()) == -1) {
+                err_code = errno;
+            }
+#else
+            if (!DeleteFileA(fname.c_str())) {
+                err_code = GetLastError();
+            }
+#endif
+            if (err_code == 0) {
+                g_logger->debug("deleted %s");
+            } else {
+                g_logger->error("failed to delete %s; error: %s", fname.c_str(),
+                    get_error_message(err_code).c_str());
+            }
+
+            return err_code == 0;
         }
 
         static bool is_valid_input_filename(const std::string& fname, std::string& err_msg) {
@@ -173,8 +191,9 @@ namespace emblob
                 fclose(f);
                 f = nullptr;
 
-                if (!delete_file(fname))
+                if (!delete_file(fname)) {
                     err_msg = get_error_message(errno);
+                }
             } else {
                 err_msg = get_error_message(err);
             }
@@ -217,6 +236,8 @@ namespace emblob
 
             if (is_system_command_available()) {
                 std::cout.flush();
+
+                g_logger->debug("executing system command '%s'...", cmd.c_str());
 
                 int sysret = std::system(cmd.c_str());
                 int status = WEXITSTATUS(sysret);

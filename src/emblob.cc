@@ -199,6 +199,8 @@ const void* emblob_get_{lname}_raw(void)
         auto blob_name = system::file_base_name(input_file);
         auto hdr_file = cmd_line.get_hdr_output_filename();
 
+        g_logger->debug("generating header file contents...");
+
         string header_contents {};
         auto blob_lname = string_to_lower(blob_name);
         auto blob_uname = string_to_upper(blob_name);
@@ -211,6 +213,8 @@ const void* emblob_get_{lname}_raw(void)
 
         regex sexpr("\\{BLOB_SIZE\\}");
         header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));
+
+        g_logger->debug("writing header file contents to %s...", hdr_file.c_str());
 
         auto openmode = ios::out | ios::trunc;
         auto wrote = system::write_file_contents(hdr_file, openmode, [&header_contents](ostream& strm) {
@@ -228,14 +232,20 @@ const void* emblob_get_{lname}_raw(void)
         state.created_hdr_file = true;
 
 #if defined(__MACOS__) || defined(__LINUS__) || defined(__BSD__)
+        g_logger->debug("generating linker assembly file contents...");
+
+        stringstream sstrm;
+        sstrm << ".global _" << blob_lname << "_data" << endl;
+        sstrm << "_" << blob_lname << "_data:" << endl;
+        sstrm << ".incbin \"" << input_file << "\"" << endl;
+        sstrm << ".global _sizeof__" << blob_lname << "_data" << endl;
+        sstrm << ".set _sizeof__" << blob_lname << "_data, . - _" << blob_lname << "_data" << endl;
+
         auto asm_file = cmd_line.get_asm_output_filename();
+        g_logger->debug("writing linker assembly file contents to %s...", asm_file.c_str());
         openmode = ios::out | ios::trunc;
-        wrote = system::write_file_contents(asm_file, openmode, [&blob_lname, input_file](ostream& strm) {
-            strm << ".global _" << blob_lname << "_data" << endl;
-            strm << "_" << blob_lname << "_data:" << endl;
-            strm << ".incbin \"" << input_file << "\"" << endl;
-            strm << ".global _sizeof__" << blob_lname << "_data" << endl;
-            strm << ".set _sizeof__" << blob_lname << "_data, . - _" << blob_lname << "_data" << endl;
+        wrote = system::write_file_contents(asm_file, openmode, [&sstrm](ostream& strm) {
+            strm << sstrm.str();
         });
 
         if (wrote == -1) {
@@ -247,6 +257,8 @@ const void* emblob_get_{lname}_raw(void)
         g_logger->info("successfully created %s (%lld bytes)", asm_file.c_str(),
             system::file_size(asm_file));
         state.created_asm_file = true;
+
+        g_logger->debug("using %s to generate linker object file...", compiler.c_str());
 
         auto obj_file = cmd_line.get_obj_output_filename();
         auto cmd = fmt_str("%s -c -o %s %s", compiler.c_str(), obj_file.c_str(), asm_file.c_str());

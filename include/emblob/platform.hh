@@ -80,6 +80,7 @@
 # include <exception>
 # include <functional>
 # include <fstream>
+# include <sstream>
 # include <iostream>
 # include <memory>
 # include <vector>
