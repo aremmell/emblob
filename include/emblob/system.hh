@@ -59,10 +59,10 @@ namespace emblob
 
             return buf.data();
 # elif defined(__HAVE_GNU_STRERROR_R__)
-            char* tmp = strerror_r(err, buf.data(), buf.size());
+            const char* tmp = strerror_r(err, buf.data(), buf.size());
             return (tmp != buf.data()) ? tmp : buf.data();
 # elif defined(__HAVE_STRERROR_S__)
-            [[maybe_unused]] errno_t finderr = strerror_s(buf.data(), buf.size(), err);
+            [[maybe_unused]] auto finderr = strerror_s(buf.data(), buf.size(), err);
             return buf;
 # else
             return strerror(err);
