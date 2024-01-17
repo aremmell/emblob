@@ -134,9 +134,9 @@ EMBLOB_EXTERNAL uintptr_t EMBLOB_{NAME};
  * Returns the size of the embedded blob, in bytes.
  */
 static inline
-uint32_t emblob_get_{lname}_size(void)
+uint64_t emblob_get_{lname}_size(void)
 {
-    return UINT32_C({BLOB_SIZE});
+    return UINT64_C({BLOB_SIZE});
 }
 
 /**
@@ -199,23 +199,21 @@ const void* emblob_get_{lname}_raw(void)
         auto input_file = cmd_line.get_input_filename();
         auto input_file_size = system::file_size(input_file);
         auto blob_name = system::file_base_name(input_file);
-        auto hdr_file = cmd_line.get_hdr_output_filename();
+        auto blob_lname = string_to_lower(blob_name);
+        string header_contents {};
 
         g_logger->debug("generating header file contents...");
-
-        string header_contents {};
-        auto blob_lname = string_to_lower(blob_name);
-        auto blob_uname = string_to_upper(blob_name);
 
         regex lexpr("\\{lname\\}");
         header_contents = regex_replace(header_template, lexpr, blob_lname);
 
         regex uexpr("\\{NAME\\}");
-        header_contents = regex_replace(header_contents, uexpr, blob_uname);
+        header_contents = regex_replace(header_contents, uexpr, string_to_upper(blob_name));
 
         regex sexpr("\\{BLOB_SIZE\\}");
         header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));
 
+        auto hdr_file = cmd_line.get_hdr_output_filename();
         g_logger->debug("writing header file contents to %s...", hdr_file.c_str());
 
         auto openmode = ios::out | ios::trunc;

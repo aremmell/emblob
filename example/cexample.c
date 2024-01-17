@@ -31,7 +31,7 @@
 int main(void)
 {
     const uint8_t* bytes = emblob_get_test_8();
-    printf("size = %" PRIu32 " bytes\n", emblob_get_test_size());
+    printf("size = %" PRIu64 " bytes\n", emblob_get_test_size());
     for (size_t n = 0; n < 15; n++) {
         printf("0x%hhx ", bytes[n]);
     }
