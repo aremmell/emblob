@@ -8,6 +8,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=aremmell_emblob&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=aremmell_emblob)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=aremmell_emblob&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=aremmell_emblob)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=aremmell_emblob&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=aremmell_emblob)
+[![CMake on multiple platforms](https://github.com/aremmell/emblob/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=master)](https://github.com/aremmell/emblob/actions/workflows/cmake-multi-platform.yml)
 
 A CLI tool to be used as part of a build toolchain which generates linker input object files containing arbitrary files as binary objects (blobs) with accompanying C/C++ header files providing the necessary code to access the blob's data at runtime.
 
