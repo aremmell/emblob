@@ -93,21 +93,21 @@ All generated functions have names in the format `emblob_get_{outfile}_{what}` w
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *two bytes (16-bits)* at a time.
 4.
-  ```cpp
-  const uint32_t* emblob_get_{outfile}_32()
-  ```
+   ```cpp
+   const uint32_t* emblob_get_{outfile}_32()
+   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *four bytes (32-bits)* at a time.
 5.
-  ```cpp
-  const uint64_t* emblob_get_{outfile}_64()
-  ```
+   ```cpp
+   const uint64_t* emblob_get_{outfile}_64()
+   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *eight bytes (64-bits)* at a time.
 6.
-  ```cpp
-  const void* emblob_get_{outfile}_raw()
-  ```
+   ```cpp
+   const void* emblob_get_{outfile}_raw()
+   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data arbitrarily.
 
