@@ -48,7 +48,7 @@ namespace emblob
             return std::string();
         }
 
-        auto buf = std::make_shared<char[]>(len + 1);
+        auto buf = std::make_unique<char[]>(len + 1);
         std::vsnprintf(buf.get(), len + 1, fmt, args2);
         va_end(args2);
 
