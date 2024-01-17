@@ -104,7 +104,7 @@ All generated functions have names in the format `emblob_get_{outfile}_{what}` w
   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *eight bytes (64-bits)* at a time.
-4.
+6.
   ```cpp
   const void* emblob_get_{outfile}_raw()
   ```
