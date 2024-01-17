@@ -111,16 +111,16 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
 
 1. Create a C++ source file, and place the following struct's definition somewhere near the top. Save it as `struct_example.cpp`:
 
-~~~cpp
-struct MyStruct
-{
-  uint32_t magic = 0U;
-  uint16_t secret_id = 0;
-  uint8_t text_area[16] {};
-};
-~~~
+   ~~~cpp
+   struct MyStruct
+   {
+     uint32_t magic = 0U;
+     uint16_t secret_id = 0;
+     uint8_t text_area[16] {};
+   };
+   ~~~
 
-2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that the last non-printable character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
+2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that at least the last character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
 
    For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters (*see [this table](https://www.asciitable.com/) for relevant hexadecimal byte values*) `"Hello, world.\0"` for `text_area`.
 
