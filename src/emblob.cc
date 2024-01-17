@@ -54,14 +54,16 @@ int main(int argc, char** argv) {
 
     try {
         int exit_code = EXIT_FAILURE;
-        if (!cmd_line.parse_and_validate(argc, argv, exit_code))
+        if (!cmd_line.parse_and_validate(argc, argv, exit_code)) {
             return _exit_main(exit_code);
+        }
 
         g_logger->set_log_level(cmd_line.get_log_level());
 
         auto compiler = system::detect_c_compiler();
-        if (compiler.empty())
+        if (compiler.empty()) {
             return _exit_main(EXIT_FAILURE);
+        }
 
 CONST_STATIC_STRING header_template = R"EOF(/*
  * emblob_{lname}.h
