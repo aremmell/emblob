@@ -131,7 +131,7 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
 4. Build emblob if you haven't already, then execute `build/emblob --infile struct.bin`. You should now have two files of interest:
 
 - `emblob_struct.h` : Contains the auto-generated code to access the embedded structure's data.
-- `struct.o` : The structure is embedded in this file, which will be made part of our sample program in step 7.
+- `struct.o` : `struct.bin` is embedded in this file, which will be made part of our sample program in step 7.
 
 5. Place the following additional code in `struct_example.cpp` so that it resembles the following:
 
@@ -163,7 +163,7 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
 
 7. Execute `c++ -c struct_example.cpp && c++ -o build/struct_example struct_example.o struct.o` in your terminal.
 
-You should now have an executable at `build/struct_example` and can execute it in the terminal to view its output. If you see the expected values being printed, then you have successfully embedded and accessed at runtime a C-style data structure based on the contents a binary file!
+You should now have a binary executable at `build/struct_example` and can run it in the terminal to view its output. If you see the expected values being printed, then you have successfully embedded and accessed at runtime a C-style data structure based on the contents a binary file!
 
 ## <a id="using-specific-compiler" /> Using a specific compiler frontend
 
