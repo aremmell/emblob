@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         if (compiler.empty())
             return _exit_main(EXIT_FAILURE);
 
-CONST_STATIC_STRING(header_template) = R"EOF(/*
+CONST_STATIC_STRING header_template = R"EOF(/*
  * emblob_{lname}.h
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
