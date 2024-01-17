@@ -83,6 +83,68 @@ At the minimum, emblob requires the input file name. This could be a text file f
 emblob --infile test.bin
 ~~~
 
+### <a id="data-structures" /> Data structures
+
+One handy way to use emblob is to embed C-style data structures, then simply obtain pointers to them at runtime and access their members. This is fairly straightforward to accomplish.
+
+Follow the below steps in order to build your own example program that includes an embedded data structure generated from a binary file and accesses it at runtime.
+
+1. Create a C or C++ source file, and place the following struct's definition somewhere near the top. Save it as `struct_example.c/cpp`:
+
+~~~c
+typedef struct
+{
+  uint32_t magic;
+  uint16_t secret_id;
+  uint8_t text_area[16];
+} MyStruct;
+~~~
+
+2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that the last non-printable character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
+
+For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters `"Hello, world.\0"` for `text_area`.
+
+> Note: this example does not take into account the [endianness](https://en.wikipedia.org/wiki/Endianness#Byte_addressing) of your system. The file I created is in little-endian format.
+
+3. Save the file in the same directory that you've cloned emblob into to and name it `struct.bin`.
+
+4. Build emblob if you haven't already, then execute `build/emblob --infile struct.bin`. If everything's gone to plan, you should now have two files of interest:
+
+- `emblob_struct.h` : Contains the auto-generated code to access the embedded structure's data.
+- `struct.o` : The structure is embedded in this file, which will be made part of our sample program in step 7.
+
+5. Place the following additional code in the C or C++ source file that you created in step 1 so that it resmbles the following:
+
+~~~c
+#include <stdlib.h>
+#include <stdio.h>
+#include "emblob_struct.h"
+
+typedef struct
+{
+  uint32_t magic;
+  uint16_t secret_id;
+  uint8_t text_area[16];
+} MyStruct;
+
+int main()
+{
+  // Obtain a typed pointer to the data structure by accessing it via
+  // an emblob auto-generated function, and casting it to the right type.
+  const MyStruct* typed_ptr = (MyStruct*)emblob_get_struct_raw();
+
+  // Print out the values the structure contains.
+  printf("Embedded structure: magic = 0x%08X, secret_id = 0x%04X, text_area = '%s'\n",
+    typed_ptr->magic, typed_ptr->secret_id, (const char*)typed_ptr->text_area);
+
+  return EXIT_SUCCESS;
+}
+~~~
+
+7. Execute `cc -c struct_example.c && cc -o build/struct_example struct_example.o struct.o` in your terminal.
+
+You should now have an executable at `build/struct_example` and can execute it in the terminal to view its output. If you see the expected values being printed, then you have successfully embedded and accessed at runtime a C-style data structure based on the contents a binary file!
+
 ## <a id="using-specific-compiler" /> Using a specific compiler frontend
 
 When choosing a compiler frontend, emblob will attempt to read the `CC` environment variable. If it is empty, emblob will execute `cc`.
