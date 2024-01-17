@@ -122,6 +122,8 @@ add_executable(
     src/emblob.cc
 )
 
+set_property(TARGET ${EMBLOB_EXE_NAME} PROPERTY CXX_STANDARD 20)
+
 add_custom_target(
     RUN_EMBLOB_SIMPLE
     COMMAND rm simple.o 2>/dev/null || true
