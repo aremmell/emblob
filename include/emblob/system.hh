@@ -95,14 +95,34 @@ namespace emblob
         }
 
         static std::string file_base_name(const std::string& fname) {
-            auto last_full_stop = fname.find_last_of('.');
-            if (std::string::npos == last_full_stop) {
-                return fname;
+            auto slash = fname.find_last_of('/');
+            if (slash == std::string::npos) {
+                slash = fname.find_last_of('\\');
             }
 
-            auto base_name = fname.substr(0, last_full_stop);
-            std::ranges::replace(base_name.begin(), base_name.end(), '.', '_');
-// TODO_strip_illegal_variable_name_chars:
+            std::string base_name = slash != std::string::npos
+                ? fname.substr(slash + 1) : fname;
+
+            return base_name.substr(0, base_name.find_last_of('.'));
+        }
+
+        static std::string sanitize_base_name(std::string& base_name) {
+            const std::array<char, 11> illegals {
+                '.', '/', '\\', '?', '*', '[', ']', '{', '}', '=', ';'
+            };
+
+            g_logger->debug("sanitizing basename '%s'...", base_name.c_str());
+            std::ranges::for_each(base_name.begin(), base_name.end(),
+                [&illegals, &base_name](char& c) {
+                for (const auto& illegal : illegals) {
+                    if (c == illegal) {
+                        c = '_';
+                        g_logger->debug("replaced %c with underscore; basename is now %s",
+                            illegal, base_name.c_str());
+                    }
+                }
+            });
+
             return base_name;
         }
 

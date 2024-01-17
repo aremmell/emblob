@@ -1,5 +1,5 @@
 /*
- * cxxexample.cc
+ * struct.cc
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
  * Copyright: Copyright (c) 2018-2024
@@ -23,17 +23,28 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <iostream>
 #include <cstdlib>
-#include "../emblob_test.h"
+#include <cstdio>
+#include <inttypes.h>
+#include "emblob_struct.h"
+
+struct MyStruct
+{
+    uint32_t magic = 0U;
+    uint16_t secret_id = 0;
+    uint8_t text[16]{};
+};
 
 int main()
 {
-    std::cout << "size = " << emblob_get_test_size() << " bytes" << std::endl;
-    auto bytes = emblob_get_test_8();
-    for (size_t n = 0; n < 15; n++) {
-        std::cout << std::hex << "0x" << static_cast<int>(bytes[n]) << ", ";
-    }
-    std::cout << std::endl;
+    // Obtain a typed pointer to the data structure by accessing it via an emblob
+    // auto-generated function, and casting it to the desired type.
+    auto ptr = static_cast<const MyStruct *>(emblob_get_struct_raw());
+
+    // Print out the values the structure contains.
+    auto struct_size = emblob_get_struct_size();
+    printf("%" PRIu64 " bytes: magic = 0x%08X, secret_id = 0x%04X, text = '%s'\n",
+        struct_size, ptr->magic, ptr->secret_id, ptr->text);
+
     return EXIT_SUCCESS;
 }

@@ -149,9 +149,16 @@ namespace emblob
             return _config.get_value(FLAG_INPUT_FILE);
         }
 
+        std::string get_input_basename() const {
+            auto base_name = system::file_base_name(get_input_filename());
+            return system::sanitize_base_name(base_name);
+        }
+
         std::string get_hdr_output_filename() const {
-            auto fname = get_input_filename();
-            return fmt_str("%s_%s.h", APP_NAME, system::file_base_name(fname).c_str());
+            auto fname =
+            system::file_base_name(get_input_filename());
+            return fmt_str("%s_%s.h", APP_NAME,
+                system::sanitize_base_name(fname).c_str());
         }
 
         std::string get_asm_output_filename() const {
@@ -381,8 +388,10 @@ namespace emblob
             std::string _get_output_filename(const char *ext) const {
                 auto val = _config.get_value(FLAG_OUTPUT_FILE);
                 if (val == "infile") {
-                    val = system::file_base_name(_config.get_value(FLAG_INPUT_FILE));
+                    val = get_input_basename();
                 }
+
+                val = system::sanitize_base_name(val);
                 return val.empty() ? val : val + ext;
             }
 

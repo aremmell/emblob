@@ -198,8 +198,8 @@ const void* emblob_get_{lname}_raw(void)
 
         auto input_file = cmd_line.get_input_filename();
         auto input_file_size = system::file_size(input_file);
-        auto blob_name = system::file_base_name(input_file);
-        auto blob_lname = string_to_lower(blob_name);
+        auto base_name = cmd_line.get_input_basename();
+        auto blob_lname = string_to_lower(base_name);
         string header_contents {};
 
         g_logger->debug("generating header file contents...");
@@ -208,7 +208,7 @@ const void* emblob_get_{lname}_raw(void)
         header_contents = regex_replace(header_template, lexpr, blob_lname);
 
         regex uexpr("\\{NAME\\}");
-        header_contents = regex_replace(header_contents, uexpr, string_to_upper(blob_name));
+        header_contents = regex_replace(header_contents, uexpr, string_to_upper(base_name));
 
         regex sexpr("\\{BLOB_SIZE\\}");
         header_contents = regex_replace(header_contents, sexpr, to_string(input_file_size));

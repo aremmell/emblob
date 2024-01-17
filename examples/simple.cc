@@ -1,5 +1,5 @@
 /*
- * cexample.c
+ * simple.cc
  *
  * Author:    Ryan M. Lederman <lederman@gmail.com>
  * Copyright: Copyright (c) 2018-2024
@@ -23,18 +23,22 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdio>
 #include <inttypes.h>
-#include "../emblob_test.h"
+#include "emblob_simple.h"
 
-int main(void)
+int main()
 {
-    const uint8_t* bytes = emblob_get_test_8();
-    printf("size = %" PRIu64 " bytes\n", emblob_get_test_size());
+    // Print the size of the blob in bytes.
+    printf("%" PRIu64 " bytes: ", emblob_get_simple_size());
+
+    // Get a pointer to the blob's data and print it one byte at a time.
+    auto bytes = emblob_get_simple_8();
     for (size_t n = 0; n < 15; n++) {
-        printf("0x%hhx ", bytes[n]);
+        printf("0x%02hhx%s", bytes[n], n < 15 - 1 ? ", " : "");
     }
     printf("\n");
+
     return EXIT_SUCCESS;
 }

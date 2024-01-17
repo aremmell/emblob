@@ -8,9 +8,7 @@ cmake_minimum_required(VERSION 3.12.0)
 
 # variables
 set(PROJECT_NAME emblob)
-set(EMBLOB_EXECUTABLE_NAME emblob)
-set(C_EXAMPLE_EXECUTABLE_NAME cexample)
-set(CXX_EXAMPLE_EXECUTABLE_NAME cxxexample)
+set(EMBLOB_EXE_NAME emblob)
 
 # versioning
 set(PROJECT_VERSION_MAJOR 2)
@@ -120,102 +118,52 @@ configure_file(
 )
 
 add_executable(
-    ${EMBLOB_EXECUTABLE_NAME}
+    ${EMBLOB_EXE_NAME}
     src/emblob.cc
 )
 
 add_custom_target(
-    RUN_EMBLOB
-    COMMAND rm test.o || true
-    COMMAND rm test.S || true
-    COMMAND build/emblob -i test.bin -l debug
+    RUN_EMBLOB_SIMPLE
+    COMMAND rm simple.o 2>/dev/null || true
+    COMMAND rm simple.S 2>/dev/null || true
+    COMMAND build/emblob -i examples/simple.bin
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/test.o
-    COMMENT "execute emblob with test.bin as input"
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/simple.o
+    COMMENT "execute emblob with examples/simple.bin"
+    DEPENDS ${EMBLOB_EXE_NAME}
 )
 
-add_dependencies(
-    RUN_EMBLOB
-    ${EMBLOB_EXECUTABLE_NAME}
-)
-
-add_dependencies(
-    RUN_EMBLOB
-    ${EMBLOB_EXECUTABLE_NAME}
+add_custom_target(
+    RUN_EMBLOB_STRUCT
+    COMMAND rm struct.o 2>/dev/null || true
+    COMMAND rm struct.S 2>/dev/null || true
+    COMMAND build/emblob -i examples/struct.bin
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/struct.o
+    COMMENT "execute emblob with examples/struct.bin"
+    DEPENDS ${EMBLOB_EXE_NAME}
 )
 
 set_source_files_properties(
-    test.o
+    simple.o struct.o
     PROPERTIES
     EXTERNAL_OBJECT true
     GENERATED true
 )
 
-add_executable(
-    ${C_EXAMPLE_EXECUTABLE_NAME}
-    example/cexample.c
-)
-
-add_dependencies(
-    ${C_EXAMPLE_EXECUTABLE_NAME}
-    RUN_EMBLOB
-)
-
-add_executable(
-    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    example/cxxexample.cc
-)
-
-add_dependencies(
-    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    RUN_EMBLOB
-)
-
 target_include_directories(
-    ${EMBLOB_EXECUTABLE_NAME}
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-)
-
-target_include_directories(
-    ${C_EXAMPLE_EXECUTABLE_NAME}
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-)
-
-target_link_libraries(
-    ${C_EXAMPLE_EXECUTABLE_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/test.o
-)
-
-target_link_libraries(
-    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/test.o
-)
-
-target_include_directories(
-    ${CXX_EXAMPLE_EXECUTABLE_NAME}
+    ${EMBLOB_EXE_NAME}
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 target_compile_features(
-    ${EMBLOB_EXECUTABLE_NAME}
+    ${EMBLOB_EXE_NAME}
     PUBLIC
     ${CXX_STANDARD}
 )
 
-target_compile_features(
-    ${C_EXAMPLE_EXECUTABLE_NAME}
-    PUBLIC
-    ${C_STANDARD}
-)
-
-target_compile_features(
-    ${CXX_EXAMPLE_EXECUTABLE_NAME}
-    PUBLIC
-    ${CXX_STANDARD}
+add_subdirectory(
+    examples
 )
