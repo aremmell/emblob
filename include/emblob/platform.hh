@@ -89,7 +89,6 @@
 # include <limits>
 # include <string>
 # include <string_view>
-# include <ranges>
 # include <cstdlib>
 # include <cstdarg>
 # include <cstdint>
