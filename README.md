@@ -104,16 +104,16 @@ struct MyStruct
 
    > Note: this example does not take into account the [endianness](https://en.wikipedia.org/wiki/Endianness#Byte_addressing) of your system. The file I created is in little-endian format.
 
-3. Save the file in the same directory that you've cloned emblob into to and name it `struct.bin`.
+3. Save the file as `struct.bin` in the same directory that you've cloned emblob into.
 
-4. Build emblob if you haven't already, then execute `build/emblob --infile struct.bin`. If everything's gone to plan, you should now have two files of interest:
+4. Build emblob if you haven't already, then execute `build/emblob --infile struct.bin`. You should now have two files of interest:
 
 - `emblob_struct.h` : Contains the auto-generated code to access the embedded structure's data.
 - `struct.o` : The structure is embedded in this file, which will be made part of our sample program in step 7.
 
-5. Place the following additional code in `struct_example.cpp` so that it resmbles the following:
+5. Place the following additional code in `struct_example.cpp` so that it resembles the following:
 
-~~~c
+~~~cpp
 #include <cstdlib>
 #include <cstdio>
 #include "emblob_struct.h"
