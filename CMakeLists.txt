@@ -84,12 +84,12 @@ else()
         $<$<CONFIG:Release>:-O3>
     )
 
-    if (CMAKE_COMPILER_IS_GNUCC)
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++")
+    else()
         add_compile_options(
             -Wformat-truncation
         )
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++")
     endif()
 
     if (THREADS_HAVE_PTHREAD_ARG)
