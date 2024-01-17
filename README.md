@@ -100,9 +100,9 @@ struct MyStruct
 
 2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that the last non-printable character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
 
-  For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters (*see [this table](https://www.asciitable.com/) for relevant hexadecimal byte values*) `"Hello, world.\0"` for `text_area`.
+   For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters (*see [this table](https://www.asciitable.com/) for relevant hexadecimal byte values*) `"Hello, world.\0"` for `text_area`.
 
-  > Note: this example does not take into account the [endianness](https://en.wikipedia.org/wiki/Endianness#Byte_addressing) of your system. The file I created is in little-endian format.
+   > Note: this example does not take into account the [endianness](https://en.wikipedia.org/wiki/Endianness#Byte_addressing) of your system. The file I created is in little-endian format.
 
 3. Save the file in the same directory that you've cloned emblob into to and name it `struct.bin`.
 
