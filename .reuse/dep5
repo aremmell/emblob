@@ -24,7 +24,7 @@ Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
 # Examples
-Files: example/*.c example/*.cc
+Files: examples/*.bin examples/*.cc
 Copyright: 2018-2024 Ryan M. Lederman <lederman@gmail.com>
 License: MIT
 
