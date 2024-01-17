@@ -52,9 +52,10 @@ namespace emblob
 #  else
             success = finderr == 0;
 #  endif
-            if (!success)
+            if (!success) {
                 snprintf(buf.data(), buf.size(), "got error %d while trying to look up error %d",
                     finderr, err);
+            }
 
             return buf.data();
 # elif defined(__HAVE_GNU_STRERROR_R__)

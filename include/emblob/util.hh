@@ -44,15 +44,17 @@ namespace emblob
         int len = std::vsnprintf(nullptr, 0, fmt, args1);
         va_end(args1);
 
-        if (len < 0)
+        if (len < 0) {
             return std::string();
+        }
 
         auto buf = std::make_shared<char[]>(len + 1);
         std::vsnprintf(buf.get(), len + 1, fmt, args2);
         va_end(args2);
 
-        if (len < 0)
+        if (len < 0) {
             return std::string();
+        }
 
         return buf.get();
     }
