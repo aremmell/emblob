@@ -85,24 +85,20 @@ emblob --infile test.bin
 
 ### <a id="data-structures" /> Data structures
 
-One handy way to use emblob is to embed C-style data structures, then simply obtain pointers to them at runtime and access their members. This is fairly straightforward to accomplish.
+One handy way to use emblob is to embed C-style data structures, then simply obtain a type-safe pointer and access members. This is fairly straightforward to accomplish; follow the below steps in order to build your own example program that includes an embedded data structure generated from a binary file and accesses it at runtime.
 
-Follow the below steps in order to build your own example program that includes an embedded data structure generated from a binary file and accesses it at runtime.
+1. Create a C++ source file, and place the following struct's definition somewhere near the top. Save it as `struct_example.cpp`:
 
-1. Create a C or C++ source file, and place the following struct's definition somewhere near the top. Save it as `struct_example.c/cpp`:
-
-~~~c
-typedef struct
+~~~cpp
+struct MyStruct
 {
-  uint32_t magic;
-  uint16_t secret_id;
-  uint8_t text_area[16];
-} MyStruct;
+  uint32_t magic = 0U;
+  uint16_t secret_id = 0;
+  uint8_t text_area[16] {};
+};
 ~~~
 
-2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that the last non-printable character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
-
-For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters `"Hello, world.\0"` for `text_area`.
+2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that the last non-printable character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size. For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters (*see [this table](https://www.asciitable.com/) for relevant hexadecimal byte values*) `"Hello, world.\0"` for `text_area`.
 
 > Note: this example does not take into account the [endianness](https://en.wikipedia.org/wiki/Endianness#Byte_addressing) of your system. The file I created is in little-endian format.
 
@@ -113,35 +109,35 @@ For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, a
 - `emblob_struct.h` : Contains the auto-generated code to access the embedded structure's data.
 - `struct.o` : The structure is embedded in this file, which will be made part of our sample program in step 7.
 
-5. Place the following additional code in the C or C++ source file that you created in step 1 so that it resmbles the following:
+5. Place the following additional code in `struct_example.cpp` so that it resmbles the following:
 
 ~~~c
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "emblob_struct.h"
 
-typedef struct
+struct MyStruct
 {
-  uint32_t magic;
-  uint16_t secret_id;
-  uint8_t text_area[16];
-} MyStruct;
+  uint32_t magic = 0U;
+  uint16_t secret_id = 0;
+  uint8_t text_area[16] {};
+};
 
 int main()
 {
   // Obtain a typed pointer to the data structure by accessing it via
   // an emblob auto-generated function, and casting it to the right type.
-  const MyStruct* typed_ptr = (MyStruct*)emblob_get_struct_raw();
+  const auto typed_ptr = static_cast<MyStruct*>(emblob_get_struct_raw());
 
   // Print out the values the structure contains.
   printf("Embedded structure: magic = 0x%08X, secret_id = 0x%04X, text_area = '%s'\n",
-    typed_ptr->magic, typed_ptr->secret_id, (const char*)typed_ptr->text_area);
+    typed_ptr->magic, typed_ptr->secret_id, static_cast<const char*>(typed_ptr->text_area));
 
   return EXIT_SUCCESS;
 }
 ~~~
 
-7. Execute `cc -c struct_example.c && cc -o build/struct_example struct_example.o struct.o` in your terminal.
+7. Execute `c++ -c struct_example.cpp && c++ -o build/struct_example struct_example.o struct.o` in your terminal.
 
 You should now have an executable at `build/struct_example` and can execute it in the terminal to view its output. If you see the expected values being printed, then you have successfully embedded and accessed at runtime a C-style data structure based on the contents a binary file!
 
