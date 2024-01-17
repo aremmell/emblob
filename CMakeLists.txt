@@ -84,9 +84,7 @@ else()
         $<$<CONFIG:Release>:-O3>
     )
 
-    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++")
-    else()
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "gcc")
         add_compile_options(
             -Wformat-truncation
         )

@@ -79,6 +79,7 @@
 
 # include <exception>
 # include <functional>
+# include <algorithm>
 # include <fstream>
 # include <sstream>
 # include <iostream>
