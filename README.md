@@ -120,7 +120,7 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
    };
    ~~~
 
-2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; [download my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that at least the last character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
+2. Using a hex editor (like [this](https://hexed.it/) free online one) and create a new file (*I've done this step already; download [my file](https://rml.dev/pub/struct.bin)* and skip ahead if you'd like). Put the desired value of `magic` in the first 4 bytes, the value of `secret_id` in the next 2 bytes, and finally, place some ASCII characters values after that, ensuring that at least the last character's value is 0x00, and that there are exactly 16 places for ASCII characters to go. When finished, your file should be precisely 22 bytes in size.
 
    For this example Let's use `0x12345678` for `magic`, `0xABCD` for `secret_id`, and the ASCII characters (*see [this table](https://www.asciitable.com/) for relevant hexadecimal byte values*) `"Hello, world.\0"` for `text_area`.
 
@@ -135,7 +135,7 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
 
 5. Place the following additional code in `struct_example.cpp` so that it resembles the following:
 
-~~~cpp
+   ~~~cpp
 #include <cstdlib>
 #include <cstdio>
 #include "emblob_struct.h"
@@ -159,7 +159,7 @@ int main()
 
   return EXIT_SUCCESS;
 }
-~~~
+   ~~~
 
 7. Execute `c++ -c struct_example.cpp && c++ -o build/struct_example struct_example.o struct.o` in your terminal.
 
