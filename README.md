@@ -136,29 +136,29 @@ One handy way to use emblob is to embed C-style data structures, then simply obt
 5. Place the following additional code in `struct_example.cpp` so that it resembles the following:
 
    ~~~cpp
-#include <cstdlib>
-#include <cstdio>
-#include "emblob_struct.h"
+   #include <cstdlib>
+   #include <cstdio>
+   #include "emblob_struct.h"
 
-struct MyStruct
-{
-  uint32_t magic = 0U;
-  uint16_t secret_id = 0;
-  uint8_t text_area[16] {};
-};
+   struct MyStruct
+   {
+     uint32_t magic = 0U;
+     uint16_t secret_id = 0;
+     uint8_t text_area[16] {};
+   };
 
-int main()
-{
-  // Obtain a typed pointer to the data structure by accessing it via
-  // an emblob auto-generated function, and casting it to the right type.
-  const auto typed_ptr = static_cast<MyStruct*>(emblob_get_struct_raw());
+   int main()
+   {
+     // Obtain a typed pointer to the data structure by accessing it via
+     // an emblob auto-generated function, and casting it to the right type.
+     const auto typed_ptr = static_cast<MyStruct*>(emblob_get_struct_raw());
 
-  // Print out the values the structure contains.
-  printf("Embedded structure: magic = 0x%08X, secret_id = 0x%04X, text_area = '%s'\n",
-    typed_ptr->magic, typed_ptr->secret_id, static_cast<const char*>(typed_ptr->text_area));
+     // Print out the values the structure contains.
+     printf("Embedded structure: magic = 0x%08X, secret_id = 0x%04X, text_area = '%s'\n",
+       typed_ptr->magic, typed_ptr->secret_id, static_cast<const char*>(typed_ptr->text_area));
 
-  return EXIT_SUCCESS;
-}
+     return EXIT_SUCCESS;
+   }
    ~~~
 
 7. Execute `c++ -c struct_example.cpp && c++ -o build/struct_example struct_example.o struct.o` in your terminal.
