@@ -74,22 +74,40 @@ One of emblob's build products is a C and C++ compatible header file containing 
 
 All generated functions have names in the format `emblob_get_{outfile}_{what}` where `{what}` represents the function's specific task or return type. All functions are declared `static inline` and `extern "C"`.
 
-1. `uint64_t emblob_get_{outfile}_size()`
+1.
+   ```cpp
+   uint64_t emblob_get_{outfile}_size()
+   ```
 
    Returns the size of the embedded blob, in bytes.
-2. `const uint8_t* emblob_get_{outfile}_8()`
+2.
+   ```cpp
+   const uint8_t* emblob_get_{outfile}_8()
+   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *one byte (8-bits)* at a time.
-3. `const uint16_t* emblob_get_{outfile}_16()`
+3.
+   ```cpp
+   const uint16_t* emblob_get_{outfile}_16()
+   ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *two bytes (16-bits)* at a time.
-4. `const uint32_t* emblob_get_{outfile}_32()`
+4.
+  ```cpp
+  const uint32_t* emblob_get_{outfile}_32()
+  ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *four bytes (32-bits)* at a time.
-5. `const uint64_t* emblob_get_{outfile}_64()`
+5.
+  ```cpp
+  const uint64_t* emblob_get_{outfile}_64()
+  ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data *eight bytes (64-bits)* at a time.
-4. `const void* emblob_get_{outfile}_raw()`
+4.
+  ```cpp
+  const void* emblob_get_{outfile}_raw()
+  ```
 
    Returns a pointer to the embedded blob that may be used to access the blob's data arbitrarily.
 
