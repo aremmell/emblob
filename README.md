@@ -63,7 +63,7 @@ These programs are bare-bones demonstrations of basic usage of the emblob-genera
 
 #### <a id="generated-code" /> Generated code
 
-One of emblob's build products is a C and C++ compatible header file containing generated code that provides quick and easy access to an embedded binary blob's data at runtime. The name of the header is dependent upon the value passed to emblob on the command-line for the `--outfile/-o` option. If you do not specify a value for this option, the basename of the input file is used. The header file's name will always be in the format `emblob_{outfile}.h`.
+One of emblob's build products is a C and C++ compatible header file containing generated code that provides quick and easy access to the related embedded binary blob's data at runtime. The name of the header is dependent upon the value passed to emblob on the command-line for the `--outfile/-o` option. If you do not specify a value for this option, the basename of the input file is used. The header file's name will always be in the format `emblob_{outfile}.h`.
 
 ##### Example filenames
 
@@ -72,14 +72,26 @@ One of emblob's build products is a C and C++ compatible header file containing 
 
 ##### <a id="generated-functions" /> Functions
 
-All generated functions have names in the format `emblob_get_{outfile}_{what}` where `{what}` represents the function's specific task or return type. All functions are also declared `static inline`.
+All generated functions have names in the format `emblob_get_{outfile}_{what}` where `{what}` represents the function's specific task or return type. All functions are declared `static inline` and `extern "C"`.
 
-1. `uint64_t emblob_get_{outfile}_size()`: Returns the size of the embedded blob, in bytes.
-2. `const uint8_t* emblob_get_{outfile}_8()`: Returns a pointer to the embedded blob that may be used to access the blob's data one byte (8-bits) at a time.
-3. `const uint16_t* emblob_get_{outfile}_16()`: Returns a pointer to the embedded blob that may be used to access the blob's data two bytes (16-bits) at a time.
-4. `const uint32_t* emblob_get_{outfile}_32()`: Returns a pointer to the embedded blob that may be used to access the blob's data four bytes (32-bits) at a time.
-5. `const uint64_t* emblob_get_{outfile}_64()`: Returns a pointer to the embedded blob that may be used to access the blob's data eight bytes (64-bits) at a time.
-4. `const void* emblob_get_{outfile}_raw()`: Returns a pointer to the embedded blob that may be used to access the blob's data arbitrarily.
+1. `uint64_t emblob_get_{outfile}_size()`
+
+   Returns the size of the embedded blob, in bytes.
+2. `const uint8_t* emblob_get_{outfile}_8()`
+
+   Returns a pointer to the embedded blob that may be used to access the blob's data *one byte (8-bits)* at a time.
+3. `const uint16_t* emblob_get_{outfile}_16()`
+
+   Returns a pointer to the embedded blob that may be used to access the blob's data *two bytes (16-bits)* at a time.
+4. `const uint32_t* emblob_get_{outfile}_32()`
+
+   Returns a pointer to the embedded blob that may be used to access the blob's data *four bytes (32-bits)* at a time.
+5. `const uint64_t* emblob_get_{outfile}_64()`
+
+   Returns a pointer to the embedded blob that may be used to access the blob's data *eight bytes (64-bits)* at a time.
+4. `const void* emblob_get_{outfile}_raw()`
+
+   Returns a pointer to the embedded blob that may be used to access the blob's data arbitrarily.
 
 # <a id="cli-interface" /> Command-line interface
 
