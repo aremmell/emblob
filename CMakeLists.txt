@@ -35,7 +35,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
     set(CMAKE_CXX_STANDARD 20)
     set(CMAKE_CXX_STANDARD_REQUIRED true)
 else()
-    message(FATAL_ERROR, "CMake >= 3.12 is required in order to build libbal")
+    message(FATAL_ERROR, "CMake >= 3.12 is required in order to build emblob")
 endif()
 
 # policy settings, so CMake doesn't whine.
