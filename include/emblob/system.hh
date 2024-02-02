@@ -153,15 +153,15 @@ namespace emblob
 
         static bool delete_file(const std::string& fname) {
             int err_code = 0;
-#if !defined(__WIN__)
+# if !defined(__WIN__)
             if (remove(fname.c_str()) == -1) {
                 err_code = errno;
             }
-#else
+# else
             if (!DeleteFileA(fname.c_str())) {
                 err_code = GetLastError();
             }
-#endif
+# endif
             if (err_code == 0) {
                 g_logger->debug("deleted %s");
             } else {
