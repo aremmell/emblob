@@ -6,7 +6,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/emblob",
             "args": [
-                
+
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -15,5 +15,5 @@
             "MIMode": "lldb"
         }
     ],
-    "version": "2.0.0"
+    "version": "2.0.1"
 }
