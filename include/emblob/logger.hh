@@ -49,7 +49,7 @@ namespace emblob
         CONST_STATIC_STRING LEVEL_ERROR   = "error";
         CONST_STATIC_STRING LEVEL_FATAL   = "fatal";
 
-        static const size_t MAX_LOG_MESSAGE = 2048;
+        CONST_STATIC_X(size_t) MAX_LOG_MESSAGE = 2048;
 
         logger() = default;
         ~logger() = default;

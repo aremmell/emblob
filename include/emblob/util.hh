@@ -59,7 +59,7 @@ namespace emblob
         return buf.get();
     }
 
-    std::string string_to_lower(const std::string& str) {
+    static std::string string_to_lower(const std::string& str) {
         auto retval = str;
 
         std::ranges::for_each(retval.begin(), retval.end(), [](char& c) {
@@ -69,7 +69,7 @@ namespace emblob
         return retval;
     }
 
-    std::string string_to_upper(const std::string& str) {
+    static std::string string_to_upper(const std::string& str) {
         auto retval = str;
 
         std::ranges::for_each(retval.begin(), retval.end(), [](char& c) {
