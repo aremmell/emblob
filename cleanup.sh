@@ -14,10 +14,10 @@ if [ "${1}" = "-f" ]; then
 fi
 
 # *.S (linker assembly)
-rm ${_arg} *.S || true
+rm ${_arg} ./*.S || true
 
 # *.o (linker object)
-rm ${_arg} *.o || true
+rm ${_arg} ./*.o || true
 
 # emblob_*.h (generated header)
 rm ${_arg} emblob_*.h || true
