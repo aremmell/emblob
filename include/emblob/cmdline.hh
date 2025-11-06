@@ -92,7 +92,7 @@ namespace emblob
                         break;
                     }
 
-                    if (std::string validate_msg; a->validator != nullptr && !a->validator(argv[i + 1], validate_msg)) {
+                    if (std::string validate_msg; a->validator && !a->validator(argv[i + 1], validate_msg)) {
                         g_logger->error("'%s' is not a valid value for '%s' (%s)", argv[i + 1],  input.c_str(),
                             validate_msg.c_str());
                         retval = false;
