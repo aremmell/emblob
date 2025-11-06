@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: Copyright (c) 2018-2024 Ryan M. Lederman
 
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.5...4.1)
 
 # variables
 set(PROJECT_NAME emblob)
@@ -29,14 +29,10 @@ project(
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
 # set the C/C++ standards
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
-    set(CMAKE_C_STANDARD 17)
-    set(CMAKE_C_STANDARD_REQUIRED true)
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED true)
-else()
-    message(FATAL_ERROR, "CMake >= 3.12 is required in order to build emblob")
-endif()
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED true)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 # policy settings, so CMake doesn't whine.
 cmake_policy(SET CMP0025 NEW) # AppleClang
